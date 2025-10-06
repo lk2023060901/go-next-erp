@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+package api.auth.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/auth/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+import "api/auth/v1/common.proto";
+
+// 认证服务
+service AuthService {
+  // 用户注册
+  rpc Register (RegisterRequest) returns (RegisterResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/register"
+      body: "*"
+    };
+  }
+
+  // 用户登录
+  rpc Login (LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/login"
+      body: "*"
+    };
+  }
+
+  // 登出
+  rpc Logout (LogoutRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/logout"
+      body: "*"
+    };
+  }
+
+  // 刷新 Token
+  rpc RefreshToken (RefreshTokenRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/refresh"
+      body: "*"
+    };
+  }
+
+  // 获取当前用户
+  rpc GetCurrentUser (google.protobuf.Empty) returns (UserInfo) {
+    option (google.api.http) = {
+      get: "/api/v1/auth/me"
+    };
+  }
+
+  // 修改密码
+  rpc ChangePassword (ChangePasswordRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put: "/api/v1/auth/password"
+      body: "*"
+    };
+  }
+}
+
+// 注册请求
+message RegisterRequest {
+  string username = 1 [(validate.rules).string = {min_len: 3, max_len: 32, pattern: "^[a-zA-Z0-9_]+$"}];
+  string email = 2 [(validate.rules).string.email = true];
+  string password = 3 [(validate.rules).string = {min_len: 8, max_len: 64}];
+  string tenant_id = 4; // 可选：多租户场景
+}
+
+// 注册响应
+message RegisterResponse {
+  UserInfo user = 1;
+}
+
+// 登录请求
+message LoginRequest {
+  string username = 1 [(validate.rules).string.min_len = 1];
+  string password = 2 [(validate.rules).string.min_len = 1];
+  string ip_address = 3; // 客户端 IP 地址
+  string user_agent = 4; // 客户端 User-Agent
+}
+
+// 登录响应
+message LoginResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_in = 3;  // 过期时间（秒）
+  UserInfo user = 4;
+}
+
+// 登出请求
+message LogoutRequest {
+  string token = 1 [(validate.rules).string.min_len = 1];
+  string ip_address = 2; // 客户端 IP 地址
+  string user_agent = 3; // 客户端 User-Agent
+}
+
+// 刷新 Token 请求
+message RefreshTokenRequest {
+  string refresh_token = 1 [(validate.rules).string.min_len = 1];
+}
+
+// 修改密码请求
+message ChangePasswordRequest {
+  string old_password = 1 [(validate.rules).string.min_len = 1];
+  string new_password = 2 [(validate.rules).string = {min_len: 8, max_len: 64}];
+}

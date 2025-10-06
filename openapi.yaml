@@ -1,0 +1,936 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /api/v1/auth/login:
+        post:
+            tags:
+                - AuthService
+            description: 用户登录
+            operationId: AuthService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/LoginResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/auth/logout:
+        post:
+            tags:
+                - AuthService
+            description: 登出
+            operationId: AuthService_Logout
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/LogoutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/auth/me:
+        get:
+            tags:
+                - AuthService
+            description: 获取当前用户
+            operationId: AuthService_GetCurrentUser
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserInfo'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/auth/password:
+        put:
+            tags:
+                - AuthService
+            description: 修改密码
+            operationId: AuthService_ChangePassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ChangePasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/auth/refresh:
+        post:
+            tags:
+                - AuthService
+            description: 刷新 Token
+            operationId: AuthService_RefreshToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RefreshTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/LoginResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/auth/register:
+        post:
+            tags:
+                - AuthService
+            description: 用户注册
+            operationId: AuthService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RegisterResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/roles:
+        get:
+            tags:
+                - RoleService
+            description: 获取角色列表
+            operationId: RoleService_ListRoles
+            parameters:
+                - name: page.page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page.pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page.sortBy
+                  in: query
+                  schema:
+                    type: string
+                - name: page.sortOrder
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListRolesResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - RoleService
+            description: 创建角色
+            operationId: RoleService_CreateRole
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RoleInfo'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/roles/{id}:
+        get:
+            tags:
+                - RoleService
+            description: 获取角色详情
+            operationId: RoleService_GetRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RoleInfo'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        put:
+            tags:
+                - RoleService
+            description: 更新角色
+            operationId: RoleService_UpdateRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RoleInfo'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - RoleService
+            description: 删除角色
+            operationId: RoleService_DeleteRole
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/roles/{roleId}/permissions:
+        get:
+            tags:
+                - RoleService
+            description: 获取角色权限
+            operationId: RoleService_GetRolePermissions
+            parameters:
+                - name: roleId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetRolePermissionsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - RoleService
+            description: 分配权限给角色
+            operationId: RoleService_AssignPermissions
+            parameters:
+                - name: roleId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AssignPermissionsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - RoleService
+            description: 撤销角色权限
+            operationId: RoleService_RevokePermissions
+            parameters:
+                - name: roleId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: permissionIds
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/roles/{roleId}/users/{userId}:
+        post:
+            tags:
+                - RoleService
+            description: 分配角色给用户
+            operationId: RoleService_AssignRoleToUser
+            parameters:
+                - name: roleId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AssignRoleToUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - RoleService
+            description: 移除用户角色
+            operationId: RoleService_RemoveRoleFromUser
+            parameters:
+                - name: roleId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/users:
+        get:
+            tags:
+                - UserService
+            description: 获取用户列表
+            operationId: UserService_ListUsers
+            parameters:
+                - name: page.page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page.pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page.sortBy
+                  in: query
+                  schema:
+                    type: string
+                - name: page.sortOrder
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListUsersResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/users/{id}:
+        get:
+            tags:
+                - UserService
+            description: 获取用户详情
+            operationId: UserService_GetUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserInfo'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        put:
+            tags:
+                - UserService
+            description: 更新用户
+            operationId: UserService_UpdateUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserInfo'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - UserService
+            description: 删除用户
+            operationId: UserService_DeleteUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/users/{userId}/permissions:
+        get:
+            tags:
+                - UserService
+            description: 获取用户权限
+            operationId: UserService_GetUserPermissions
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserPermissionsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/users/{userId}/roles:
+        get:
+            tags:
+                - UserService
+            description: 获取用户角色
+            operationId: UserService_GetUserRoles
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserRolesResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - UserService
+            description: 分配角色给用户
+            operationId: UserService_AssignRoles
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AssignRolesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/users/{userId}/sessions:
+        get:
+            tags:
+                - UserService
+            description: 获取用户会话列表
+            operationId: UserService_GetUserSessions
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserSessionsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        AssignPermissionsRequest:
+            type: object
+            properties:
+                roleId:
+                    type: string
+                permissionIds:
+                    type: array
+                    items:
+                        type: string
+            description: 分配权限请求
+        AssignRoleToUserRequest:
+            type: object
+            properties:
+                roleId:
+                    type: string
+                userId:
+                    type: string
+            description: 分配角色给用户请求
+        AssignRolesRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+                roleIds:
+                    type: array
+                    items:
+                        type: string
+            description: 分配角色请求
+        ChangePasswordRequest:
+            type: object
+            properties:
+                oldPassword:
+                    type: string
+                newPassword:
+                    type: string
+            description: 修改密码请求
+        CreateRoleRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                displayName:
+                    type: string
+                description:
+                    type: string
+                parentId:
+                    type: string
+            description: 创建角色请求
+        GetRolePermissionsResponse:
+            type: object
+            properties:
+                permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/PermissionInfo'
+            description: 获取角色权限响应
+        GetUserPermissionsResponse:
+            type: object
+            properties:
+                permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/PermissionInfo'
+            description: 获取用户权限响应
+        GetUserRolesResponse:
+            type: object
+            properties:
+                roles:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/RoleInfo'
+            description: 获取用户角色响应
+        GetUserSessionsResponse:
+            type: object
+            properties:
+                sessions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/SessionInfo'
+            description: 获取用户会话响应
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        ListRolesResponse:
+            type: object
+            properties:
+                roles:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/RoleInfo'
+                page:
+                    $ref: '#/components/schemas/PageResponse'
+            description: 角色列表响应
+        ListUsersResponse:
+            type: object
+            properties:
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/UserInfo'
+                page:
+                    $ref: '#/components/schemas/PageResponse'
+            description: 用户列表响应
+        LoginRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                ipAddress:
+                    type: string
+                userAgent:
+                    type: string
+            description: 登录请求
+        LoginResponse:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                expiresIn:
+                    type: string
+                user:
+                    $ref: '#/components/schemas/UserInfo'
+            description: 登录响应
+        LogoutRequest:
+            type: object
+            properties:
+                token:
+                    type: string
+                ipAddress:
+                    type: string
+                userAgent:
+                    type: string
+            description: 登出请求
+        PageResponse:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    format: int32
+                pageSize:
+                    type: integer
+                    format: int32
+                total:
+                    type: string
+                totalPages:
+                    type: integer
+                    format: int32
+            description: 分页响应
+        PermissionInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                resource:
+                    type: string
+                action:
+                    type: string
+                displayName:
+                    type: string
+                description:
+                    type: string
+            description: 权限信息
+        RefreshTokenRequest:
+            type: object
+            properties:
+                refreshToken:
+                    type: string
+            description: 刷新 Token 请求
+        RegisterRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                email:
+                    type: string
+                password:
+                    type: string
+                tenantId:
+                    type: string
+            description: 注册请求
+        RegisterResponse:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/UserInfo'
+            description: 注册响应
+        RoleInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                displayName:
+                    type: string
+                description:
+                    type: string
+                tenantId:
+                    type: string
+                createdAt:
+                    type: string
+            description: 角色信息
+        SessionInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                ipAddress:
+                    type: string
+                userAgent:
+                    type: string
+                createdAt:
+                    type: string
+                expiresAt:
+                    type: string
+            description: 会话信息
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        UpdateRoleRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                displayName:
+                    type: string
+                description:
+                    type: string
+            description: 更新角色请求
+        UpdateUserRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                email:
+                    type: string
+                status:
+                    type: string
+            description: 更新用户请求
+        UserInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                username:
+                    type: string
+                email:
+                    type: string
+                status:
+                    type: string
+                tenantId:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+            description: 用户信息
+tags:
+    - name: AuthService
+      description: 认证服务
+    - name: RoleService
+      description: 角色服务
+    - name: UserService
+      description: 用户服务

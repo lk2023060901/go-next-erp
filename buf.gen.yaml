@@ -1,0 +1,43 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/lk2023060901/go-next-erp
+  disable:
+    - module: buf.build/googleapis/googleapis
+      file_option: go_package_prefix
+    - module: buf.build/envoyproxy/protoc-gen-validate
+      file_option: go_package_prefix
+plugins:
+  # 生成 Go Protobuf 代码
+  - local: protoc-gen-go
+    out: .
+    opt:
+      - paths=source_relative
+
+  # 生成 gRPC Go 代码
+  - local: protoc-gen-go-grpc
+    out: .
+    opt:
+      - paths=source_relative
+      - require_unimplemented_servers=false
+
+  # 生成 Kratos HTTP 代码
+  - local: protoc-gen-go-http
+    out: .
+    opt:
+      - paths=source_relative
+
+  # 生成 OpenAPI 文档
+  - local: protoc-gen-openapi
+    out: .
+    opt:
+      - paths=source_relative
+
+  # 生成校验代码
+  - local: protoc-gen-validate
+    out: .
+    opt:
+      - paths=source_relative
+      - lang=go

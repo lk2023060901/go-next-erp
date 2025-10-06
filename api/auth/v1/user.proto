@@ -1,0 +1,146 @@
+syntax = "proto3";
+
+package api.auth.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/auth/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+import "api/auth/v1/common.proto";
+
+// 用户服务
+service UserService {
+  // 获取用户列表
+  rpc ListUsers (ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users"
+    };
+  }
+
+  // 获取用户详情
+  rpc GetUser (GetUserRequest) returns (UserInfo) {
+    option (google.api.http) = {
+      get: "/api/v1/users/{id}"
+    };
+  }
+
+  // 更新用户
+  rpc UpdateUser (UpdateUserRequest) returns (UserInfo) {
+    option (google.api.http) = {
+      put: "/api/v1/users/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除用户
+  rpc DeleteUser (DeleteUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/users/{id}"
+    };
+  }
+
+  // 分配角色给用户
+  rpc AssignRoles (AssignRolesRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/users/{user_id}/roles"
+      body: "*"
+    };
+  }
+
+  // 获取用户角色
+  rpc GetUserRoles (GetUserRolesRequest) returns (GetUserRolesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/{user_id}/roles"
+    };
+  }
+
+  // 获取用户会话列表
+  rpc GetUserSessions (GetUserSessionsRequest) returns (GetUserSessionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/{user_id}/sessions"
+    };
+  }
+
+  // 获取用户权限
+  rpc GetUserPermissions (GetUserPermissionsRequest) returns (GetUserPermissionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/{user_id}/permissions"
+    };
+  }
+}
+
+// 用户列表请求
+message ListUsersRequest {
+  PageRequest page = 1;                    // 分页参数
+  string keyword = 2;                      // 快速搜索（username/email）
+  repeated FilterGroup filters = 3;        // 高级筛选条件
+}
+
+// 用户列表响应
+message ListUsersResponse {
+  repeated UserInfo users = 1;
+  PageResponse page = 2;
+}
+
+// 获取用户请求
+message GetUserRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+// 更新用户请求
+message UpdateUserRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+  string email = 2 [(validate.rules).string.email = true];
+  string status = 3; // active/inactive/locked
+}
+
+// 删除用户请求
+message DeleteUserRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+// 分配角色请求
+message AssignRolesRequest {
+  string user_id = 1 [(validate.rules).string.uuid = true];
+  repeated string role_ids = 2;
+}
+
+// 获取用户角色请求
+message GetUserRolesRequest {
+  string user_id = 1 [(validate.rules).string.uuid = true];
+}
+
+// 获取用户角色响应
+message GetUserRolesResponse {
+  repeated RoleInfo roles = 1;
+}
+
+// 获取用户会话请求
+message GetUserSessionsRequest {
+  string user_id = 1 [(validate.rules).string.uuid = true];
+}
+
+// 会话信息
+message SessionInfo {
+  string id = 1;
+  string ip_address = 2;
+  string user_agent = 3;
+  int64 created_at = 4;
+  int64 expires_at = 5;
+}
+
+// 获取用户会话响应
+message GetUserSessionsResponse {
+  repeated SessionInfo sessions = 1;
+}
+
+// 获取用户权限请求
+message GetUserPermissionsRequest {
+  string user_id = 1 [(validate.rules).string.uuid = true];
+}
+
+// 获取用户权限响应
+message GetUserPermissionsResponse {
+  repeated PermissionInfo permissions = 1;
+}

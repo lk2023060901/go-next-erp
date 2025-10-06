@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package api.auth.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/auth/v1;v1";
+
+// ===== 筛选器定义 =====
+
+// 筛选操作符
+enum FilterOperator {
+  FILTER_OPERATOR_UNSPECIFIED = 0;
+  FILTER_OPERATOR_EQ = 1;          // 等于 =
+  FILTER_OPERATOR_NE = 2;          // 不等于 !=
+  FILTER_OPERATOR_GT = 3;          // 大于 >
+  FILTER_OPERATOR_GTE = 4;         // 大于等于 >=
+  FILTER_OPERATOR_LT = 5;          // 小于 <
+  FILTER_OPERATOR_LTE = 6;         // 小于等于 <=
+  FILTER_OPERATOR_LIKE = 7;        // 模糊匹配 LIKE
+  FILTER_OPERATOR_IN = 8;          // 在列表中 IN
+  FILTER_OPERATOR_NOT_IN = 9;      // 不在列表中 NOT IN
+  FILTER_OPERATOR_IS_NULL = 10;    // 为空 IS NULL
+  FILTER_OPERATOR_IS_NOT_NULL = 11; // 不为空 IS NOT NULL
+}
+
+// 单个筛选条件
+message FilterCondition {
+  string field = 1;                // 字段名（如：username, status, created_at）
+  FilterOperator operator = 2;     // 操作符
+  string value = 3;                // 单个值
+  repeated string values = 4;      // 多个值（用于 IN/NOT_IN 操作符）
+}
+
+// 筛选组（支持 AND/OR 逻辑）
+message FilterGroup {
+  enum LogicOperator {
+    LOGIC_OPERATOR_UNSPECIFIED = 0;
+    LOGIC_OPERATOR_AND = 1;        // 且
+    LOGIC_OPERATOR_OR = 2;         // 或
+  }
+
+  LogicOperator logic = 1;         // 逻辑操作符
+  repeated FilterCondition conditions = 2; // 筛选条件列表
+}
+
+// ===== 排序定义 =====
+
+// 排序方向
+enum SortOrder {
+  SORT_ORDER_UNSPECIFIED = 0;
+  SORT_ORDER_ASC = 1;              // 升序
+  SORT_ORDER_DESC = 2;             // 降序
+}
+
+// ===== 分页定义 =====
+
+// 分页请求
+message PageRequest {
+  int32 page = 1;                  // 页码（从1开始，默认1）
+  int32 page_size = 2;             // 每页大小（默认10，最大100）
+  string sort_by = 3;              // 排序字段（如：created_at, username）
+  SortOrder sort_order = 4;        // 排序方向（默认 DESC）
+}
+
+// 分页响应
+message PageResponse {
+  int32 page = 1;
+  int32 page_size = 2;
+  int64 total = 3;
+  int32 total_pages = 4;
+}
+
+// ===== 业务实体定义 =====
+
+// 用户信息
+message UserInfo {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string status = 4;
+  string tenant_id = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
+
+// 角色信息
+message RoleInfo {
+  string id = 1;
+  string name = 2;
+  string display_name = 3;
+  string description = 4;
+  string tenant_id = 5;
+  int64 created_at = 6;
+}
+
+// 权限信息
+message PermissionInfo {
+  string id = 1;
+  string resource = 2;
+  string action = 3;
+  string display_name = 4;
+  string description = 5;
+}

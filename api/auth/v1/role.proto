@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package api.auth.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/auth/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+import "api/auth/v1/common.proto";
+
+// 角色服务
+service RoleService {
+  // 获取角色列表
+  rpc ListRoles (ListRolesRequest) returns (ListRolesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/roles"
+    };
+  }
+
+  // 创建角色
+  rpc CreateRole (CreateRoleRequest) returns (RoleInfo) {
+    option (google.api.http) = {
+      post: "/api/v1/roles"
+      body: "*"
+    };
+  }
+
+  // 更新角色
+  rpc UpdateRole (UpdateRoleRequest) returns (RoleInfo) {
+    option (google.api.http) = {
+      put: "/api/v1/roles/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除角色
+  rpc DeleteRole (DeleteRoleRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/roles/{id}"
+    };
+  }
+
+  // 分配权限给角色
+  rpc AssignPermissions (AssignPermissionsRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/roles/{role_id}/permissions"
+      body: "*"
+    };
+  }
+
+  // 获取角色权限
+  rpc GetRolePermissions (GetRolePermissionsRequest) returns (GetRolePermissionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/roles/{role_id}/permissions"
+    };
+  }
+
+  // 获取角色详情
+  rpc GetRole (GetRoleRequest) returns (RoleInfo) {
+    option (google.api.http) = {
+      get: "/api/v1/roles/{id}"
+    };
+  }
+
+  // 撤销角色权限
+  rpc RevokePermissions (RevokePermissionsRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/roles/{role_id}/permissions"
+    };
+  }
+
+  // 分配角色给用户
+  rpc AssignRoleToUser (AssignRoleToUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/roles/{role_id}/users/{user_id}"
+      body: "*"
+    };
+  }
+
+  // 移除用户角色
+  rpc RemoveRoleFromUser (RemoveRoleFromUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/roles/{role_id}/users/{user_id}"
+    };
+  }
+}
+
+// 角色列表请求
+message ListRolesRequest {
+  PageRequest page = 1;
+  string keyword = 2;
+  repeated FilterGroup filters = 3;
+}
+
+// 角色列表响应
+message ListRolesResponse {
+  repeated RoleInfo roles = 1;
+  PageResponse page = 2;
+}
+
+// 创建角色请求
+message CreateRoleRequest {
+  string name = 1 [(validate.rules).string = {min_len: 2, max_len: 50}];
+  string display_name = 2 [(validate.rules).string.min_len = 1];
+  string description = 3;
+  string parent_id = 4; // 父角色 ID（支持角色继承）
+}
+
+// 获取角色请求
+message GetRoleRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+// 更新角色请求
+message UpdateRoleRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+  string display_name = 2;
+  string description = 3;
+}
+
+// 删除角色请求
+message DeleteRoleRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+// 分配权限请求
+message AssignPermissionsRequest {
+  string role_id = 1 [(validate.rules).string.uuid = true];
+  repeated string permission_ids = 2;
+}
+
+// 获取角色权限请求
+message GetRolePermissionsRequest {
+  string role_id = 1 [(validate.rules).string.uuid = true];
+}
+
+// 获取角色权限响应
+message GetRolePermissionsResponse {
+  repeated PermissionInfo permissions = 1;
+}
+
+// 撤销权限请求
+message RevokePermissionsRequest {
+  string role_id = 1 [(validate.rules).string.uuid = true];
+  repeated string permission_ids = 2;
+}
+
+// 分配角色给用户请求
+message AssignRoleToUserRequest {
+  string role_id = 1 [(validate.rules).string.uuid = true];
+  string user_id = 2 [(validate.rules).string.uuid = true];
+}
+
+// 移除用户角色请求
+message RemoveRoleFromUserRequest {
+  string role_id = 1 [(validate.rules).string.uuid = true];
+  string user_id = 2 [(validate.rules).string.uuid = true];
+}

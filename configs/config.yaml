@@ -1,0 +1,36 @@
+server:
+  http:
+    network: tcp
+    addr: 0.0.0.0:15006
+    timeout: 30s
+  grpc:
+    network: tcp
+    addr: 0.0.0.0:15007
+    timeout: 30s
+
+database:
+  driver: postgres
+  master: postgres://postgres:postgres123@localhost:15000/erp?sslmode=disable
+  slaves: []
+  max_open_conns: 100
+  max_idle_conns: 10
+  conn_max_lifetime: 3600s
+
+redis:
+  addr: localhost:15001
+  password: redis123
+  db: 0
+
+jwt:
+  secret: your-secret-key-change-this-in-production
+  access_expire: 86400    # 24 hours
+  refresh_expire: 604800  # 7 days
+
+log:
+  level: info
+  format: json
+  output: stdout
+  max_size: 100
+  max_backups: 3
+  max_age: 7
+  compress: true
