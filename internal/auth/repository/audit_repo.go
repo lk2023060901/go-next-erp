@@ -49,20 +49,27 @@ func (r *auditLogRepo) Create(ctx context.Context, log *model.AuditLog) error {
 
 	beforeJSON, _ := json.Marshal(log.BeforeData)
 	afterJSON, _ := json.Marshal(log.AfterData)
-	metadataJSON, _ := json.Marshal(log.Metadata)
+
+	// 合并before/after data到changes字段
+	changes := make(map[string]interface{})
+	if len(beforeJSON) > 0 {
+		changes["before"] = json.RawMessage(beforeJSON)
+	}
+	if len(afterJSON) > 0 {
+		changes["after"] = json.RawMessage(afterJSON)
+	}
+	changesJSON, _ := json.Marshal(changes)
 
 	// 审计日志直接写入主库，不使用事务（避免影响业务操作）
 	_, err := r.db.Master().Exec(ctx, `
 		INSERT INTO audit_logs (
-			id, event_id, tenant_id, user_id, action, resource, resource_id,
-			before_data, after_data, ip_address, user_agent, result, error_msg,
-			metadata, created_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+			id, request_id, tenant_id, user_id, action, resource_type, resource_id,
+			changes, ip_address, user_agent, result, error_message, created_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 	`,
 		log.ID, log.EventID, log.TenantID, log.UserID, log.Action,
-		log.Resource, log.ResourceID, beforeJSON, afterJSON,
-		log.IPAddress, log.UserAgent, log.Result, log.ErrorMsg,
-		metadataJSON, log.CreatedAt,
+		log.Resource, log.ResourceID, changesJSON,
+		log.IPAddress, log.UserAgent, log.Result, log.ErrorMsg, log.CreatedAt,
 	)
 
 	return err
@@ -73,9 +80,8 @@ func (r *auditLogRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Audit
 	var log model.AuditLog
 
 	row := r.db.QueryRow(ctx, `
-		SELECT id, event_id, tenant_id, user_id, action, resource, resource_id,
-			   before_data, after_data, ip_address, user_agent, result, error_msg,
-			   metadata, created_at
+		SELECT id, request_id, tenant_id, user_id, action, resource_type, resource_id,
+			   changes, ip_address, user_agent, result, error_message, created_at
 		FROM audit_logs
 		WHERE id = $1
 	`, id)
@@ -92,11 +98,10 @@ func (r *auditLogRepo) FindByEventID(ctx context.Context, eventID string) (*mode
 	var log model.AuditLog
 
 	row := r.db.QueryRow(ctx, `
-		SELECT id, event_id, tenant_id, user_id, action, resource, resource_id,
-			   before_data, after_data, ip_address, user_agent, result, error_msg,
-			   metadata, created_at
+		SELECT id, request_id, tenant_id, user_id, action, resource_type, resource_id,
+			   changes, ip_address, user_agent, result, error_message, created_at
 		FROM audit_logs
-		WHERE event_id = $1
+		WHERE request_id = $1
 	`, eventID)
 
 	if err := r.scanAuditLog(row, &log); err != nil {
@@ -109,9 +114,8 @@ func (r *auditLogRepo) FindByEventID(ctx context.Context, eventID string) (*mode
 // ListByUser 查询用户的审计日志
 func (r *auditLogRepo) ListByUser(ctx context.Context, userID uuid.UUID, limit, offset int) ([]*model.AuditLog, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, event_id, tenant_id, user_id, action, resource, resource_id,
-			   before_data, after_data, ip_address, user_agent, result, error_msg,
-			   metadata, created_at
+		SELECT id, request_id, tenant_id, user_id, action, resource_type, resource_id,
+			   changes, ip_address, user_agent, result, error_message, created_at
 		FROM audit_logs
 		WHERE user_id = $1
 		ORDER BY created_at DESC
@@ -129,9 +133,8 @@ func (r *auditLogRepo) ListByUser(ctx context.Context, userID uuid.UUID, limit, 
 // ListByTenant 查询租户的审计日志
 func (r *auditLogRepo) ListByTenant(ctx context.Context, tenantID uuid.UUID, limit, offset int) ([]*model.AuditLog, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, event_id, tenant_id, user_id, action, resource, resource_id,
-			   before_data, after_data, ip_address, user_agent, result, error_msg,
-			   metadata, created_at
+		SELECT id, request_id, tenant_id, user_id, action, resource_type, resource_id,
+			   changes, ip_address, user_agent, result, error_message, created_at
 		FROM audit_logs
 		WHERE tenant_id = $1
 		ORDER BY created_at DESC
@@ -149,9 +152,8 @@ func (r *auditLogRepo) ListByTenant(ctx context.Context, tenantID uuid.UUID, lim
 // ListByAction 查询指定动作的审计日志
 func (r *auditLogRepo) ListByAction(ctx context.Context, tenantID uuid.UUID, action string, limit, offset int) ([]*model.AuditLog, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, event_id, tenant_id, user_id, action, resource, resource_id,
-			   before_data, after_data, ip_address, user_agent, result, error_msg,
-			   metadata, created_at
+		SELECT id, request_id, tenant_id, user_id, action, resource_type, resource_id,
+			   changes, ip_address, user_agent, result, error_message, created_at
 		FROM audit_logs
 		WHERE tenant_id = $1 AND action = $2
 		ORDER BY created_at DESC
@@ -169,9 +171,8 @@ func (r *auditLogRepo) ListByAction(ctx context.Context, tenantID uuid.UUID, act
 // ListByTimeRange 查询时间范围内的审计日志
 func (r *auditLogRepo) ListByTimeRange(ctx context.Context, tenantID uuid.UUID, start, end time.Time, limit, offset int) ([]*model.AuditLog, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, event_id, tenant_id, user_id, action, resource, resource_id,
-			   before_data, after_data, ip_address, user_agent, result, error_msg,
-			   metadata, created_at
+		SELECT id, request_id, tenant_id, user_id, action, resource_type, resource_id,
+			   changes, ip_address, user_agent, result, error_message, created_at
 		FROM audit_logs
 		WHERE tenant_id = $1 AND created_at BETWEEN $2 AND $3
 		ORDER BY created_at DESC
@@ -217,28 +218,30 @@ func (r *auditLogRepo) CleanupOldLogs(ctx context.Context, before time.Time) err
 
 // scanAuditLog 扫描单条审计日志
 func (r *auditLogRepo) scanAuditLog(row pgx.Row, log *model.AuditLog) error {
-	var beforeJSON, afterJSON, metadataJSON []byte
+	var changesJSON []byte
 
 	err := row.Scan(
 		&log.ID, &log.EventID, &log.TenantID, &log.UserID, &log.Action,
-		&log.Resource, &log.ResourceID, &beforeJSON, &afterJSON,
+		&log.Resource, &log.ResourceID, &changesJSON,
 		&log.IPAddress, &log.UserAgent, &log.Result, &log.ErrorMsg,
-		&metadataJSON, &log.CreatedAt,
+		&log.CreatedAt,
 	)
 
 	if err != nil {
 		return err
 	}
 
-	// 解析 JSON 字段
-	if len(beforeJSON) > 0 {
-		log.BeforeData = beforeJSON
-	}
-	if len(afterJSON) > 0 {
-		log.AfterData = afterJSON
-	}
-	if len(metadataJSON) > 0 {
-		_ = json.Unmarshal(metadataJSON, &log.Metadata)
+	// 解析 changes JSON 字段
+	if len(changesJSON) > 0 {
+		var changes map[string]json.RawMessage
+		if err := json.Unmarshal(changesJSON, &changes); err == nil {
+			if before, ok := changes["before"]; ok {
+				log.BeforeData = before
+			}
+			if after, ok := changes["after"]; ok {
+				log.AfterData = after
+			}
+		}
 	}
 
 	return nil

@@ -48,6 +48,7 @@ func New(opts ...Option) (*Engine, error) {
 		evaluator:   NewConditionEvaluator(),
 		ctxMgr:      NewContextManager(),
 		persistence: NewNopPersistence(), // 默认使用空持久化
+		middlewares: make([]Middleware, 0),
 		metrics:     make(map[string]*ExecutionMetrics),
 	}
 
@@ -427,7 +428,10 @@ func (e *Engine) validateWorkflow(def *WorkflowDefinition) error {
 		}
 	}
 
-	// TODO: 检测循环依赖
+	// 检测循环依赖
+	if err := e.detectCycles(def); err != nil {
+		return fmt.Errorf("cycle detected: %w", err)
+	}
 
 	return nil
 }
@@ -505,4 +509,57 @@ func (e *Engine) updateMetrics(workflowID string, status ExecutionStatus, durati
 	total := metrics.TotalExecutions.Load()
 	newAvg := (currentAvg*int64(total-1) + duration.Milliseconds()) / int64(total)
 	metrics.AverageDuration.Store(newAvg)
+}
+
+// detectCycles 使用深度优先搜索(DFS)检测工作流中的循环依赖
+func (e *Engine) detectCycles(def *WorkflowDefinition) error {
+	// 构建邻接表
+	graph := make(map[string][]string)
+	for _, edge := range def.Edges {
+		graph[edge.Source] = append(graph[edge.Source], edge.Target)
+	}
+
+	// 访问状态：0=未访问，1=访问中，2=已完成
+	visited := make(map[string]int)
+
+	// DFS辅助函数
+	var dfs func(nodeID string, path []string) error
+	dfs = func(nodeID string, path []string) error {
+		// 如果节点正在访问中，说明发现循环
+		if visited[nodeID] == 1 {
+			cyclePath := append(path, nodeID)
+			return fmt.Errorf("cycle detected: %v", cyclePath)
+		}
+
+		// 如果节点已完成访问，跳过
+		if visited[nodeID] == 2 {
+			return nil
+		}
+
+		// 标记为访问中
+		visited[nodeID] = 1
+		path = append(path, nodeID)
+
+		// 访问所有邻居
+		for _, neighbor := range graph[nodeID] {
+			if err := dfs(neighbor, path); err != nil {
+				return err
+			}
+		}
+
+		// 标记为已完成
+		visited[nodeID] = 2
+		return nil
+	}
+
+	// 对所有节点执行DFS
+	for _, node := range def.Nodes {
+		if visited[node.ID] == 0 {
+			if err := dfs(node.ID, []string{}); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

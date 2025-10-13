@@ -59,7 +59,7 @@ func (r *sessionRepo) Create(ctx context.Context, session *model.Session) error 
 			session.CreatedAt, session.UpdatedAt,
 		)
 
-		if err == nil {
+		if err == nil && r.cache != nil {
 			// 缓存会话
 			cacheKey := fmt.Sprintf("session:token:%s", session.Token)
 			_ = r.cache.Set(ctx, cacheKey, session, int(time.Until(session.ExpiresAt).Seconds()))
@@ -74,8 +74,10 @@ func (r *sessionRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Sessio
 	cacheKey := fmt.Sprintf("session:id:%s", id.String())
 
 	var session model.Session
-	if err := r.cache.Get(ctx, cacheKey, &session); err == nil {
-		return &session, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &session); err == nil {
+			return &session, nil
+		}
 	}
 
 	row := r.db.QueryRow(ctx, `
@@ -89,7 +91,9 @@ func (r *sessionRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Sessio
 		return nil, err
 	}
 
-	_ = r.cache.Set(ctx, cacheKey, &session, 300)
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, &session, 300)
+	}
 	return &session, nil
 }
 
@@ -98,8 +102,10 @@ func (r *sessionRepo) FindByToken(ctx context.Context, token string) (*model.Ses
 	cacheKey := fmt.Sprintf("session:token:%s", token)
 
 	var session model.Session
-	if err := r.cache.Get(ctx, cacheKey, &session); err == nil {
-		return &session, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &session); err == nil {
+			return &session, nil
+		}
 	}
 
 	row := r.db.QueryRow(ctx, `
@@ -114,9 +120,11 @@ func (r *sessionRepo) FindByToken(ctx context.Context, token string) (*model.Ses
 	}
 
 	// 缓存到过期时间
-	ttl := int(time.Until(session.ExpiresAt).Seconds())
-	if ttl > 0 {
-		_ = r.cache.Set(ctx, cacheKey, &session, ttl)
+	if r.cache != nil {
+		ttl := int(time.Until(session.ExpiresAt).Seconds())
+		if ttl > 0 {
+			_ = r.cache.Set(ctx, cacheKey, &session, ttl)
+		}
 	}
 
 	return &session, nil
@@ -289,6 +297,9 @@ func (r *sessionRepo) scanSession(row pgx.Row, session *model.Session) error {
 
 // invalidateCache 清除缓存
 func (r *sessionRepo) invalidateCache(id uuid.UUID, token string) {
+	if r.cache == nil {
+		return
+	}
 	ctx := context.Background()
 	r.cache.Delete(ctx, fmt.Sprintf("session:id:%s", id.String()))
 	r.cache.Delete(ctx, fmt.Sprintf("session:token:%s", token))

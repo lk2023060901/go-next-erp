@@ -1,0 +1,166 @@
+syntax = "proto3";
+
+package api.file.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/file/v1;v1";
+
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+// 上传请求
+message UploadRequest {
+  string filename = 1 [(validate.rules).string.min_len = 1];
+  string content_type = 2;
+  int64 size = 3 [(validate.rules).int64.gt = 0];
+  string category = 4;
+  repeated string tags = 5;
+  map<string, string> metadata = 6;
+  bool is_temporary = 7;
+  google.protobuf.Timestamp expires_at = 8;
+  string access_level = 9; // private, tenant, public
+  bytes content = 10; // 文件内容
+}
+
+// 上传响应
+message UploadResponse {
+  string file_id = 1;
+  string filename = 2;
+  int64 size = 3;
+  string mime_type = 4;
+  string storage_key = 5;
+  string checksum = 6;
+  string download_url = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+// 获取文件请求
+message GetFileRequest {
+  string id = 1 [(validate.rules).string.min_len = 1];
+}
+
+// 文件信息
+message FileInfo {
+  string id = 1;
+  string tenant_id = 2;
+  string filename = 3;
+  string original_name = 4;
+  int64 size = 5;
+  string mime_type = 6;
+  string extension = 7;
+  string category = 8;
+  string checksum = 9;
+  string storage_key = 10;
+  string bucket = 11;
+  repeated string tags = 12;
+  map<string, string> metadata = 13;
+  string status = 14;
+  bool is_temporary = 15;
+  bool is_public = 16;
+  bool virus_scanned = 17;
+  string virus_scan_result = 18;
+  int32 download_count = 19;
+  int32 version_number = 20;
+  string access_level = 21;
+  string uploaded_by = 22;
+  google.protobuf.Timestamp uploaded_at = 23;
+  google.protobuf.Timestamp expires_at = 24;
+  string preview_url = 25;
+  string download_url = 26;
+  google.protobuf.Timestamp created_at = 27;
+  google.protobuf.Timestamp updated_at = 28;
+}
+
+// 文件列表请求
+message ListFilesRequest {
+  int32 page = 1 [(validate.rules).int32.gte = 1];
+  int32 page_size = 2 [(validate.rules).int32 = {gte: 1, lte: 100}];
+  string filename = 3;
+  string category = 4;
+  string mime_type = 5;
+  string status = 6;
+  bool is_temporary = 7;
+  string uploaded_by = 8;
+  google.protobuf.Timestamp start_date = 9;
+  google.protobuf.Timestamp end_date = 10;
+  repeated string tags = 11;
+  string sort_by = 12; // created_at, size, filename
+  string sort_order = 13; // asc, desc
+  bool include_stats = 14;
+}
+
+// 文件列表响应
+message ListFilesResponse {
+  repeated FileInfo files = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+  int32 total_pages = 5;
+  FileStats stats = 6;
+}
+
+// 文件统计
+message FileStats {
+  int64 total_files = 1;
+  int64 total_size = 2;
+  string total_size_formatted = 3;
+}
+
+// 删除文件请求
+message DeleteFileRequest {
+  string id = 1 [(validate.rules).string.min_len = 1];
+}
+
+// 获取下载URL请求
+message GetDownloadURLRequest {
+  string id = 1 [(validate.rules).string.min_len = 1];
+  int32 expiry = 2; // 有效期（秒）
+}
+
+// 下载URL响应
+message DownloadURLResponse {
+  string url = 1;
+  google.protobuf.Timestamp expires_at = 2;
+}
+
+// 配额信息
+message QuotaInfo {
+  string subject_type = 1;
+  string subject_id = 2;
+  int64 quota_limit = 3;
+  int64 quota_used = 4;
+  int64 quota_available = 5;
+  double quota_used_percent = 6;
+  string quota_limit_formatted = 7;
+  string quota_used_formatted = 8;
+  bool is_warning = 9;
+  bool is_exceeded = 10;
+}
+
+// 初始化分片上传请求
+message InitiateMultipartRequest {
+  string filename = 1 [(validate.rules).string.min_len = 1];
+  int64 total_size = 2 [(validate.rules).int64.gt = 0];
+  string content_type = 3;
+  bool is_temporary = 4;
+  google.protobuf.Timestamp expires_at = 5;
+}
+
+// 初始化分片上传响应
+message InitiateMultipartResponse {
+  string upload_id = 1;
+  string storage_key = 2;
+  int64 part_size = 3;
+  int32 total_parts = 4;
+}
+
+// 完成分片上传请求
+message CompleteMultipartRequest {
+  string upload_id = 1 [(validate.rules).string.min_len = 1];
+  repeated PartInfo parts = 2 [(validate.rules).repeated.min_items = 1];
+}
+
+// 分片信息
+message PartInfo {
+  int32 part_number = 1;
+  string etag = 2;
+}

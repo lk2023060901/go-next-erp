@@ -3,6 +3,7 @@ package authentication
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,6 +18,7 @@ var (
 	ErrSessionNotFound    = errors.New("session not found")
 	ErrSessionRevoked     = errors.New("session has been revoked")
 	ErrSessionExpired     = errors.New("session has expired")
+	ErrUserAlreadyExists  = errors.New("user already exists")
 )
 
 // Service 认证服务
@@ -259,6 +261,10 @@ func (s *Service) Register(ctx context.Context, username, email, password string
 	}
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
+		// 检查是否为唯一性约束错误
+		if isUniqueViolation(err) {
+			return nil, ErrUserAlreadyExists
+		}
 		return nil, err
 	}
 
@@ -332,4 +338,18 @@ func (s *Service) GetUserSessions(ctx context.Context, userID uuid.UUID) ([]*mod
 // RevokeSession 撤销指定会话
 func (s *Service) RevokeSession(ctx context.Context, sessionID uuid.UUID) error {
 	return s.sessionRepo.RevokeSession(ctx, sessionID)
+}
+
+// isUniqueViolation 检查是否为唯一性约束违反错误
+func isUniqueViolation(err error) bool {
+	if err == nil {
+		return false
+	}
+	// 检查PostgreSQL唯一性约束错误
+	// pgx错误码 23505 表示unique_violation
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "23505") ||
+		strings.Contains(errMsg, "unique constraint") ||
+		strings.Contains(errMsg, "duplicate key") ||
+		strings.Contains(errMsg, "already exists")
 }

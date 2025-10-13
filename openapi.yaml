@@ -6,17 +6,17 @@ info:
     title: ""
     version: 0.0.1
 paths:
-    /api/v1/auth/login:
+    /api/v1/approval-tasks/batch-process:
         post:
             tags:
-                - AuthService
-            description: 用户登录
-            operationId: AuthService_Login
+                - ApprovalTaskService
+            description: 批量处理任务
+            operationId: ApprovalTaskService_BatchProcessTasks
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/LoginRequest'
+                            $ref: '#/components/schemas/BatchProcessTasksRequest'
                 required: true
             responses:
                 "200":
@@ -24,199 +24,72 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/LoginResponse'
+                                $ref: '#/components/schemas/BatchProcessTasksResponse'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/v1/auth/logout:
-        post:
-            tags:
-                - AuthService
-            description: 登出
-            operationId: AuthService_Logout
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/LogoutRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/auth/me:
+    /api/v1/approval-tasks/my-tasks:
         get:
             tags:
-                - AuthService
-            description: 获取当前用户
-            operationId: AuthService_GetCurrentUser
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UserInfo'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/auth/password:
-        put:
-            tags:
-                - AuthService
-            description: 修改密码
-            operationId: AuthService_ChangePassword
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/ChangePasswordRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/auth/refresh:
-        post:
-            tags:
-                - AuthService
-            description: 刷新 Token
-            operationId: AuthService_RefreshToken
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/RefreshTokenRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/LoginResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/auth/register:
-        post:
-            tags:
-                - AuthService
-            description: 用户注册
-            operationId: AuthService_Register
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/RegisterRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/RegisterResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/roles:
-        get:
-            tags:
-                - RoleService
-            description: 获取角色列表
-            operationId: RoleService_ListRoles
+                - ApprovalTaskService
+            description: 列出我的任务
+            operationId: ApprovalTaskService_ListMyTasks
             parameters:
-                - name: page.page
+                - name: status
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
                   in: query
                   schema:
                     type: integer
                     format: int32
-                - name: page.pageSize
+                - name: offset
                   in: query
                   schema:
                     type: integer
                     format: int32
-                - name: page.sortBy
-                  in: query
-                  schema:
-                    type: string
-                - name: page.sortOrder
-                  in: query
-                  schema:
-                    type: integer
-                    format: enum
-                - name: keyword
-                  in: query
-                  schema:
-                    type: string
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ListRolesResponse'
+                                $ref: '#/components/schemas/ListApprovalTasksResponse'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-        post:
-            tags:
-                - RoleService
-            description: 创建角色
-            operationId: RoleService_CreateRole
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/CreateRoleRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/RoleInfo'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/roles/{id}:
+    /api/v1/approval-tasks/my-tasks/count:
         get:
             tags:
-                - RoleService
-            description: 获取角色详情
-            operationId: RoleService_GetRole
+                - ApprovalTaskService
+            description: 统计待处理任务数
+            operationId: ApprovalTaskService_CountPendingTasks
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CountPendingTasksResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/approval-tasks/{id}:
+        get:
+            tags:
+                - ApprovalTaskService
+            description: 获取审批任务
+            operationId: ApprovalTaskService_GetApprovalTask
             parameters:
                 - name: id
                   in: path
@@ -229,18 +102,19 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/RoleInfo'
+                                $ref: '#/components/schemas/ApprovalTaskResponse'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-        put:
+    /api/v1/approval-tasks/{id}/delegate:
+        post:
             tags:
-                - RoleService
-            description: 更新角色
-            operationId: RoleService_UpdateRole
+                - ApprovalTaskService
+            description: 委托任务
+            operationId: ApprovalTaskService_DelegateTask
             parameters:
                 - name: id
                   in: path
@@ -251,32 +125,8 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/UpdateRoleRequest'
+                            $ref: '#/components/schemas/DelegateTaskRequest'
                 required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/RoleInfo'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        delete:
-            tags:
-                - RoleService
-            description: 删除角色
-            operationId: RoleService_DeleteRole
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
             responses:
                 "200":
                     description: OK
@@ -287,14 +137,194 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/v1/roles/{roleId}/permissions:
+    /api/v1/approval-tasks/{id}/process:
+        post:
+            tags:
+                - ApprovalTaskService
+            description: 处理审批任务
+            operationId: ApprovalTaskService_ProcessTask
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ProcessTaskRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/approval-tasks/{id}/transfer:
+        post:
+            tags:
+                - ApprovalTaskService
+            description: 转审任务
+            operationId: ApprovalTaskService_TransferTask
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/TransferTaskRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances:
         get:
             tags:
-                - RoleService
-            description: 获取角色权限
-            operationId: RoleService_GetRolePermissions
+                - ProcessInstanceService
+            description: 列出流程实例
+            operationId: ProcessInstanceService_ListProcessInstances
             parameters:
-                - name: roleId
+                - name: processDefId
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    type: string
+                - name: applicantId
+                  in: query
+                  schema:
+                    type: string
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListProcessInstancesResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/my-applications:
+        get:
+            tags:
+                - ProcessInstanceService
+            description: 列出我的申请
+            operationId: ProcessInstanceService_ListMyApplications
+            parameters:
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListProcessInstancesResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/start:
+        post:
+            tags:
+                - ProcessInstanceService
+            description: 启动流程
+            operationId: ProcessInstanceService_StartProcess
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/StartProcessRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ProcessInstanceResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/stats/summary:
+        get:
+            tags:
+                - ProcessInstanceService
+            description: 获取实例统计汇总
+            operationId: ProcessInstanceService_GetInstanceStatsSummary
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InstanceStatsSummaryResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/{id}:
+        get:
+            tags:
+                - ProcessInstanceService
+            description: 获取流程实例
+            operationId: ProcessInstanceService_GetProcessInstance
+            parameters:
+                - name: id
                   in: path
                   required: true
                   schema:
@@ -305,7 +335,93 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetRolePermissionsResponse'
+                                $ref: '#/components/schemas/ProcessInstanceResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/{id}/cancel:
+        post:
+            tags:
+                - ProcessInstanceService
+            description: 取消流程
+            operationId: ProcessInstanceService_CancelProcess
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CancelProcessRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/{id}/withdraw:
+        post:
+            tags:
+                - ProcessInstanceService
+            description: 撤回流程
+            operationId: ProcessInstanceService_WithdrawProcess
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/WithdrawProcessRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/processes:
+        get:
+            tags:
+                - ProcessDefinitionService
+            description: 列出流程定义
+            operationId: ProcessDefinitionService_ListProcessDefinitions
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListProcessDefinitionsResponse'
                 default:
                     description: Default error response
                     content:
@@ -314,166 +430,34 @@ paths:
                                 $ref: '#/components/schemas/Status'
         post:
             tags:
-                - RoleService
-            description: 分配权限给角色
-            operationId: RoleService_AssignPermissions
-            parameters:
-                - name: roleId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
+                - ProcessDefinitionService
+            description: 创建流程定义
+            operationId: ProcessDefinitionService_CreateProcessDefinition
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/AssignPermissionsRequest'
+                            $ref: '#/components/schemas/CreateProcessDefinitionRequest'
                 required: true
             responses:
                 "200":
                     description: OK
-                    content: {}
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ProcessDefinitionResponse'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-        delete:
-            tags:
-                - RoleService
-            description: 撤销角色权限
-            operationId: RoleService_RevokePermissions
-            parameters:
-                - name: roleId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: permissionIds
-                  in: query
-                  schema:
-                    type: array
-                    items:
-                        type: string
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/roles/{roleId}/users/{userId}:
-        post:
-            tags:
-                - RoleService
-            description: 分配角色给用户
-            operationId: RoleService_AssignRoleToUser
-            parameters:
-                - name: roleId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: userId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/AssignRoleToUserRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        delete:
-            tags:
-                - RoleService
-            description: 移除用户角色
-            operationId: RoleService_RemoveRoleFromUser
-            parameters:
-                - name: roleId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: userId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/users:
+    /api/v1/processes/{id}:
         get:
             tags:
-                - UserService
-            description: 获取用户列表
-            operationId: UserService_ListUsers
-            parameters:
-                - name: page.page
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: page.pageSize
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: page.sortBy
-                  in: query
-                  schema:
-                    type: string
-                - name: page.sortOrder
-                  in: query
-                  schema:
-                    type: integer
-                    format: enum
-                - name: keyword
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListUsersResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/users/{id}:
-        get:
-            tags:
-                - UserService
-            description: 获取用户详情
-            operationId: UserService_GetUser
+                - ProcessDefinitionService
+            description: 获取流程定义
+            operationId: ProcessDefinitionService_GetProcessDefinition
             parameters:
                 - name: id
                   in: path
@@ -486,7 +470,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/UserInfo'
+                                $ref: '#/components/schemas/ProcessDefinitionResponse'
                 default:
                     description: Default error response
                     content:
@@ -495,9 +479,9 @@ paths:
                                 $ref: '#/components/schemas/Status'
         put:
             tags:
-                - UserService
-            description: 更新用户
-            operationId: UserService_UpdateUser
+                - ProcessDefinitionService
+            description: 更新流程定义
+            operationId: ProcessDefinitionService_UpdateProcessDefinition
             parameters:
                 - name: id
                   in: path
@@ -508,7 +492,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/UpdateUserRequest'
+                            $ref: '#/components/schemas/UpdateProcessDefinitionRequest'
                 required: true
             responses:
                 "200":
@@ -516,7 +500,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/UserInfo'
+                                $ref: '#/components/schemas/ProcessDefinitionResponse'
                 default:
                     description: Default error response
                     content:
@@ -525,9 +509,9 @@ paths:
                                 $ref: '#/components/schemas/Status'
         delete:
             tags:
-                - UserService
-            description: 删除用户
-            operationId: UserService_DeleteUser
+                - ProcessDefinitionService
+            description: 删除流程定义
+            operationId: ProcessDefinitionService_DeleteProcessDefinition
             parameters:
                 - name: id
                   in: path
@@ -544,73 +528,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/v1/users/{userId}/permissions:
-        get:
+    /api/v1/processes/{id}/disable:
+        patch:
             tags:
-                - UserService
-            description: 获取用户权限
-            operationId: UserService_GetUserPermissions
+                - ProcessDefinitionService
+            description: 禁用流程定义
+            operationId: ProcessDefinitionService_DisableProcessDefinition
             parameters:
-                - name: userId
+                - name: id
                   in: path
                   required: true
                   schema:
                     type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/GetUserPermissionsResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/users/{userId}/roles:
-        get:
-            tags:
-                - UserService
-            description: 获取用户角色
-            operationId: UserService_GetUserRoles
-            parameters:
-                - name: userId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/GetUserRolesResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        post:
-            tags:
-                - UserService
-            description: 分配角色给用户
-            operationId: UserService_AssignRoles
-            parameters:
-                - name: userId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/AssignRolesRequest'
-                required: true
             responses:
                 "200":
                     description: OK
@@ -621,14 +550,36 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/v1/users/{userId}/sessions:
+    /api/v1/processes/{id}/enable:
+        patch:
+            tags:
+                - ProcessDefinitionService
+            description: 启用流程定义
+            operationId: ProcessDefinitionService_EnableProcessDefinition
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/processes/{id}/stats:
         get:
             tags:
-                - UserService
-            description: 获取用户会话列表
-            operationId: UserService_GetUserSessions
+                - ProcessDefinitionService
+            description: 获取流程统计
+            operationId: ProcessDefinitionService_GetProcessStats
             parameters:
-                - name: userId
+                - name: id
                   in: path
                   required: true
                   schema:
@@ -639,7 +590,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetUserSessionsResponse'
+                                $ref: '#/components/schemas/ProcessStatsResponse'
                 default:
                     description: Default error response
                     content:
@@ -648,86 +599,98 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
-        AssignPermissionsRequest:
+        ApprovalTaskResponse:
             type: object
             properties:
-                roleId:
+                id:
                     type: string
-                permissionIds:
+                tenantId:
+                    type: string
+                processInstanceId:
+                    type: string
+                nodeId:
+                    type: string
+                nodeName:
+                    type: string
+                assigneeId:
+                    type: string
+                assigneeName:
+                    type: string
+                status:
+                    type: string
+                action:
+                    type: string
+                comment:
+                    type: string
+                approvedAt:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        BatchProcessResult:
+            type: object
+            properties:
+                taskId:
+                    type: string
+                success:
+                    type: boolean
+                error:
+                    type: string
+        BatchProcessTasksRequest:
+            type: object
+            properties:
+                taskIds:
                     type: array
                     items:
                         type: string
-            description: 分配权限请求
-        AssignRoleToUserRequest:
+                action:
+                    type: string
+                comment:
+                    type: string
+        BatchProcessTasksResponse:
             type: object
             properties:
-                roleId:
-                    type: string
-                userId:
-                    type: string
-            description: 分配角色给用户请求
-        AssignRolesRequest:
-            type: object
-            properties:
-                userId:
-                    type: string
-                roleIds:
+                results:
                     type: array
                     items:
-                        type: string
-            description: 分配角色请求
-        ChangePasswordRequest:
+                        $ref: '#/components/schemas/BatchProcessResult'
+        CancelProcessRequest:
             type: object
             properties:
-                oldPassword:
+                id:
                     type: string
-                newPassword:
+                reason:
                     type: string
-            description: 修改密码请求
-        CreateRoleRequest:
+        CountPendingTasksResponse:
             type: object
             properties:
+                count:
+                    type: integer
+                    format: int32
+        CreateProcessDefinitionRequest:
+            type: object
+            properties:
+                code:
+                    type: string
                 name:
                     type: string
-                displayName:
+                category:
                     type: string
-                description:
+                formId:
                     type: string
-                parentId:
+                workflowId:
                     type: string
-            description: 创建角色请求
-        GetRolePermissionsResponse:
+            description: 请求和响应消息定义
+        DelegateTaskRequest:
             type: object
             properties:
-                permissions:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/PermissionInfo'
-            description: 获取角色权限响应
-        GetUserPermissionsResponse:
-            type: object
-            properties:
-                permissions:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/PermissionInfo'
-            description: 获取用户权限响应
-        GetUserRolesResponse:
-            type: object
-            properties:
-                roles:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/RoleInfo'
-            description: 获取用户角色响应
-        GetUserSessionsResponse:
-            type: object
-            properties:
-                sessions:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/SessionInfo'
-            description: 获取用户会话响应
+                id:
+                    type: string
+                delegateToId:
+                    type: string
+                comment:
+                    type: string
         GoogleProtobufAny:
             type: object
             properties:
@@ -736,143 +699,165 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        ListRolesResponse:
+        InstanceStatsSummaryResponse:
             type: object
             properties:
-                roles:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/RoleInfo'
-                page:
-                    $ref: '#/components/schemas/PageResponse'
-            description: 角色列表响应
-        ListUsersResponse:
-            type: object
-            properties:
-                users:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/UserInfo'
-                page:
-                    $ref: '#/components/schemas/PageResponse'
-            description: 用户列表响应
-        LoginRequest:
-            type: object
-            properties:
-                username:
-                    type: string
-                password:
-                    type: string
-                ipAddress:
-                    type: string
-                userAgent:
-                    type: string
-            description: 登录请求
-        LoginResponse:
-            type: object
-            properties:
-                accessToken:
-                    type: string
-                refreshToken:
-                    type: string
-                expiresIn:
-                    type: string
-                user:
-                    $ref: '#/components/schemas/UserInfo'
-            description: 登录响应
-        LogoutRequest:
-            type: object
-            properties:
-                token:
-                    type: string
-                ipAddress:
-                    type: string
-                userAgent:
-                    type: string
-            description: 登出请求
-        PageResponse:
-            type: object
-            properties:
-                page:
-                    type: integer
-                    format: int32
-                pageSize:
-                    type: integer
-                    format: int32
                 total:
-                    type: string
-                totalPages:
                     type: integer
                     format: int32
-            description: 分页响应
-        PermissionInfo:
+                pending:
+                    type: integer
+                    format: int32
+                approved:
+                    type: integer
+                    format: int32
+                rejected:
+                    type: integer
+                    format: int32
+                withdrawn:
+                    type: integer
+                    format: int32
+                cancelled:
+                    type: integer
+                    format: int32
+                byStatus:
+                    type: object
+                    additionalProperties:
+                        type: integer
+                        format: int32
+        ListApprovalTasksResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ApprovalTaskResponse'
+                total:
+                    type: integer
+                    format: int32
+        ListProcessDefinitionsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ProcessDefinitionResponse'
+                total:
+                    type: integer
+                    format: int32
+        ListProcessInstancesResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ProcessInstanceResponse'
+                total:
+                    type: integer
+                    format: int32
+        ProcessDefinitionResponse:
             type: object
             properties:
                 id:
-                    type: string
-                resource:
-                    type: string
-                action:
-                    type: string
-                displayName:
-                    type: string
-                description:
-                    type: string
-            description: 权限信息
-        RefreshTokenRequest:
-            type: object
-            properties:
-                refreshToken:
-                    type: string
-            description: 刷新 Token 请求
-        RegisterRequest:
-            type: object
-            properties:
-                username:
-                    type: string
-                email:
-                    type: string
-                password:
                     type: string
                 tenantId:
                     type: string
-            description: 注册请求
-        RegisterResponse:
-            type: object
-            properties:
-                user:
-                    $ref: '#/components/schemas/UserInfo'
-            description: 注册响应
-        RoleInfo:
-            type: object
-            properties:
-                id:
+                code:
                     type: string
                 name:
                     type: string
-                displayName:
+                formId:
                     type: string
-                description:
+                formName:
                     type: string
-                tenantId:
+                workflowId:
                     type: string
+                workflowName:
+                    type: string
+                enabled:
+                    type: boolean
                 createdAt:
                     type: string
-            description: 角色信息
-        SessionInfo:
+                updatedAt:
+                    type: string
+        ProcessInstanceResponse:
             type: object
             properties:
                 id:
                     type: string
-                ipAddress:
+                tenantId:
                     type: string
-                userAgent:
+                processDefId:
+                    type: string
+                processDefCode:
+                    type: string
+                processDefName:
+                    type: string
+                workflowInstanceId:
+                    type: string
+                formDataId:
+                    type: string
+                applicantId:
+                    type: string
+                applicantName:
+                    type: string
+                title:
+                    type: string
+                status:
+                    type: string
+                currentNodeId:
+                    type: string
+                currentNodeName:
+                    type: string
+                startedAt:
+                    type: string
+                completedAt:
                     type: string
                 createdAt:
                     type: string
-                expiresAt:
+                updatedAt:
                     type: string
-            description: 会话信息
+        ProcessStatsResponse:
+            type: object
+            properties:
+                processDefId:
+                    type: string
+                processCode:
+                    type: string
+                processName:
+                    type: string
+                totalInstances:
+                    type: integer
+                    format: int32
+                pendingInstances:
+                    type: integer
+                    format: int32
+                approvedInstances:
+                    type: integer
+                    format: int32
+                rejectedInstances:
+                    type: integer
+                    format: int32
+                avgDuration:
+                    type: string
+        ProcessTaskRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                action:
+                    type: string
+                comment:
+                    type: string
+        StartProcessRequest:
+            type: object
+            properties:
+                processDefId:
+                    type: string
+                formData:
+                    type: object
+                    additionalProperties:
+                        type: string
         Status:
             type: object
             properties:
@@ -889,48 +874,37 @@ components:
                         $ref: '#/components/schemas/GoogleProtobufAny'
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
-        UpdateRoleRequest:
+        TransferTaskRequest:
             type: object
             properties:
                 id:
                     type: string
-                displayName:
+                transferToId:
                     type: string
-                description:
+                comment:
                     type: string
-            description: 更新角色请求
-        UpdateUserRequest:
+        UpdateProcessDefinitionRequest:
             type: object
             properties:
                 id:
                     type: string
-                email:
+                name:
                     type: string
-                status:
+                formId:
                     type: string
-            description: 更新用户请求
-        UserInfo:
+                workflowId:
+                    type: string
+                enabled:
+                    type: boolean
+        WithdrawProcessRequest:
             type: object
             properties:
                 id:
                     type: string
-                username:
-                    type: string
-                email:
-                    type: string
-                status:
-                    type: string
-                tenantId:
-                    type: string
-                createdAt:
-                    type: string
-                updatedAt:
-                    type: string
-            description: 用户信息
 tags:
-    - name: AuthService
-      description: 认证服务
-    - name: RoleService
-      description: 角色服务
-    - name: UserService
-      description: 用户服务
+    - name: ApprovalTaskService
+      description: ApprovalTaskService 审批任务服务
+    - name: ProcessDefinitionService
+      description: ProcessDefinitionService 流程定义服务
+    - name: ProcessInstanceService
+      description: ProcessInstanceService 流程实例服务

@@ -52,12 +52,11 @@ func (r *tenantRepo) Create(ctx context.Context, tenant *model.Tenant) error {
 	return r.db.Transaction(ctx, func(tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, `
 			INSERT INTO tenants (
-				id, name, display_name, domain, status,
-				max_users, max_storage, settings, created_at, updated_at
-			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+				id, name, domain, status, settings, created_at, updated_at
+			) VALUES ($1, $2, $3, $4, $5, $6, $7)
 		`,
-			tenant.ID, tenant.Name, tenant.DisplayName, tenant.Domain, tenant.Status,
-			tenant.MaxUsers, tenant.MaxStorage, settingsJSON, tenant.CreatedAt, tenant.UpdatedAt,
+			tenant.ID, tenant.Name, tenant.Domain, tenant.Status,
+			settingsJSON, tenant.CreatedAt, tenant.UpdatedAt,
 		)
 
 		return err
@@ -69,13 +68,14 @@ func (r *tenantRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Tenant,
 	cacheKey := fmt.Sprintf("tenant:id:%s", id.String())
 
 	var tenant model.Tenant
-	if err := r.cache.Get(ctx, cacheKey, &tenant); err == nil {
-		return &tenant, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &tenant); err == nil {
+			return &tenant, nil
+		}
 	}
 
 	row := r.db.QueryRow(ctx, `
-		SELECT id, name, display_name, domain, status,
-			   max_users, max_storage, settings, created_at, updated_at, deleted_at
+		SELECT id, name, domain, status, settings, created_at, updated_at, deleted_at
 		FROM tenants
 		WHERE id = $1 AND deleted_at IS NULL
 	`, id)
@@ -84,7 +84,9 @@ func (r *tenantRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Tenant,
 		return nil, err
 	}
 
-	_ = r.cache.Set(ctx, cacheKey, &tenant, 600)
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, &tenant, 600)
+	}
 	return &tenant, nil
 }
 
@@ -93,13 +95,14 @@ func (r *tenantRepo) FindByDomain(ctx context.Context, domain string) (*model.Te
 	cacheKey := fmt.Sprintf("tenant:domain:%s", domain)
 
 	var tenant model.Tenant
-	if err := r.cache.Get(ctx, cacheKey, &tenant); err == nil {
-		return &tenant, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &tenant); err == nil {
+			return &tenant, nil
+		}
 	}
 
 	row := r.db.QueryRow(ctx, `
-		SELECT id, name, display_name, domain, status,
-			   max_users, max_storage, settings, created_at, updated_at, deleted_at
+		SELECT id, name, domain, status, settings, created_at, updated_at, deleted_at
 		FROM tenants
 		WHERE domain = $1 AND deleted_at IS NULL
 	`, domain)
@@ -108,7 +111,9 @@ func (r *tenantRepo) FindByDomain(ctx context.Context, domain string) (*model.Te
 		return nil, err
 	}
 
-	_ = r.cache.Set(ctx, cacheKey, &tenant, 600)
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, &tenant, 600)
+	}
 	return &tenant, nil
 }
 
@@ -120,12 +125,11 @@ func (r *tenantRepo) Update(ctx context.Context, tenant *model.Tenant) error {
 	return r.db.Transaction(ctx, func(tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, `
 			UPDATE tenants SET
-				name = $2, display_name = $3, domain = $4, status = $5,
-				max_users = $6, max_storage = $7, settings = $8, updated_at = $9
+				name = $2, domain = $3, status = $4, settings = $5, updated_at = $6
 			WHERE id = $1 AND deleted_at IS NULL
 		`,
-			tenant.ID, tenant.Name, tenant.DisplayName, tenant.Domain, tenant.Status,
-			tenant.MaxUsers, tenant.MaxStorage, settingsJSON, tenant.UpdatedAt,
+			tenant.ID, tenant.Name, tenant.Domain, tenant.Status,
+			settingsJSON, tenant.UpdatedAt,
 		)
 
 		if err == nil {
@@ -160,8 +164,7 @@ func (r *tenantRepo) Delete(ctx context.Context, id uuid.UUID) error {
 // List 查询租户列表
 func (r *tenantRepo) List(ctx context.Context, limit, offset int) ([]*model.Tenant, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, name, display_name, domain, status,
-			   max_users, max_storage, settings, created_at, updated_at, deleted_at
+		SELECT id, name, domain, status, settings, created_at, updated_at, deleted_at
 		FROM tenants
 		WHERE deleted_at IS NULL
 		ORDER BY created_at DESC
@@ -234,15 +237,19 @@ func (r *tenantRepo) UpdateSettings(ctx context.Context, id uuid.UUID, settings 
 // scanTenant 扫描租户数据
 func (r *tenantRepo) scanTenant(row pgx.Row, tenant *model.Tenant) error {
 	var settingsJSON []byte
+	var domain *string
 
 	err := row.Scan(
-		&tenant.ID, &tenant.Name, &tenant.DisplayName, &tenant.Domain, &tenant.Status,
-		&tenant.MaxUsers, &tenant.MaxStorage, &settingsJSON,
-		&tenant.CreatedAt, &tenant.UpdatedAt, &tenant.DeletedAt,
+		&tenant.ID, &tenant.Name, &domain, &tenant.Status,
+		&settingsJSON, &tenant.CreatedAt, &tenant.UpdatedAt, &tenant.DeletedAt,
 	)
 
 	if err != nil {
 		return err
+	}
+
+	if domain != nil {
+		tenant.Domain = *domain
 	}
 
 	// 解析 settings
@@ -255,9 +262,11 @@ func (r *tenantRepo) scanTenant(row pgx.Row, tenant *model.Tenant) error {
 
 // invalidateCache 清除缓存
 func (r *tenantRepo) invalidateCache(id uuid.UUID, domain string) {
-	ctx := context.Background()
-	r.cache.Delete(ctx, fmt.Sprintf("tenant:id:%s", id.String()))
-	if domain != "" {
-		r.cache.Delete(ctx, fmt.Sprintf("tenant:domain:%s", domain))
+	if r.cache != nil {
+		ctx := context.Background()
+		r.cache.Delete(ctx, fmt.Sprintf("tenant:id:%s", id.String()))
+		if domain != "" {
+			r.cache.Delete(ctx, fmt.Sprintf("tenant:domain:%s", domain))
+		}
 	}
 }

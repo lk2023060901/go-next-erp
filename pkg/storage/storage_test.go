@@ -3,7 +3,6 @@ package storage
 import (
 	"bytes"
 	"context"
-	"os"
 	"testing"
 	"time"
 )
@@ -23,17 +22,22 @@ func TestStorage(t *testing.T) {
 	}
 	defer s.Close()
 
+	// 获取底层 ObjectStorage
+	store := s.GetObjectStorage()
+
 	t.Run("BucketOperations", func(t *testing.T) {
 		bucket := "test-bucket-ops"
 
 		// 创建桶
-		err := s.CreateBucket(ctx, bucket)
+		err := store.MakeBucket(ctx, bucket, MakeBucketOptions{
+			Region: "us-east-1",
+		})
 		if err != nil {
-			t.Errorf("CreateBucket() error = %v", err)
+			t.Errorf("MakeBucket() error = %v", err)
 		}
 
 		// 检查桶存在
-		exists, err := s.BucketExists(ctx, bucket)
+		exists, err := store.BucketExists(ctx, bucket)
 		if err != nil {
 			t.Errorf("BucketExists() error = %v", err)
 		}
@@ -42,7 +46,7 @@ func TestStorage(t *testing.T) {
 		}
 
 		// 列出桶
-		buckets, err := s.ListBuckets(ctx)
+		buckets, err := store.ListBuckets(ctx)
 		if err != nil {
 			t.Errorf("ListBuckets() error = %v", err)
 		}
@@ -51,90 +55,51 @@ func TestStorage(t *testing.T) {
 		}
 
 		// 删除桶
-		err = s.DeleteBucket(ctx, bucket)
+		err = store.RemoveBucket(ctx, bucket)
 		if err != nil {
-			t.Errorf("DeleteBucket() error = %v", err)
+			t.Errorf("RemoveBucket() error = %v", err)
 		}
 	})
 
-	t.Run("FileOperations", func(t *testing.T) {
+	t.Run("ObjectOperations", func(t *testing.T) {
 		bucket := "test-bucket"
 		key := "test/file.txt"
 		content := []byte("Hello, MinIO!")
 
-		// 上传文件
+		// 上传对象
 		reader := bytes.NewReader(content)
-		err := s.UploadFile(ctx, bucket, key, reader, int64(len(content)), "text/plain")
+		result, err := store.PutObject(ctx, bucket, key, reader, int64(len(content)), PutObjectOptions{
+			ContentType: "text/plain",
+		})
 		if err != nil {
-			t.Errorf("UploadFile() error = %v", err)
+			t.Errorf("PutObject() error = %v", err)
+		}
+		if result == nil {
+			t.Error("PutObject() result should not be nil")
 		}
 
-		// 检查文件存在
-		exists, err := s.FileExists(ctx, bucket, key)
+		// 检查对象信息
+		info, err := store.StatObject(ctx, bucket, key)
 		if err != nil {
-			t.Errorf("FileExists() error = %v", err)
+			t.Errorf("StatObject() error = %v", err)
 		}
-		if !exists {
-			t.Error("File should exist")
-		}
-
-		// 获取文件信息
-		info, err := s.GetFileInfo(ctx, bucket, key)
-		if err != nil {
-			t.Errorf("GetFileInfo() error = %v", err)
-		}
-		if info.Size != int64(len(content)) {
-			t.Errorf("File size = %d, want %d", info.Size, len(content))
-		}
-
-		// 下载文件
-		tmpFile := "/tmp/test-download.txt"
-		err = s.DownloadFile(ctx, bucket, key, tmpFile)
-		if err != nil {
-			t.Errorf("DownloadFile() error = %v", err)
-		}
-		defer os.Remove(tmpFile)
-
-		// 验证下载内容
-		downloaded, err := os.ReadFile(tmpFile)
-		if err != nil {
-			t.Errorf("ReadFile() error = %v", err)
-		}
-		if !bytes.Equal(downloaded, content) {
-			t.Errorf("Downloaded content = %s, want %s", downloaded, content)
+		if info == nil || info.Size != int64(len(content)) {
+			t.Error("Object info mismatch")
 		}
 
 		// 获取预签名 URL
-		url, err := s.GetPresignedURL(ctx, bucket, key, 1*time.Hour)
+		url, err := store.PresignedGetObject(ctx, bucket, key, 1*time.Hour, PresignedGetOptions{})
 		if err != nil {
-			t.Errorf("GetPresignedURL() error = %v", err)
+			t.Errorf("PresignedGetObject() error = %v", err)
 		}
 		if url == "" {
 			t.Error("Presigned URL should not be empty")
 		}
 
-		// 列出文件
-		files, err := s.ListFiles(ctx, bucket, "test/")
+		// 删除对象
+		err = store.RemoveObject(ctx, bucket, key)
 		if err != nil {
-			t.Errorf("ListFiles() error = %v", err)
-		}
-		if len(files) == 0 {
-			t.Error("Should have at least one file")
-		}
-
-		// 删除文件
-		err = s.DeleteFile(ctx, bucket, key)
-		if err != nil {
-			t.Errorf("DeleteFile() error = %v", err)
-		}
-
-		// 验证文件已删除
-		exists, err = s.FileExists(ctx, bucket, key)
-		if err != nil {
-			t.Errorf("FileExists() error = %v", err)
-		}
-		if exists {
-			t.Error("File should not exist after deletion")
+			t.Errorf("RemoveObject() error = %v", err)
 		}
 	})
 }

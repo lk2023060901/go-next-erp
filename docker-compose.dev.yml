@@ -1,0 +1,156 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  go-next-erp-postgres:
+    image: postgres:15-alpine
+    container_name: go-next-erp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: erp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      TZ: Asia/Shanghai
+    ports:
+      - "16000:5432"  # PostgreSQL 端口
+    volumes:
+      - go-next-erp-postgres-data:/var/lib/postgresql/data
+    networks:
+      - go-next-erp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存
+  go-next-erp-redis:
+    image: redis:7-alpine
+    container_name: go-next-erp-redis
+    restart: unless-stopped
+    command: redis-server --requirepass redis123 --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "16001:6379"  # Redis 端口
+    volumes:
+      - go-next-erp-redis-data:/data
+    networks:
+      - go-next-erp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MinIO 对象存储
+  go-next-erp-minio:
+    image: minio/minio:latest
+    container_name: go-next-erp-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BROWSER: "on"
+      TZ: Asia/Shanghai
+    ports:
+      - "16002:9000"  # MinIO API 端口
+      - "16003:9001"  # MinIO Console 控制台端口
+    volumes:
+      - go-next-erp-minio-data:/data
+    networks:
+      - go-next-erp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Milvus etcd (向量数据库依赖)
+  go-next-erp-milvus-etcd:
+    image: quay.io/coreos/etcd:v3.5.14
+    container_name: go-next-erp-milvus-etcd
+    restart: unless-stopped
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_AUTO_COMPACTION_RETENTION: "1000"
+      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+      ETCD_SNAPSHOT_COUNT: "50000"
+    volumes:
+      - go-next-erp-milvus-etcd-data:/etcd
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    networks:
+      - go-next-erp-network
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Milvus MinIO (向量数据库专用存储)
+  go-next-erp-milvus-minio:
+    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+    container_name: go-next-erp-milvus-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - go-next-erp-milvus-minio-data:/minio_data
+    command: minio server /minio_data --console-address ":9001"
+    networks:
+      - go-next-erp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Milvus 向量数据库
+  go-next-erp-milvus:
+    image: milvusdb/milvus:v2.4.5
+    container_name: go-next-erp-milvus
+    restart: unless-stopped
+    command: milvus run standalone
+    environment:
+      ETCD_ENDPOINTS: go-next-erp-milvus-etcd:2379
+      MINIO_ADDRESS: go-next-erp-milvus-minio:9000
+      MINIO_ACCESS_KEY_ID: minioadmin
+      MINIO_SECRET_ACCESS_KEY: minioadmin123
+      TZ: Asia/Shanghai
+    volumes:
+      - go-next-erp-milvus-data:/var/lib/milvus
+    ports:
+      - "16004:19530"  # Milvus gRPC API 端口
+      - "16005:9091"   # Milvus Metrics 端口
+    networks:
+      - go-next-erp-network
+    depends_on:
+      go-next-erp-milvus-etcd:
+        condition: service_healthy
+      go-next-erp-milvus-minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  go-next-erp-network:
+    driver: bridge
+    name: go-next-erp-network
+
+volumes:
+  go-next-erp-postgres-data:
+    name: go-next-erp-postgres-data
+  go-next-erp-redis-data:
+    name: go-next-erp-redis-data
+  go-next-erp-minio-data:
+    name: go-next-erp-minio-data
+  go-next-erp-milvus-etcd-data:
+    name: go-next-erp-milvus-etcd-data
+  go-next-erp-milvus-minio-data:
+    name: go-next-erp-milvus-minio-data
+  go-next-erp-milvus-data:
+    name: go-next-erp-milvus-data

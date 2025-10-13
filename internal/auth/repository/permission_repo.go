@@ -67,8 +67,10 @@ func (r *permissionRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Per
 	cacheKey := fmt.Sprintf("permission:id:%s", id.String())
 
 	var perm model.Permission
-	if err := r.cache.Get(ctx, cacheKey, &perm); err == nil {
-		return &perm, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &perm); err == nil {
+			return &perm, nil
+		}
 	}
 
 	row := r.db.QueryRow(ctx, `
@@ -81,7 +83,9 @@ func (r *permissionRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Per
 		return nil, err
 	}
 
-	_ = r.cache.Set(ctx, cacheKey, &perm, 600)
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, &perm, 600)
+	}
 	return &perm, nil
 }
 
@@ -115,7 +119,9 @@ func (r *permissionRepo) Update(ctx context.Context, permission *model.Permissio
 			permission.DisplayName, permission.Description, permission.UpdatedAt)
 
 		if err == nil {
-			r.cache.Delete(ctx, fmt.Sprintf("permission:id:%s", permission.ID.String()))
+			if r.cache != nil {
+				r.cache.Delete(ctx, fmt.Sprintf("permission:id:%s", permission.ID.String()))
+			}
 		}
 
 		return err
@@ -130,7 +136,9 @@ func (r *permissionRepo) Delete(ctx context.Context, id uuid.UUID) error {
 		_, err := tx.Exec(ctx, "UPDATE permissions SET deleted_at = $1 WHERE id = $2", now, id)
 
 		if err == nil {
-			r.cache.Delete(ctx, fmt.Sprintf("permission:id:%s", id.String()))
+			if r.cache != nil {
+				r.cache.Delete(ctx, fmt.Sprintf("permission:id:%s", id.String()))
+			}
 		}
 
 		return err
@@ -142,8 +150,10 @@ func (r *permissionRepo) GetRolePermissions(ctx context.Context, roleID uuid.UUI
 	cacheKey := fmt.Sprintf("role:permissions:%s", roleID.String())
 
 	var permissions []*model.Permission
-	if err := r.cache.Get(ctx, cacheKey, &permissions); err == nil {
-		return permissions, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &permissions); err == nil {
+			return permissions, nil
+		}
 	}
 
 	rows, err := r.db.Query(ctx, `
@@ -166,7 +176,9 @@ func (r *permissionRepo) GetRolePermissions(ctx context.Context, roleID uuid.UUI
 		permissions = append(permissions, &perm)
 	}
 
-	_ = r.cache.Set(ctx, cacheKey, permissions, 600)
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, permissions, 600)
+	}
 	return permissions, nil
 }
 
@@ -175,8 +187,10 @@ func (r *permissionRepo) GetUserPermissions(ctx context.Context, userID uuid.UUI
 	cacheKey := fmt.Sprintf("user:permissions:%s", userID.String())
 
 	var permissions []*model.Permission
-	if err := r.cache.Get(ctx, cacheKey, &permissions); err == nil {
-		return permissions, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &permissions); err == nil {
+			return permissions, nil
+		}
 	}
 
 	rows, err := r.db.Query(ctx, `
@@ -200,7 +214,9 @@ func (r *permissionRepo) GetUserPermissions(ctx context.Context, userID uuid.UUI
 		permissions = append(permissions, &perm)
 	}
 
-	_ = r.cache.Set(ctx, cacheKey, permissions, 600)
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, permissions, 600)
+	}
 	return permissions, nil
 }
 
@@ -256,7 +272,9 @@ func (r *permissionRepo) AssignPermissionToRole(ctx context.Context, roleID, per
 		`, id, roleID, permissionID, tenantID, time.Now())
 
 		if err == nil {
-			r.cache.Delete(ctx, fmt.Sprintf("role:permissions:%s", roleID.String()))
+			if r.cache != nil {
+				r.cache.Delete(ctx, fmt.Sprintf("role:permissions:%s", roleID.String()))
+			}
 		}
 
 		return err
@@ -272,7 +290,9 @@ func (r *permissionRepo) RemovePermissionFromRole(ctx context.Context, roleID, p
 		)
 
 		if err == nil {
-			r.cache.Delete(ctx, fmt.Sprintf("role:permissions:%s", roleID.String()))
+			if r.cache != nil {
+				r.cache.Delete(ctx, fmt.Sprintf("role:permissions:%s", roleID.String()))
+			}
 		}
 
 		return err

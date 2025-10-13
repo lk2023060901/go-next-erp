@@ -1,0 +1,398 @@
+syntax = "proto3";
+
+package api.approval.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/approval/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+
+// ProcessDefinitionService 流程定义服务
+service ProcessDefinitionService {
+  // 创建流程定义
+  rpc CreateProcessDefinition (CreateProcessDefinitionRequest) returns (ProcessDefinitionResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/processes"
+      body: "*"
+    };
+  }
+
+  // 更新流程定义
+  rpc UpdateProcessDefinition (UpdateProcessDefinitionRequest) returns (ProcessDefinitionResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/processes/{id}"
+      body: "*"
+    };
+  }
+
+  // 获取流程定义
+  rpc GetProcessDefinition (GetProcessDefinitionRequest) returns (ProcessDefinitionResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/processes/{id}"
+    };
+  }
+
+  // 列出流程定义
+  rpc ListProcessDefinitions (ListProcessDefinitionsRequest) returns (ListProcessDefinitionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/processes"
+    };
+  }
+
+  // 删除流程定义
+  rpc DeleteProcessDefinition (DeleteProcessDefinitionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/processes/{id}"
+    };
+  }
+
+  // 启用流程定义
+  rpc EnableProcessDefinition (EnableProcessDefinitionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      patch: "/api/v1/processes/{id}/enable"
+    };
+  }
+
+  // 禁用流程定义
+  rpc DisableProcessDefinition (DisableProcessDefinitionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      patch: "/api/v1/processes/{id}/disable"
+    };
+  }
+
+  // 获取流程统计
+  rpc GetProcessStats (GetProcessStatsRequest) returns (ProcessStatsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/processes/{id}/stats"
+    };
+  }
+}
+
+// ProcessInstanceService 流程实例服务
+service ProcessInstanceService {
+  // 启动流程
+  rpc StartProcess (StartProcessRequest) returns (ProcessInstanceResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/process-instances/start"
+      body: "*"
+    };
+  }
+
+  // 获取流程实例
+  rpc GetProcessInstance (GetProcessInstanceRequest) returns (ProcessInstanceResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/process-instances/{id}"
+    };
+  }
+
+  // 列出我的申请
+  rpc ListMyApplications (ListMyApplicationsRequest) returns (ListProcessInstancesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/process-instances/my-applications"
+    };
+  }
+
+  // 撤回流程
+  rpc WithdrawProcess (WithdrawProcessRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/process-instances/{id}/withdraw"
+      body: "*"
+    };
+  }
+
+  // 取消流程
+  rpc CancelProcess (CancelProcessRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/process-instances/{id}/cancel"
+      body: "*"
+    };
+  }
+
+  // 列出流程实例
+  rpc ListProcessInstances (ListProcessInstancesRequest) returns (ListProcessInstancesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/process-instances"
+    };
+  }
+
+  // 获取实例统计汇总
+  rpc GetInstanceStatsSummary (GetInstanceStatsSummaryRequest) returns (InstanceStatsSummaryResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/process-instances/stats/summary"
+    };
+  }
+}
+
+// ApprovalTaskService 审批任务服务  
+service ApprovalTaskService {
+  // 获取审批任务
+  rpc GetApprovalTask (GetApprovalTaskRequest) returns (ApprovalTaskResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-tasks/{id}"
+    };
+  }
+
+  // 列出我的任务
+  rpc ListMyTasks (ListMyTasksRequest) returns (ListApprovalTasksResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-tasks/my-tasks"
+    };
+  }
+
+  // 统计待处理任务数
+  rpc CountPendingTasks (CountPendingTasksRequest) returns (CountPendingTasksResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-tasks/my-tasks/count"
+    };
+  }
+
+  // 处理审批任务
+  rpc ProcessTask (ProcessTaskRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/approval-tasks/{id}/process"
+      body: "*"
+    };
+  }
+
+  // 批量处理任务
+  rpc BatchProcessTasks (BatchProcessTasksRequest) returns (BatchProcessTasksResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/approval-tasks/batch-process"
+      body: "*"
+    };
+  }
+
+  // 转审任务
+  rpc TransferTask (TransferTaskRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/approval-tasks/{id}/transfer"
+      body: "*"
+    };
+  }
+
+  // 委托任务
+  rpc DelegateTask (DelegateTaskRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/approval-tasks/{id}/delegate"
+      body: "*"
+    };
+  }
+}
+
+// 请求和响应消息定义
+message CreateProcessDefinitionRequest {
+  string code = 1 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string name = 2 [(validate.rules).string = {min_len: 1, max_len: 100}];
+  string category = 3 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string form_id = 4 [(validate.rules).string.uuid = true];
+  string workflow_id = 5 [(validate.rules).string.uuid = true];
+}
+
+message UpdateProcessDefinitionRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+  string name = 2 [(validate.rules).string = {min_len: 1, max_len: 100}];
+  string form_id = 3 [(validate.rules).string.uuid = true];
+  string workflow_id = 4 [(validate.rules).string.uuid = true];
+  bool enabled = 5;
+}
+
+message GetProcessDefinitionRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+message ListProcessDefinitionsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message DeleteProcessDefinitionRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+message EnableProcessDefinitionRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+message DisableProcessDefinitionRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+message GetProcessStatsRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+message ProcessDefinitionResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string form_id = 5;
+  string form_name = 6;
+  string workflow_id = 7;
+  string workflow_name = 8;
+  bool enabled = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+message ListProcessDefinitionsResponse {
+  repeated ProcessDefinitionResponse items = 1;
+  int32 total = 2;
+}
+
+message ProcessStatsResponse {
+  string process_def_id = 1;
+  string process_code = 2;
+  string process_name = 3;
+  int32 total_instances = 4;
+  int32 pending_instances = 5;
+  int32 approved_instances = 6;
+  int32 rejected_instances = 7;
+  int64 avg_duration = 8;
+}
+
+message StartProcessRequest {
+  string process_def_id = 1 [(validate.rules).string.uuid = true];
+  map<string, string> form_data = 2;
+}
+
+message GetProcessInstanceRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+message ListMyApplicationsRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message WithdrawProcessRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+message CancelProcessRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+  string reason = 2;
+}
+
+message ListProcessInstancesRequest {
+  string process_def_id = 1;
+  string status = 2;
+  string applicant_id = 3;
+  string start_date = 4;
+  string end_date = 5;
+  int32 limit = 6;
+  int32 offset = 7;
+}
+
+message ProcessInstanceResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string process_def_id = 3;
+  string process_def_code = 4;
+  string process_def_name = 5;
+  string workflow_instance_id = 6;
+  string form_data_id = 7;
+  string applicant_id = 8;
+  string applicant_name = 9;
+  string title = 10;
+  string status = 11;
+  string current_node_id = 12;
+  string current_node_name = 13;
+  string started_at = 14;
+  string completed_at = 15;
+  string created_at = 16;
+  string updated_at = 17;
+}
+
+message ListProcessInstancesResponse {
+  repeated ProcessInstanceResponse items = 1;
+  int32 total = 2;
+}
+
+message InstanceStatsSummaryResponse {
+  int32 total = 1;
+  int32 pending = 2;
+  int32 approved = 3;
+  int32 rejected = 4;
+  int32 withdrawn = 5;
+  int32 cancelled = 6;
+  map<string, int32> by_status = 7;
+}
+
+message GetInstanceStatsSummaryRequest {
+  // 无参数，使用 context 中的 tenant_id
+}
+
+message GetApprovalTaskRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+}
+
+message ListMyTasksRequest {
+  string status = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message CountPendingTasksRequest {
+  // 无参数，使用 context 中的 user_id
+}
+
+message CountPendingTasksResponse {
+  int32 count = 1;
+}
+
+message ProcessTaskRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+  string action = 2 [(validate.rules).string = {in: ["approve", "reject", "transfer"]}];
+  string comment = 3;
+}
+
+message BatchProcessTasksRequest {
+  repeated string task_ids = 1;
+  string action = 2 [(validate.rules).string = {in: ["approve", "reject"]}];
+  string comment = 3;
+}
+
+message BatchProcessTasksResponse {
+  repeated BatchProcessResult results = 1;
+}
+
+message BatchProcessResult {
+  string task_id = 1;
+  bool success = 2;
+  string error = 3;
+}
+
+message TransferTaskRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+  string transfer_to_id = 2 [(validate.rules).string.uuid = true];
+  string comment = 3;
+}
+
+message DelegateTaskRequest {
+  string id = 1 [(validate.rules).string.uuid = true];
+  string delegate_to_id = 2 [(validate.rules).string.uuid = true];
+  string comment = 3;
+}
+
+message ApprovalTaskResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string process_instance_id = 3;
+  string node_id = 4;
+  string node_name = 5;
+  string assignee_id = 6;
+  string assignee_name = 7;
+  string status = 8;
+  string action = 9;
+  string comment = 10;
+  string approved_at = 11;
+  string created_at = 12;
+  string updated_at = 13;
+}
+
+message ListApprovalTasksResponse {
+  repeated ApprovalTaskResponse items = 1;
+  int32 total = 2;
+}

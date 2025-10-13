@@ -1,0 +1,191 @@
+syntax = "proto3";
+
+package api.form.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/form/v1;v1";
+
+// FormDefinitionService 表单定义服务
+service FormDefinitionService {
+  // 创建表单定义
+  rpc CreateFormDefinition (CreateFormDefinitionRequest) returns (FormDefinitionResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/forms"
+      body: "*"
+    };
+  }
+
+  // 获取表单定义
+  rpc GetFormDefinition (GetFormDefinitionRequest) returns (FormDefinitionResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/forms/{id}"
+    };
+  }
+
+  // 更新表单定义
+  rpc UpdateFormDefinition (UpdateFormDefinitionRequest) returns (FormDefinitionResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/forms/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除表单定义
+  rpc DeleteFormDefinition (DeleteFormDefinitionRequest) returns (DeleteFormDefinitionResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/forms/{id}"
+    };
+  }
+
+  // 列出表单定义
+  rpc ListFormDefinitions (ListFormDefinitionsRequest) returns (ListFormDefinitionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/forms"
+    };
+  }
+}
+
+// FormDataService 表单数据服务
+service FormDataService {
+  // 提交表单数据
+  rpc SubmitFormData (SubmitFormDataRequest) returns (FormDataResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/forms/{form_id}/data"
+      body: "*"
+    };
+  }
+
+  // 获取表单数据
+  rpc GetFormData (GetFormDataRequest) returns (FormDataResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/forms/{form_id}/data/{id}"
+    };
+  }
+
+  // 更新表单数据
+  rpc UpdateFormData (UpdateFormDataRequest) returns (FormDataResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/forms/{form_id}/data/{id}"
+      body: "*"
+    };
+  }
+
+  // 查询表单数据列表
+  rpc ListFormData (ListFormDataRequest) returns (ListFormDataResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/forms/{form_id}/data"
+    };
+  }
+}
+
+// ========== 消息定义 ==========
+
+// CreateFormDefinitionRequest 创建表单定义请求
+message CreateFormDefinitionRequest {
+  string tenant_id = 1;
+  string name = 2;
+  string code = 3;
+  string description = 4;
+  string category = 5;
+  string schema = 6;  // JSON schema
+  string ui_schema = 7;  // UI schema
+}
+
+// GetFormDefinitionRequest 获取表单定义请求
+message GetFormDefinitionRequest {
+  string id = 1;
+}
+
+// UpdateFormDefinitionRequest 更新表单定义请求
+message UpdateFormDefinitionRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string schema = 4;
+  string ui_schema = 5;
+}
+
+// DeleteFormDefinitionRequest 删除表单定义请求
+message DeleteFormDefinitionRequest {
+  string id = 1;
+}
+
+// ListFormDefinitionsRequest 列出表单定义请求
+message ListFormDefinitionsRequest {
+  string tenant_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+// FormDefinitionResponse 表单定义响应
+message FormDefinitionResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  string code = 4;
+  string description = 5;
+  string category = 6;
+  string schema = 7;
+  string ui_schema = 8;
+  int32 version = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+// DeleteFormDefinitionResponse 删除表单定义响应
+message DeleteFormDefinitionResponse {
+  bool success = 1;
+}
+
+// ListFormDefinitionsResponse 列出表单定义响应
+message ListFormDefinitionsResponse {
+  repeated FormDefinitionResponse items = 1;
+  int32 total = 2;
+}
+
+// SubmitFormDataRequest 提交表单数据请求
+message SubmitFormDataRequest {
+  string form_id = 1;
+  string tenant_id = 2;
+  string user_id = 3;
+  string data = 4;  // JSON data
+}
+
+// GetFormDataRequest 获取表单数据请求
+message GetFormDataRequest {
+  string form_id = 1;
+  string id = 2;
+}
+
+// UpdateFormDataRequest 更新表单数据请求
+message UpdateFormDataRequest {
+  string form_id = 1;
+  string id = 2;
+  string data = 3;
+}
+
+// ListFormDataRequest 查询表单数据列表请求
+message ListFormDataRequest {
+  string form_id = 1;
+  string tenant_id = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// FormDataResponse 表单数据响应
+message FormDataResponse {
+  string id = 1;
+  string form_id = 2;
+  string tenant_id = 3;
+  string user_id = 4;
+  string data = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+// ListFormDataResponse 查询表单数据列表响应
+message ListFormDataResponse {
+  repeated FormDataResponse items = 1;
+  int32 total = 2;
+}

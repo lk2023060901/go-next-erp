@@ -7,4 +7,9 @@ var ProviderSet = wire.NewSet(
 	NewAuthAdapter,
 	NewUserAdapter,
 	NewRoleAdapter,
+	NewFormAdapter,
+	NewOrganizationAdapter,
+	NewNotificationAdapter,
+	NewApprovalAdapter,
+	NewFileAdapter,
 )

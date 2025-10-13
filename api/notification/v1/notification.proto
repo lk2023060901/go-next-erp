@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package api.notification.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/notification/v1;v1";
+
+// NotificationService 通知服务
+service NotificationService {
+  // 发送通知
+  rpc SendNotification (SendNotificationRequest) returns (NotificationResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/notifications"
+      body: "*"
+    };
+  }
+
+  // 获取通知
+  rpc GetNotification (GetNotificationRequest) returns (NotificationResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/notifications/{id}"
+    };
+  }
+
+  // 列出通知
+  rpc ListNotifications (ListNotificationsRequest) returns (ListNotificationsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/notifications"
+    };
+  }
+
+  // 标记为已读
+  rpc MarkAsRead (MarkAsReadRequest) returns (NotificationResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/notifications/{id}/read"
+      body: "*"
+    };
+  }
+
+  // 批量标记为已读
+  rpc BatchMarkAsRead (BatchMarkAsReadRequest) returns (BatchMarkAsReadResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/notifications/read"
+      body: "*"
+    };
+  }
+
+  // 删除通知
+  rpc DeleteNotification (DeleteNotificationRequest) returns (DeleteNotificationResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/notifications/{id}"
+    };
+  }
+
+  // 获取未读数量
+  rpc GetUnreadCount (GetUnreadCountRequest) returns (UnreadCountResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/notifications/unread-count"
+    };
+  }
+}
+
+// ========== 消息定义 ==========
+
+message SendNotificationRequest {
+  string tenant_id = 1;
+  string user_id = 2;
+  string type = 3;
+  string title = 4;
+  string content = 5;
+  string link = 6;
+  string priority = 7;
+}
+
+message GetNotificationRequest {
+  string id = 1;
+}
+
+message ListNotificationsRequest {
+  string user_id = 1;
+  string type = 2;
+  bool only_unread = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+message MarkAsReadRequest {
+  string id = 1;
+}
+
+message BatchMarkAsReadRequest {
+  repeated string ids = 1;
+}
+
+message DeleteNotificationRequest {
+  string id = 1;
+}
+
+message GetUnreadCountRequest {
+  string user_id = 1;
+}
+
+message NotificationResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string user_id = 3;
+  string type = 4;
+  string title = 5;
+  string content = 6;
+  string link = 7;
+  string priority = 8;
+  bool is_read = 9;
+  string read_at = 10;
+  string created_at = 11;
+}
+
+message ListNotificationsResponse {
+  repeated NotificationResponse items = 1;
+  int32 total = 2;
+}
+
+message BatchMarkAsReadResponse {
+  int32 count = 1;
+  bool success = 2;
+}
+
+message DeleteNotificationResponse {
+  bool success = 1;
+}
+
+message UnreadCountResponse {
+  int32 count = 1;
+}

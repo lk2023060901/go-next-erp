@@ -8,31 +8,39 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/lk2023060901/go-next-erp/internal/adapter"
+	"github.com/lk2023060901/go-next-erp/internal/approval"
+	repository5 "github.com/lk2023060901/go-next-erp/internal/approval/repository"
+	service3 "github.com/lk2023060901/go-next-erp/internal/approval/service"
+	"github.com/lk2023060901/go-next-erp/internal/auth"
 	"github.com/lk2023060901/go-next-erp/internal/auth/authentication"
-	"github.com/lk2023060901/go-next-erp/internal/auth/authentication/jwt"
 	"github.com/lk2023060901/go-next-erp/internal/auth/authorization"
 	"github.com/lk2023060901/go-next-erp/internal/auth/repository"
-	"github.com/lk2023060901/go-next-erp/internal/conf"
+	"github.com/lk2023060901/go-next-erp/internal/file"
+	repository6 "github.com/lk2023060901/go-next-erp/internal/file/repository"
+	service4 "github.com/lk2023060901/go-next-erp/internal/file/service"
+	repository2 "github.com/lk2023060901/go-next-erp/internal/form/repository"
+	"github.com/lk2023060901/go-next-erp/internal/notification"
+	repository4 "github.com/lk2023060901/go-next-erp/internal/notification/repository"
+	service2 "github.com/lk2023060901/go-next-erp/internal/notification/service"
+	repository3 "github.com/lk2023060901/go-next-erp/internal/organization/repository"
+	"github.com/lk2023060901/go-next-erp/internal/organization/service"
 	"github.com/lk2023060901/go-next-erp/internal/server"
-	"github.com/lk2023060901/go-next-erp/pkg/cache"
-	"github.com/lk2023060901/go-next-erp/pkg/database"
-	"strings"
-	"time"
+	"github.com/lk2023060901/go-next-erp/pkg"
 )
 
 // Injectors from wire.go:
 
-// wireApp 通过 Wire 自动生成依赖注入代码
-func wireApp(config *conf.Config, logger log.Logger) (*kratos.App, func(), error) {
-	db, cleanup, err := provideDatabase(config)
+// wireApp 通过 Wire 进行依赖注入
+func wireApp(contextContext context.Context, configConfig config.Config, logger log.Logger) (*kratos.App, func(), error) {
+	db, cleanup, err := pkg.ProvideDatabase(contextContext)
 	if err != nil {
 		return nil, nil, err
 	}
-	redis, cleanup2, err := provideCache(config)
+	redis, cleanup2, err := pkg.ProvideCache(contextContext)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -40,9 +48,9 @@ func wireApp(config *conf.Config, logger log.Logger) (*kratos.App, func(), error
 	userRepository := repository.NewUserRepository(db, redis)
 	sessionRepository := repository.NewSessionRepository(db, redis)
 	auditLogRepository := repository.NewAuditLogRepository(db)
-	jwtConfig := provideJWTConfig(config)
-	service := authentication.NewService(userRepository, sessionRepository, auditLogRepository, jwtConfig)
-	authAdapter := adapter.NewAuthAdapter(service, userRepository)
+	jwtConfig := auth.ProvideJWTConfig()
+	authenticationService := authentication.NewService(userRepository, sessionRepository, auditLogRepository, jwtConfig)
+	authAdapter := adapter.NewAuthAdapter(authenticationService, userRepository)
 	roleRepository := repository.NewRoleRepository(db, redis)
 	permissionRepository := repository.NewPermissionRepository(db, redis)
 	policyRepository := repository.NewPolicyRepository(db, redis)
@@ -50,104 +58,61 @@ func wireApp(config *conf.Config, logger log.Logger) (*kratos.App, func(), error
 	authorizationService := authorization.NewService(roleRepository, permissionRepository, policyRepository, userRepository, relationRepository, auditLogRepository, redis)
 	userAdapter := adapter.NewUserAdapter(userRepository, roleRepository, authorizationService)
 	roleAdapter := adapter.NewRoleAdapter(roleRepository, permissionRepository)
-	httpServer := server.NewHTTPServer(authAdapter, userAdapter, roleAdapter, logger)
-	grpcServer := server.NewGRPCServer(authAdapter, userAdapter, roleAdapter, logger)
+	formDefinitionRepository := repository2.NewFormDefinitionRepository(db)
+	formDataRepository := repository2.NewFormDataRepository(db)
+	formAdapter := adapter.NewFormAdapter(formDefinitionRepository, formDataRepository)
+	organizationRepository := repository3.NewOrganizationRepository(db)
+	closureRepository := repository3.NewClosureRepository(db)
+	organizationTypeRepository := repository3.NewOrganizationTypeRepository(db)
+	employeeRepository := repository3.NewEmployeeRepository(db)
+	organizationService := service.NewOrganizationService(db, organizationRepository, closureRepository, organizationTypeRepository, employeeRepository)
+	organizationAdapter := adapter.NewOrganizationAdapter(organizationService)
+	notificationRepository := repository4.NewNotificationRepository(db)
+	emailConfig := notification.ProvideEmailConfig()
+	notificationService := service2.NewNotificationService(notificationRepository, emailConfig)
+	notificationAdapter := adapter.NewNotificationAdapter(notificationService)
+	processDefinitionRepository := repository5.NewProcessDefinitionRepository(db)
+	processInstanceRepository := repository5.NewProcessInstanceRepository(db)
+	approvalTaskRepository := repository5.NewApprovalTaskRepository(db)
+	processHistoryRepository := repository5.NewProcessHistoryRepository(db)
+	engine := approval.ProvideWorkflowEngine()
+	positionRepository := repository3.NewPositionRepository(db)
+	employeeService := service.NewEmployeeService(employeeRepository, organizationRepository, positionRepository)
+	assigneeResolver := service3.NewAssigneeResolver(userRepository, employeeService, organizationService)
+	approvalService := service3.NewApprovalService(processDefinitionRepository, processInstanceRepository, approvalTaskRepository, processHistoryRepository, formDefinitionRepository, formDataRepository, engine, assigneeResolver, authorizationService, notificationService)
+	approvalAdapter := adapter.NewApprovalAdapter(approvalService)
+	fileRepository := repository6.NewFileRepository(db, redis)
+	quotaRepository := repository6.NewQuotaRepository(db)
+	storage, cleanup3, err := pkg.ProvideStorage(contextContext)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	loggerLogger, cleanup4, err := pkg.ProvideLogger()
+	if err != nil {
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	uploadServiceConfig := file.ProvideUploadServiceConfig()
+	uploadService := service4.NewUploadService(fileRepository, quotaRepository, storage, loggerLogger, uploadServiceConfig)
+	downloadStatsRepository := repository6.NewDownloadStatsRepository(db, redis)
+	downloadService := service4.NewDownloadService(fileRepository, downloadStatsRepository, storage, loggerLogger)
+	quotaServiceConfig := file.ProvideQuotaServiceConfig()
+	quotaService := service4.NewQuotaService(fileRepository, quotaRepository, loggerLogger, quotaServiceConfig)
+	multipartUploadRepository := repository6.NewMultipartUploadRepository(db)
+	multipartUploadServiceConfig := file.ProvideMultipartUploadServiceConfig()
+	multipartUploadService := service4.NewMultipartUploadService(fileRepository, quotaRepository, multipartUploadRepository, storage, loggerLogger, multipartUploadServiceConfig)
+	fileAdapter := adapter.NewFileAdapter(fileRepository, uploadService, downloadService, quotaService, multipartUploadService)
+	httpServer := server.NewHTTPServer(authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, logger)
+	grpcServer := server.NewGRPCServer(authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, logger)
 	app := newApp(logger, httpServer, grpcServer)
 	return app, func() {
+		cleanup4()
+		cleanup3()
 		cleanup2()
 		cleanup()
 	}, nil
-}
-
-// wire.go:
-
-// provideDatabase 提供数据库连接
-func provideDatabase(c *conf.Config) (*database.DB, func(), error) {
-	ctx := context.Background()
-
-	parts := strings.TrimPrefix(c.Database.Master, "postgres://")
-
-	var dbCfg *database.Config
-	if userPass, hostInfo, found := strings.Cut(parts, "@"); found {
-		user, pass, _ := strings.Cut(userPass, ":")
-		hostPort, dbParams, _ := strings.Cut(hostInfo, "/")
-		host, portStr, _ := strings.Cut(hostPort, ":")
-		dbName, _, _ := strings.Cut(dbParams, "?")
-
-		port := 5432
-		fmt.Sscanf(portStr, "%d", &port)
-
-		dbCfg = &database.Config{
-			Host:     host,
-			Port:     port,
-			Database: dbName,
-			Username: user,
-			Password: pass,
-			SSLMode:  "disable",
-			MaxConns: int32(c.Database.MaxOpenConns),
-			MinConns: int32(c.Database.MaxIdleConns),
-		}
-	} else {
-		return nil, nil, fmt.Errorf("invalid database connection string")
-	}
-
-	opts := []database.Option{
-		func(cfg *database.Config) {
-			*cfg = *dbCfg
-		},
-	}
-
-	db, err := database.New(ctx, opts...)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	cleanup := func() {
-		db.Close()
-	}
-
-	return db, cleanup, nil
-}
-
-// provideCache 提供缓存客户端
-func provideCache(c *conf.Config) (*cache.Redis, func(), error) {
-	ctx := context.Background()
-
-	host, portStr, _ := strings.Cut(c.Redis.Addr, ":")
-	port := 6379
-	fmt.Sscanf(portStr, "%d", &port)
-
-	cacheCfg := &cache.Config{
-		Host:     host,
-		Port:     port,
-		Password: c.Redis.Password,
-		DB:       c.Redis.DB,
-	}
-
-	opts := []cache.Option{
-		func(cfg *cache.Config) {
-			*cfg = *cacheCfg
-		},
-	}
-
-	redis, err := cache.New(ctx, opts...)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	cleanup := func() {
-		redis.Close()
-	}
-
-	return redis, cleanup, nil
-}
-
-// provideJWTConfig 提供 JWT 配置
-func provideJWTConfig(c *conf.Config) *jwt.Config {
-	return &jwt.Config{
-		SecretKey:       c.JWT.Secret,
-		AccessTokenTTL:  time.Duration(c.JWT.AccessExpire) * time.Second,
-		RefreshTokenTTL: time.Duration(c.JWT.RefreshExpire) * time.Second,
-		Issuer:          "go-next-erp",
-	}
 }

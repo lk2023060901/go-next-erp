@@ -33,6 +33,9 @@ type UserRepository interface {
 	ResetLoginAttempts(ctx context.Context, userID uuid.UUID) error
 	LockUser(ctx context.Context, userID uuid.UUID, until time.Time) error
 	UnlockUser(ctx context.Context, userID uuid.UUID) error
+
+	// 角色用户查询
+	ListUsersByRole(ctx context.Context, roleID uuid.UUID) ([]*model.User, error)
 }
 
 // userRepo 用户仓储实现
@@ -90,8 +93,10 @@ func (r *userRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.User, err
 
 	// 尝试从缓存获取
 	var user model.User
-	if err := r.cache.Get(ctx, cacheKey, &user); err == nil {
-		return &user, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &user); err == nil {
+			return &user, nil
+		}
 	}
 
 	// 从数据库查询（自动路由到从库）
@@ -108,7 +113,9 @@ func (r *userRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.User, err
 	}
 
 	// 写入缓存
-	_ = r.cache.Set(ctx, cacheKey, &user, 300) // 5分钟
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, &user, 300) // 5分钟
+	}
 
 	return &user, nil
 }
@@ -118,8 +125,10 @@ func (r *userRepo) FindByUsername(ctx context.Context, username string) (*model.
 	cacheKey := fmt.Sprintf("user:username:%s", username)
 
 	var user model.User
-	if err := r.cache.Get(ctx, cacheKey, &user); err == nil {
-		return &user, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &user); err == nil {
+			return &user, nil
+		}
 	}
 
 	row := r.db.QueryRow(ctx, `
@@ -134,7 +143,9 @@ func (r *userRepo) FindByUsername(ctx context.Context, username string) (*model.
 		return nil, err
 	}
 
-	_ = r.cache.Set(ctx, cacheKey, &user, 300)
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, &user, 300)
+	}
 	return &user, nil
 }
 
@@ -143,8 +154,10 @@ func (r *userRepo) FindByEmail(ctx context.Context, email string) (*model.User, 
 	cacheKey := fmt.Sprintf("user:email:%s", email)
 
 	var user model.User
-	if err := r.cache.Get(ctx, cacheKey, &user); err == nil {
-		return &user, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &user); err == nil {
+			return &user, nil
+		}
 	}
 
 	row := r.db.QueryRow(ctx, `
@@ -159,7 +172,9 @@ func (r *userRepo) FindByEmail(ctx context.Context, email string) (*model.User, 
 		return nil, err
 	}
 
-	_ = r.cache.Set(ctx, cacheKey, &user, 300)
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, &user, 300)
+	}
 	return &user, nil
 }
 
@@ -263,7 +278,7 @@ func (r *userRepo) UpdateLastLogin(ctx context.Context, userID uuid.UUID, ip str
 		WHERE id = $3
 	`, now, ip, userID)
 
-	if err == nil {
+	if err == nil && r.cache != nil {
 		// 清除缓存
 		r.cache.Delete(ctx, fmt.Sprintf("user:id:%s", userID.String()))
 	}
@@ -298,7 +313,7 @@ func (r *userRepo) LockUser(ctx context.Context, userID uuid.UUID, until time.Ti
 		WHERE id = $3
 	`, until, model.UserStatusLocked, userID)
 
-	if err == nil {
+	if err == nil && r.cache != nil {
 		r.cache.Delete(ctx, fmt.Sprintf("user:id:%s", userID.String()))
 	}
 
@@ -312,7 +327,7 @@ func (r *userRepo) UnlockUser(ctx context.Context, userID uuid.UUID) error {
 		WHERE id = $2
 	`, model.UserStatusActive, userID)
 
-	if err == nil {
+	if err == nil && r.cache != nil {
 		r.cache.Delete(ctx, fmt.Sprintf("user:id:%s", userID.String()))
 	}
 
@@ -343,8 +358,50 @@ func (r *userRepo) scanUser(row pgx.Row, user *model.User) error {
 
 // invalidateCache 清除相关缓存
 func (r *userRepo) invalidateCache(username, email string, id uuid.UUID) {
+	if r.cache == nil {
+		return
+	}
 	ctx := context.Background()
 	r.cache.Delete(ctx, fmt.Sprintf("user:username:%s", username))
 	r.cache.Delete(ctx, fmt.Sprintf("user:email:%s", email))
 	r.cache.Delete(ctx, fmt.Sprintf("user:id:%s", id.String()))
+}
+
+// ListUsersByRole 查询角色下的所有用户
+func (r *userRepo) ListUsersByRole(ctx context.Context, roleID uuid.UUID) ([]*model.User, error) {
+	cacheKey := fmt.Sprintf("role:users:%s", roleID.String())
+
+	var users []*model.User
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &users); err == nil {
+			return users, nil
+		}
+	}
+
+	rows, err := r.db.Query(ctx, `
+		SELECT u.id, u.username, u.email, u.password_hash, u.tenant_id, u.status,
+			   u.mfa_enabled, u.mfa_secret, u.last_login_at, u.last_login_ip,
+			   u.login_attempts, u.locked_until, u.metadata, u.created_at, u.updated_at, u.deleted_at
+		FROM users u
+		INNER JOIN user_roles ur ON u.id = ur.user_id
+		WHERE ur.role_id = $1 AND u.deleted_at IS NULL AND u.status = 'active'
+	`, roleID)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user model.User
+		if err := r.scanUser(rows, &user); err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, users, 300) // 5分钟缓存
+	}
+	return users, nil
 }

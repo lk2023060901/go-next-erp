@@ -109,8 +109,10 @@ func (e *Engine) getUserPermissions(ctx context.Context, userID uuid.UUID) ([]*m
 
 	// 尝试从缓存获取
 	var permissions []*model.Permission
-	if err := e.cache.Get(ctx, cacheKey, &permissions); err == nil {
-		return permissions, nil
+	if e.cache != nil {
+		if err := e.cache.Get(ctx, cacheKey, &permissions); err == nil {
+			return permissions, nil
+		}
 	}
 
 	// 1. 获取用户的所有角色（包含继承）
@@ -139,7 +141,9 @@ func (e *Engine) getUserPermissions(ctx context.Context, userID uuid.UUID) ([]*m
 	}
 
 	// 4. 缓存结果
-	_ = e.cache.Set(ctx, cacheKey, permissions, 600) // 10分钟
+	if e.cache != nil {
+		_ = e.cache.Set(ctx, cacheKey, permissions, 600) // 10分钟
+	}
 
 	return permissions, nil
 }

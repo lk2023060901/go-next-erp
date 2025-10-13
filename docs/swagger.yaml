@@ -1,0 +1,1757 @@
+basePath: /api/v1
+definitions:
+  github_com_lk2023060901_go-next-erp_internal_auth_dto.CreateUserRequest:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      metadata:
+        additionalProperties: true
+        type: object
+      nickname:
+        type: string
+      password:
+        maxLength: 100
+        minLength: 8
+        type: string
+      phone:
+        type: string
+      status:
+        enum:
+        - active
+        - inactive
+        - locked
+        - banned
+        type: string
+      tenant_id:
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - tenant_id
+    - username
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      details: {}
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_auth_dto.LockUserRequest:
+    properties:
+      duration:
+        description: 秒数，最少1分钟
+        minimum: 60
+        type: integer
+      reason:
+        type: string
+    required:
+    - duration
+    - reason
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_auth_dto.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_auth_dto.UpdateUserRequest:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      metadata:
+        additionalProperties: true
+        type: object
+      nickname:
+        type: string
+      phone:
+        type: string
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_auth_dto.UpdateUserStatusRequest:
+    properties:
+      reason:
+        type: string
+      status:
+        enum:
+        - active
+        - inactive
+        - locked
+        - banned
+        type: string
+    required:
+    - status
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_auth_dto.UserListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.UserResponse'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_auth_dto.UserResponse:
+    properties:
+      avatar:
+        type: string
+      created_at:
+        type: integer
+      email:
+        type: string
+      email_verified:
+        type: boolean
+      id:
+        type: string
+      last_login_at:
+        type: integer
+      last_login_ip:
+        type: string
+      locked_until:
+        type: integer
+      login_attempts:
+        type: integer
+      metadata:
+        additionalProperties: true
+        type: object
+      mfa_enabled:
+        type: boolean
+      nickname:
+        type: string
+      phone:
+        type: string
+      phone_verified:
+        type: boolean
+      status:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: integer
+      username:
+        type: string
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.CreateEmployeeRequest:
+    properties:
+      avatar:
+        maxLength: 500
+        type: string
+      direct_leader_id:
+        type: string
+      email:
+        maxLength: 100
+        type: string
+      employee_no:
+        maxLength: 50
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        type: string
+      join_date:
+        type: string
+      mobile:
+        maxLength: 20
+        type: string
+      name:
+        maxLength: 100
+        type: string
+      org_id:
+        type: string
+      position_id:
+        type: string
+      probation_end:
+        type: string
+      status:
+        enum:
+        - probation
+        - active
+        type: string
+      user_id:
+        type: string
+    required:
+    - employee_no
+    - name
+    - org_id
+    - status
+    - user_id
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.CreateOrganizationRequest:
+    properties:
+      address:
+        maxLength: 500
+        type: string
+      code:
+        maxLength: 50
+        type: string
+      description:
+        type: string
+      email:
+        maxLength: 100
+        type: string
+      leader_id:
+        type: string
+      leader_name:
+        maxLength: 100
+        type: string
+      legal_person:
+        maxLength: 100
+        type: string
+      name:
+        maxLength: 200
+        type: string
+      parent_id:
+        type: string
+      phone:
+        maxLength: 50
+        type: string
+      register_addr:
+        maxLength: 500
+        type: string
+      register_date:
+        type: string
+      short_name:
+        maxLength: 100
+        type: string
+      sort:
+        type: integer
+      status:
+        enum:
+        - active
+        - inactive
+        - disbanded
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      type_id:
+        type: string
+      unified_code:
+        maxLength: 50
+        type: string
+    required:
+    - code
+    - name
+    - status
+    - type_id
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.CreateOrganizationTypeRequest:
+    properties:
+      allow_multi:
+        type: boolean
+      allow_root:
+        type: boolean
+      allowed_child_types:
+        items:
+          type: string
+        type: array
+      allowed_parent_types:
+        items:
+          type: string
+        type: array
+      code:
+        maxLength: 50
+        type: string
+      enable_address:
+        type: boolean
+      enable_leader:
+        type: boolean
+      enable_legal_info:
+        type: boolean
+      icon:
+        maxLength: 100
+        type: string
+      level:
+        minimum: 1
+        type: integer
+      max_level:
+        minimum: 0
+        type: integer
+      name:
+        maxLength: 100
+        type: string
+      sort:
+        type: integer
+      status:
+        enum:
+        - active
+        - inactive
+        type: string
+    required:
+    - code
+    - level
+    - name
+    - status
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.CreatePositionRequest:
+    properties:
+      category:
+        enum:
+        - management
+        - technical
+        - sales
+        - support
+        - general
+        type: string
+      code:
+        maxLength: 50
+        type: string
+      description:
+        type: string
+      level:
+        minimum: 0
+        type: integer
+      name:
+        maxLength: 100
+        type: string
+      org_id:
+        type: string
+      sort:
+        type: integer
+      status:
+        enum:
+        - active
+        - inactive
+        type: string
+    required:
+    - code
+    - name
+    - status
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.EmployeeResponse:
+    properties:
+      avatar:
+        type: string
+      created_at:
+        type: string
+      direct_leader_id:
+        type: string
+      email:
+        type: string
+      employee_no:
+        type: string
+      formal_date:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      join_date:
+        type: string
+      leave_date:
+        type: string
+      mobile:
+        type: string
+      name:
+        type: string
+      org_id:
+        type: string
+      org_path:
+        type: string
+      position_id:
+        type: string
+      probation_end:
+        type: string
+      status:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.MoveOrganizationRequest:
+    properties:
+      new_parent_id:
+        type: string
+    required:
+    - new_parent_id
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationResponse:
+    properties:
+      address:
+        type: string
+      code:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      direct_emp_count:
+        type: integer
+      email:
+        type: string
+      employee_count:
+        type: integer
+      id:
+        type: string
+      is_leaf:
+        type: boolean
+      leader_id:
+        type: string
+      leader_name:
+        type: string
+      legal_person:
+        type: string
+      level:
+        type: integer
+      name:
+        type: string
+      parent_id:
+        type: string
+      path:
+        type: string
+      path_names:
+        type: string
+      phone:
+        type: string
+      register_addr:
+        type: string
+      register_date:
+        type: string
+      short_name:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      tenant_id:
+        type: string
+      type_code:
+        type: string
+      type_id:
+        type: string
+      unified_code:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationTreeResponse:
+    properties:
+      address:
+        type: string
+      children:
+        items:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationTreeResponse'
+        type: array
+      code:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      direct_emp_count:
+        type: integer
+      email:
+        type: string
+      employee_count:
+        type: integer
+      id:
+        type: string
+      is_leaf:
+        type: boolean
+      leader_id:
+        type: string
+      leader_name:
+        type: string
+      legal_person:
+        type: string
+      level:
+        type: integer
+      name:
+        type: string
+      parent_id:
+        type: string
+      path:
+        type: string
+      path_names:
+        type: string
+      phone:
+        type: string
+      register_addr:
+        type: string
+      register_date:
+        type: string
+      short_name:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      tenant_id:
+        type: string
+      type_code:
+        type: string
+      type_id:
+        type: string
+      unified_code:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationTypeResponse:
+    properties:
+      allow_multi:
+        type: boolean
+      allow_root:
+        type: boolean
+      allowed_child_types:
+        items:
+          type: string
+        type: array
+      allowed_parent_types:
+        items:
+          type: string
+        type: array
+      code:
+        type: string
+      created_at:
+        type: string
+      enable_address:
+        type: boolean
+      enable_leader:
+        type: boolean
+      enable_legal_info:
+        type: boolean
+      icon:
+        type: string
+      id:
+        type: string
+      is_system:
+        type: boolean
+      level:
+        type: integer
+      max_level:
+        type: integer
+      name:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.PositionResponse:
+    properties:
+      category:
+        type: string
+      code:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      level:
+        type: integer
+      name:
+        type: string
+      org_id:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.RegularizeRequest:
+    properties:
+      formal_date:
+        type: string
+    required:
+    - formal_date
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.ResignRequest:
+    properties:
+      leave_date:
+        type: string
+    required:
+    - leave_date
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.TransferEmployeeRequest:
+    properties:
+      new_org_id:
+        type: string
+      new_position_id:
+        type: string
+    required:
+    - new_org_id
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.UpdateEmployeeRequest:
+    properties:
+      avatar:
+        maxLength: 500
+        type: string
+      direct_leader_id:
+        type: string
+      email:
+        maxLength: 100
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        type: string
+      mobile:
+        maxLength: 20
+        type: string
+      name:
+        maxLength: 100
+        type: string
+    required:
+    - name
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.UpdateOrganizationRequest:
+    properties:
+      address:
+        maxLength: 500
+        type: string
+      description:
+        type: string
+      email:
+        maxLength: 100
+        type: string
+      leader_id:
+        type: string
+      leader_name:
+        maxLength: 100
+        type: string
+      legal_person:
+        maxLength: 100
+        type: string
+      name:
+        maxLength: 200
+        type: string
+      phone:
+        maxLength: 50
+        type: string
+      register_addr:
+        maxLength: 500
+        type: string
+      register_date:
+        type: string
+      short_name:
+        maxLength: 100
+        type: string
+      sort:
+        type: integer
+      status:
+        enum:
+        - active
+        - inactive
+        - disbanded
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      unified_code:
+        maxLength: 50
+        type: string
+    required:
+    - name
+    - status
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.UpdateOrganizationTypeRequest:
+    properties:
+      allow_multi:
+        type: boolean
+      allow_root:
+        type: boolean
+      allowed_child_types:
+        items:
+          type: string
+        type: array
+      allowed_parent_types:
+        items:
+          type: string
+        type: array
+      enable_address:
+        type: boolean
+      enable_leader:
+        type: boolean
+      enable_legal_info:
+        type: boolean
+      icon:
+        maxLength: 100
+        type: string
+      max_level:
+        minimum: 0
+        type: integer
+      name:
+        maxLength: 100
+        type: string
+      sort:
+        type: integer
+      status:
+        enum:
+        - active
+        - inactive
+        type: string
+    required:
+    - name
+    - status
+    type: object
+  github_com_lk2023060901_go-next-erp_internal_organization_dto.UpdatePositionRequest:
+    properties:
+      category:
+        enum:
+        - management
+        - technical
+        - sales
+        - support
+        - general
+        type: string
+      description:
+        type: string
+      level:
+        minimum: 0
+        type: integer
+      name:
+        maxLength: 100
+        type: string
+      sort:
+        type: integer
+      status:
+        enum:
+        - active
+        - inactive
+        type: string
+    required:
+    - name
+    - status
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@go-next-erp.com
+    name: API Support
+  description: Enterprise Resource Planning system with 4A permission system
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Go-Next-ERP API
+  version: "1.0"
+paths:
+  /api/v1/employees:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.EmployeeResponse'
+                  type: array
+              type: object
+      summary: 列出所有员工
+      tags:
+      - 员工
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.CreateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.EmployeeResponse'
+              type: object
+      summary: 创建员工
+      tags:
+      - 员工
+  /api/v1/employees/{id}:
+    delete:
+      parameters:
+      - description: 员工ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+      summary: 删除员工
+      tags:
+      - 员工
+    get:
+      parameters:
+      - description: 员工ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.EmployeeResponse'
+              type: object
+      summary: 根据ID获取员工
+      tags:
+      - 员工
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.UpdateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.EmployeeResponse'
+              type: object
+      summary: 更新员工
+      tags:
+      - 员工
+  /api/v1/employees/{id}/regularize:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 转正请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.RegularizeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+      summary: 转正
+      tags:
+      - 员工
+  /api/v1/employees/{id}/resign:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 离职请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.ResignRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+      summary: 离职
+      tags:
+      - 员工
+  /api/v1/employees/{id}/transfer:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 调岗请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.TransferEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+      summary: 调岗
+      tags:
+      - 员工
+  /api/v1/organization-types:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationTypeResponse'
+                  type: array
+              type: object
+      summary: 列出所有组织类型
+      tags:
+      - 组织类型
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.CreateOrganizationTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationTypeResponse'
+              type: object
+      summary: 创建组织类型
+      tags:
+      - 组织类型
+  /api/v1/organization-types/{id}:
+    delete:
+      parameters:
+      - description: 组织类型ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+      summary: 删除组织类型
+      tags:
+      - 组织类型
+    get:
+      parameters:
+      - description: 组织类型ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationTypeResponse'
+              type: object
+      summary: 根据ID获取组织类型
+      tags:
+      - 组织类型
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 组织类型ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.UpdateOrganizationTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationTypeResponse'
+              type: object
+      summary: 更新组织类型
+      tags:
+      - 组织类型
+  /api/v1/organization-types/active:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationTypeResponse'
+                  type: array
+              type: object
+      summary: 列出激活的组织类型
+      tags:
+      - 组织类型
+  /api/v1/organizations:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationResponse'
+                  type: array
+              type: object
+      summary: 列出所有组织
+      tags:
+      - 组织
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.CreateOrganizationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationResponse'
+              type: object
+      summary: 创建组织
+      tags:
+      - 组织
+  /api/v1/organizations/{id}:
+    delete:
+      parameters:
+      - description: 组织ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+      summary: 删除组织
+      tags:
+      - 组织
+    get:
+      parameters:
+      - description: 组织ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationResponse'
+              type: object
+      summary: 根据ID获取组织
+      tags:
+      - 组织
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 组织ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.UpdateOrganizationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationResponse'
+              type: object
+      summary: 更新组织
+      tags:
+      - 组织
+  /api/v1/organizations/{id}/children:
+    get:
+      parameters:
+      - description: 父组织ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationResponse'
+                  type: array
+              type: object
+      summary: 获取子组织
+      tags:
+      - 组织
+  /api/v1/organizations/{id}/move:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 组织ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 移动请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.MoveOrganizationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+      summary: 移动组织到新父节点
+      tags:
+      - 组织
+  /api/v1/organizations/tree:
+    get:
+      parameters:
+      - description: 根节点ID（可选）
+        in: query
+        name: root_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.OrganizationTreeResponse'
+                  type: array
+              type: object
+      summary: 获取组织树
+      tags:
+      - 组织
+  /api/v1/positions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.PositionResponse'
+                  type: array
+              type: object
+      summary: 列出所有职位
+      tags:
+      - 职位
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.CreatePositionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.PositionResponse'
+              type: object
+      summary: 创建职位
+      tags:
+      - 职位
+  /api/v1/positions/{id}:
+    delete:
+      parameters:
+      - description: 职位ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+      summary: 删除职位
+      tags:
+      - 职位
+    get:
+      parameters:
+      - description: 职位ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.PositionResponse'
+              type: object
+      summary: 根据ID获取职位
+      tags:
+      - 职位
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 职位ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.UpdatePositionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.PositionResponse'
+              type: object
+      summary: 更新职位
+      tags:
+      - 职位
+  /api/v1/positions/active:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_organization_dto.PositionResponse'
+                  type: array
+              type: object
+      summary: 列出激活的职位
+      tags:
+      - 职位
+  /users:
+    get:
+      parameters:
+      - description: 租户ID
+        in: query
+        name: tenant_id
+        required: true
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      - description: 关键词
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.UserListResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 获取用户列表
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 创建用户
+      tags:
+      - User
+  /users/{id}:
+    delete:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 删除用户
+      tags:
+      - User
+    get:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 获取用户详情
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 更新用户
+      tags:
+      - User
+  /users/{id}/lock:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 锁定信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.LockUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 锁定用户
+      tags:
+      - User
+  /users/{id}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 状态信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.UpdateUserStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 更新用户状态
+      tags:
+      - User
+  /users/{id}/unlock:
+    post:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_lk2023060901_go-next-erp_internal_auth_dto.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 解锁用户
+      tags:
+      - User
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

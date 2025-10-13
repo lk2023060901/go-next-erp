@@ -2,6 +2,8 @@ package workflow
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"runtime/debug"
 	"sync"
@@ -303,8 +305,15 @@ func NewCachingMiddleware(ttl time.Duration, log *logger.Logger) *CachingMiddlew
 		ttl: ttl,
 		log: log,
 		keyBuilder: func(input map[string]interface{}) string {
-			// 简单实现：将输入转换为字符串作为 key
-			return fmt.Sprintf("%v", input)
+			// 使用JSON序列化确保key的确定性
+			data, err := json.Marshal(input)
+			if err != nil {
+				// 降级到字符串格式
+				return fmt.Sprintf("%v", input)
+			}
+			// 使用SHA256哈希生成固定长度的key
+			hash := sha256.Sum256(data)
+			return fmt.Sprintf("%x", hash)
 		},
 	}
 }

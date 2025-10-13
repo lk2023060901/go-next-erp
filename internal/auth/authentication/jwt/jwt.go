@@ -16,10 +16,11 @@ var (
 
 // Claims JWT 声明
 type Claims struct {
-	UserID   uuid.UUID `json:"user_id"`
-	TenantID uuid.UUID `json:"tenant_id"`
-	Username string    `json:"username"`
-	Email    string    `json:"email"`
+	UserID   uuid.UUID              `json:"user_id"`
+	TenantID uuid.UUID              `json:"tenant_id"`
+	Username string                 `json:"username"`
+	Email    string                 `json:"email"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"` // 扩展元数据(employee_id, org_id, org_path, roles等)
 	jwt.RegisteredClaims
 }
 
@@ -51,6 +52,11 @@ func NewManager(config *Config) *Manager {
 
 // GenerateAccessToken 生成访问令牌
 func (m *Manager) GenerateAccessToken(userID, tenantID uuid.UUID, username, email string) (string, error) {
+	return m.GenerateAccessTokenWithMetadata(userID, tenantID, username, email, nil)
+}
+
+// GenerateAccessTokenWithMetadata 生成带元数据的访问令牌
+func (m *Manager) GenerateAccessTokenWithMetadata(userID, tenantID uuid.UUID, username, email string, metadata map[string]interface{}) (string, error) {
 	now := time.Now()
 	expiresAt := now.Add(m.accessTokenTTL)
 
@@ -59,6 +65,7 @@ func (m *Manager) GenerateAccessToken(userID, tenantID uuid.UUID, username, emai
 		TenantID: tenantID,
 		Username: username,
 		Email:    email,
+		Metadata: metadata,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
 			IssuedAt:  jwt.NewNumericDate(now),
@@ -78,13 +85,17 @@ func (m *Manager) GenerateRefreshToken(userID, tenantID uuid.UUID) (string, erro
 	now := time.Now()
 	expiresAt := now.Add(m.refreshTokenTTL)
 
-	claims := &jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(expiresAt),
-		IssuedAt:  jwt.NewNumericDate(now),
-		NotBefore: jwt.NewNumericDate(now),
-		Issuer:    m.issuer,
-		Subject:   userID.String(),
-		ID:        uuid.New().String(),
+	claims := &Claims{
+		UserID:   userID,
+		TenantID: tenantID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			Issuer:    m.issuer,
+			Subject:   userID.String(),
+			ID:        uuid.New().String(),
+		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

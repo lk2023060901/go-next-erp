@@ -32,14 +32,14 @@ func TestStandaloneMode(t *testing.T) {
 		key := "test:standalone:key"
 		value := "test_value"
 
-		// Set
-		if err := r.Set(ctx, key, value, time.Minute).Err(); err != nil {
+		// Set (expirationSeconds as int)
+		if err := r.Set(ctx, key, value, 60); err != nil {
 			t.Errorf("Set() error = %v", err)
 		}
 
-		// Get
-		result, err := r.Get(ctx, key).Result()
-		if err != nil {
+		// Get (requires value parameter)
+		var result string
+		if err := r.Get(ctx, key, &result); err != nil {
 			t.Errorf("Get() error = %v", err)
 		}
 		if result != value {
@@ -150,8 +150,8 @@ func TestStandaloneMode(t *testing.T) {
 	t.Run("Expiration", func(t *testing.T) {
 		key := "test:standalone:expire"
 
-		// Set with expiration
-		if err := r.Set(ctx, key, "value", 2*time.Second).Err(); err != nil {
+		// Set with expiration (2 seconds)
+		if err := r.Set(ctx, key, "value", 2); err != nil {
 			t.Errorf("Set() error = %v", err)
 		}
 
@@ -212,7 +212,7 @@ func TestMasterSlaveMode(t *testing.T) {
 		key := "test:masterslave:key"
 		value := "test_value"
 
-		if err := r.Set(ctx, key, value, time.Minute).Err(); err != nil {
+		if err := r.Set(ctx, key, value, 60); err != nil {
 			t.Errorf("Set() error = %v", err)
 		}
 
@@ -220,8 +220,8 @@ func TestMasterSlaveMode(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 
 		// 读操作（应该路由到从库）
-		result, err := r.Get(ctx, key).Result()
-		if err != nil {
+		var result string
+		if err := r.Get(ctx, key, &result); err != nil {
 			t.Errorf("Get() error = %v", err)
 		}
 		if result != value {
@@ -237,7 +237,7 @@ func TestMasterSlaveMode(t *testing.T) {
 		key := "test:masterslave:master"
 
 		master := r.Master()
-		if err := master.Set(ctx, key, "master_value", time.Minute).Err(); err != nil {
+		if err := master.Set(ctx, key, "master_value", 60*time.Second).Err(); err != nil {
 			t.Errorf("Master.Set() error = %v", err)
 		}
 
@@ -247,14 +247,21 @@ func TestMasterSlaveMode(t *testing.T) {
 
 	// 显式从库操作
 	t.Run("Explicit Slave", func(t *testing.T) {
+		// 如果Slave()返回的是Master，说明没有slave可用，跳过测试
+		slave := r.Slave()
+		master := r.Master()
+		if slave == master {
+			t.Skip("No slave Redis available, skipping slave-specific test")
+			return
+		}
+
 		key := "test:masterslave:slave"
 
 		// 先写入主库
-		r.Set(ctx, key, "slave_value", time.Minute)
+		r.Set(ctx, key, "slave_value", 60)
 		time.Sleep(100 * time.Millisecond)
 
 		// 从从库读取
-		slave := r.Slave()
 		result, err := slave.Get(ctx, key).Result()
 		if err != nil {
 			t.Errorf("Slave.Get() error = %v", err)
@@ -303,12 +310,12 @@ func TestSentinelMode(t *testing.T) {
 		key := "test:sentinel:key"
 		value := "test_value"
 
-		if err := r.Set(ctx, key, value, time.Minute).Err(); err != nil {
+		if err := r.Set(ctx, key, value, 60); err != nil {
 			t.Errorf("Set() error = %v", err)
 		}
 
-		result, err := r.Get(ctx, key).Result()
-		if err != nil {
+		var result string
+		if err := r.Get(ctx, key, &result); err != nil {
 			t.Errorf("Get() error = %v", err)
 		}
 		if result != value {
@@ -354,12 +361,12 @@ func TestClusterMode(t *testing.T) {
 		key := "test:cluster:key"
 		value := "test_value"
 
-		if err := r.Set(ctx, key, value, time.Minute).Err(); err != nil {
+		if err := r.Set(ctx, key, value, 60); err != nil {
 			t.Errorf("Set() error = %v", err)
 		}
 
-		result, err := r.Get(ctx, key).Result()
-		if err != nil {
+		var result string
+		if err := r.Get(ctx, key, &result); err != nil {
 			t.Errorf("Get() error = %v", err)
 		}
 		if result != value {
@@ -375,11 +382,12 @@ func TestClusterMode(t *testing.T) {
 		key1 := "{user:1}:name"
 		key2 := "{user:1}:age"
 
-		r.Set(ctx, key1, "Alice", time.Minute)
-		r.Set(ctx, key2, "25", time.Minute)
+		r.Set(ctx, key1, "Alice", 60)
+		r.Set(ctx, key2, "25", 60)
 
-		name, _ := r.Get(ctx, key1).Result()
-		age, _ := r.Get(ctx, key2).Result()
+		var name, age string
+		r.Get(ctx, key1, &name)
+		r.Get(ctx, key2, &age)
 
 		if name != "Alice" {
 			t.Errorf("Get(%v) = %v, want Alice", key1, name)

@@ -15,13 +15,18 @@ type User struct {
 	TenantID     uuid.UUID  `json:"tenant_id"`     // 租户 ID
 	Status       UserStatus `json:"status"`
 
+	// 个人信息
+	Nickname string `json:"nickname,omitempty"` // 昵称/显示名称
+	Phone    string `json:"phone,omitempty"`    // 电话号码
+	Avatar   string `json:"avatar,omitempty"`   // 头像 URL
+
 	// MFA 多因素认证
-	MFAEnabled bool   `json:"mfa_enabled"`
-	MFASecret  string `json:"-"` // TOTP 密钥
+	MFAEnabled bool    `json:"mfa_enabled"`
+	MFASecret  *string `json:"-"` // TOTP 密钥 (nullable)
 
 	// 安全字段
 	LastLoginAt   *time.Time `json:"last_login_at,omitempty"`
-	LastLoginIP   string     `json:"last_login_ip,omitempty"`   // 上次登录 IP
+	LastLoginIP   *string    `json:"last_login_ip,omitempty"`   // 上次登录 IP (nullable)
 	LoginAttempts int        `json:"-"`
 	LockedUntil   *time.Time `json:"-"`
 

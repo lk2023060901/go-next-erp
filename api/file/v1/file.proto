@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package api.file.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/file/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+import "api/file/v1/types.proto";
+
+// 文件服务
+service FileService {
+  // 上传文件
+  rpc Upload (UploadRequest) returns (UploadResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/files/upload"
+      body: "*"
+    };
+  }
+
+  // 获取文件信息
+  rpc GetFile (GetFileRequest) returns (FileInfo) {
+    option (google.api.http) = {
+      get: "/api/v1/files/{id}"
+    };
+  }
+
+  // 获取文件列表
+  rpc ListFiles (ListFilesRequest) returns (ListFilesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/files"
+    };
+  }
+
+  // 删除文件
+  rpc DeleteFile (DeleteFileRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/files/{id}"
+    };
+  }
+
+  // 获取下载URL
+  rpc GetDownloadURL (GetDownloadURLRequest) returns (DownloadURLResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/files/{id}/download-url"
+    };
+  }
+
+  // 获取配额信息
+  rpc GetQuota (google.protobuf.Empty) returns (QuotaInfo) {
+    option (google.api.http) = {
+      get: "/api/v1/files/quotas"
+    };
+  }
+
+  // 初始化分片上传
+  rpc InitiateMultipartUpload (InitiateMultipartRequest) returns (InitiateMultipartResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/files/multipart/initiate"
+      body: "*"
+    };
+  }
+
+  // 完成分片上传
+  rpc CompleteMultipartUpload (CompleteMultipartRequest) returns (UploadResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/files/multipart/complete"
+      body: "*"
+    };
+  }
+}

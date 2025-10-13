@@ -1,0 +1,229 @@
+syntax = "proto3";
+
+package api.organization.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/organization/v1;v1";
+
+// OrganizationService 组织服务
+service OrganizationService {
+  // 创建组织
+  rpc CreateOrganization (CreateOrganizationRequest) returns (OrganizationResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/organizations"
+      body: "*"
+    };
+  }
+
+  // 获取组织
+  rpc GetOrganization (GetOrganizationRequest) returns (OrganizationResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/organizations/{id}"
+    };
+  }
+
+  // 更新组织
+  rpc UpdateOrganization (UpdateOrganizationRequest) returns (OrganizationResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/organizations/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除组织
+  rpc DeleteOrganization (DeleteOrganizationRequest) returns (DeleteOrganizationResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/organizations/{id}"
+    };
+  }
+
+  // 列出组织
+  rpc ListOrganizations (ListOrganizationsRequest) returns (ListOrganizationsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/organizations"
+    };
+  }
+
+  // 获取组织树
+  rpc GetOrganizationTree (GetOrganizationTreeRequest) returns (OrganizationTreeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/organizations/tree"
+    };
+  }
+}
+
+// EmployeeService 员工服务
+service EmployeeService {
+  // 创建员工
+  rpc CreateEmployee (CreateEmployeeRequest) returns (EmployeeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/employees"
+      body: "*"
+    };
+  }
+
+  // 获取员工
+  rpc GetEmployee (GetEmployeeRequest) returns (EmployeeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/employees/{id}"
+    };
+  }
+
+  // 更新员工
+  rpc UpdateEmployee (UpdateEmployeeRequest) returns (EmployeeResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/employees/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除员工
+  rpc DeleteEmployee (DeleteEmployeeRequest) returns (DeleteEmployeeResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/employees/{id}"
+    };
+  }
+
+  // 列出员工
+  rpc ListEmployees (ListEmployeesRequest) returns (ListEmployeesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/employees"
+    };
+  }
+}
+
+// ========== 组织相关消息 ==========
+
+message CreateOrganizationRequest {
+  string tenant_id = 1;
+  string parent_id = 2;
+  string name = 3;
+  string code = 4;
+  string type = 5;
+  int32 sort = 6;
+}
+
+message GetOrganizationRequest {
+  string id = 1;
+}
+
+message UpdateOrganizationRequest {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  int32 sort = 4;
+}
+
+message DeleteOrganizationRequest {
+  string id = 1;
+}
+
+message ListOrganizationsRequest {
+  string tenant_id = 1;
+  string parent_id = 2;
+}
+
+message GetOrganizationTreeRequest {
+  string tenant_id = 1;
+}
+
+message OrganizationResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string parent_id = 3;
+  string name = 4;
+  string code = 5;
+  string type = 6;
+  string path = 7;
+  int32 level = 8;
+  int32 sort = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+message DeleteOrganizationResponse {
+  bool success = 1;
+}
+
+message ListOrganizationsResponse {
+  repeated OrganizationResponse items = 1;
+  int32 total = 2;
+}
+
+message OrganizationTreeNode {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  string type = 4;
+  repeated OrganizationTreeNode children = 5;
+}
+
+message OrganizationTreeResponse {
+  repeated OrganizationTreeNode nodes = 1;
+}
+
+// ========== 员工相关消息 ==========
+
+message CreateEmployeeRequest {
+  string tenant_id = 1;
+  string user_id = 2;
+  string org_id = 3;
+  string position_id = 4;
+  string employee_no = 5;
+  string name = 6;
+  string mobile = 7;
+  string email = 8;
+  string status = 9;
+}
+
+message GetEmployeeRequest {
+  string id = 1;
+}
+
+message UpdateEmployeeRequest {
+  string id = 1;
+  string org_id = 2;
+  string position_id = 3;
+  string name = 4;
+  string mobile = 5;
+  string email = 6;
+  string status = 7;
+}
+
+message DeleteEmployeeRequest {
+  string id = 1;
+}
+
+message ListEmployeesRequest {
+  string tenant_id = 1;
+  string org_id = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message EmployeeResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string user_id = 3;
+  string org_id = 4;
+  string org_name = 5;
+  string position_id = 6;
+  string position_name = 7;
+  string employee_no = 8;
+  string name = 9;
+  string mobile = 10;
+  string email = 11;
+  string status = 12;
+  string created_at = 13;
+  string updated_at = 14;
+}
+
+message DeleteEmployeeResponse {
+  bool success = 1;
+}
+
+message ListEmployeesResponse {
+  repeated EmployeeResponse items = 1;
+  int32 total = 2;
+}

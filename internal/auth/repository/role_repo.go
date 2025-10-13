@@ -66,8 +66,10 @@ func (r *roleRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Role, err
 	cacheKey := fmt.Sprintf("role:id:%s", id.String())
 
 	var role model.Role
-	if err := r.cache.Get(ctx, cacheKey, &role); err == nil {
-		return &role, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &role); err == nil {
+			return &role, nil
+		}
 	}
 
 	row := r.db.QueryRow(ctx, `
@@ -80,7 +82,9 @@ func (r *roleRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Role, err
 		return nil, err
 	}
 
-	_ = r.cache.Set(ctx, cacheKey, &role, 600) // 10分钟
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, &role, 600) // 10分钟
+	}
 	return &role, nil
 }
 
@@ -113,7 +117,9 @@ func (r *roleRepo) Update(ctx context.Context, role *model.Role) error {
 		`, role.ID, role.Name, role.DisplayName, role.Description, role.ParentID, role.UpdatedAt)
 
 		if err == nil {
+			if r.cache != nil {
 			r.cache.Delete(ctx, fmt.Sprintf("role:id:%s", role.ID.String()))
+			}
 		}
 
 		return err
@@ -128,7 +134,9 @@ func (r *roleRepo) Delete(ctx context.Context, id uuid.UUID) error {
 		_, err := tx.Exec(ctx, "UPDATE roles SET deleted_at = $1 WHERE id = $2", now, id)
 
 		if err == nil {
+			if r.cache != nil {
 			r.cache.Delete(ctx, fmt.Sprintf("role:id:%s", id.String()))
+			}
 		}
 
 		return err
@@ -140,8 +148,10 @@ func (r *roleRepo) GetUserRoles(ctx context.Context, userID uuid.UUID) ([]*model
 	cacheKey := fmt.Sprintf("user:roles:%s", userID.String())
 
 	var roles []*model.Role
-	if err := r.cache.Get(ctx, cacheKey, &roles); err == nil {
-		return roles, nil
+	if r.cache != nil {
+		if err := r.cache.Get(ctx, cacheKey, &roles); err == nil {
+			return roles, nil
+		}
 	}
 
 	rows, err := r.db.Query(ctx, `
@@ -164,7 +174,9 @@ func (r *roleRepo) GetUserRoles(ctx context.Context, userID uuid.UUID) ([]*model
 		roles = append(roles, &role)
 	}
 
-	_ = r.cache.Set(ctx, cacheKey, roles, 600) // 10分钟
+	if r.cache != nil {
+		_ = r.cache.Set(ctx, cacheKey, roles, 600) // 10分钟
+	}
 	return roles, nil
 }
 
@@ -258,7 +270,9 @@ func (r *roleRepo) AssignRoleToUser(ctx context.Context, userID, roleID, tenantI
 
 		if err == nil {
 			// 清除缓存
+			if r.cache != nil {
 			r.cache.Delete(ctx, fmt.Sprintf("user:roles:%s", userID.String()))
+			}
 		}
 
 		return err
@@ -274,7 +288,9 @@ func (r *roleRepo) RemoveRoleFromUser(ctx context.Context, userID, roleID uuid.U
 		)
 
 		if err == nil {
+			if r.cache != nil {
 			r.cache.Delete(ctx, fmt.Sprintf("user:roles:%s", userID.String()))
+			}
 		}
 
 		return err

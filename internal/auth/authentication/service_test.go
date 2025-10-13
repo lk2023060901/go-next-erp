@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -60,6 +61,50 @@ func (m *MockUserRepository) ResetLoginAttempts(ctx context.Context, userID uuid
 	return args.Error(0)
 }
 
+func (m *MockUserRepository) FindByEmail(ctx context.Context, email string) (*model.User, error) {
+	args := m.Called(ctx, email)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.User), args.Error(1)
+}
+
+func (m *MockUserRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
+func (m *MockUserRepository) ListByTenant(ctx context.Context, tenantID uuid.UUID, limit, offset int) ([]*model.User, error) {
+	args := m.Called(ctx, tenantID, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*model.User), args.Error(1)
+}
+
+func (m *MockUserRepository) CountByTenant(ctx context.Context, tenantID uuid.UUID) (int64, error) {
+	args := m.Called(ctx, tenantID)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *MockUserRepository) LockUser(ctx context.Context, userID uuid.UUID, until time.Time) error {
+	args := m.Called(ctx, userID, until)
+	return args.Error(0)
+}
+
+func (m *MockUserRepository) UnlockUser(ctx context.Context, userID uuid.UUID) error {
+	args := m.Called(ctx, userID)
+	return args.Error(0)
+}
+
+func (m *MockUserRepository) ListUsersByRole(ctx context.Context, roleID uuid.UUID) ([]*model.User, error) {
+	args := m.Called(ctx, roleID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*model.User), args.Error(1)
+}
+
 type MockSessionRepository struct {
 	mock.Mock
 }
@@ -95,12 +140,98 @@ func (m *MockSessionRepository) GetUserSessions(ctx context.Context, userID uuid
 	return args.Get(0).([]*model.Session), args.Error(1)
 }
 
+func (m *MockSessionRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.Session, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.Session), args.Error(1)
+}
+
+func (m *MockSessionRepository) Update(ctx context.Context, session *model.Session) error {
+	args := m.Called(ctx, session)
+	return args.Error(0)
+}
+
+func (m *MockSessionRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
+func (m *MockSessionRepository) CleanupExpiredSessions(ctx context.Context) error {
+	args := m.Called(ctx)
+	return args.Error(0)
+}
+
 type MockAuditRepository struct {
 	mock.Mock
 }
 
 func (m *MockAuditRepository) Create(ctx context.Context, log *model.AuditLog) error {
 	args := m.Called(ctx, log)
+	return args.Error(0)
+}
+
+func (m *MockAuditRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.AuditLog, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.AuditLog), args.Error(1)
+}
+
+func (m *MockAuditRepository) FindByEventID(ctx context.Context, eventID string) (*model.AuditLog, error) {
+	args := m.Called(ctx, eventID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.AuditLog), args.Error(1)
+}
+
+func (m *MockAuditRepository) ListByUser(ctx context.Context, userID uuid.UUID, limit, offset int) ([]*model.AuditLog, error) {
+	args := m.Called(ctx, userID, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*model.AuditLog), args.Error(1)
+}
+
+func (m *MockAuditRepository) ListByTenant(ctx context.Context, tenantID uuid.UUID, limit, offset int) ([]*model.AuditLog, error) {
+	args := m.Called(ctx, tenantID, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*model.AuditLog), args.Error(1)
+}
+
+func (m *MockAuditRepository) ListByAction(ctx context.Context, tenantID uuid.UUID, action string, limit, offset int) ([]*model.AuditLog, error) {
+	args := m.Called(ctx, tenantID, action, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*model.AuditLog), args.Error(1)
+}
+
+func (m *MockAuditRepository) ListByTimeRange(ctx context.Context, tenantID uuid.UUID, start, end time.Time, limit, offset int) ([]*model.AuditLog, error) {
+	args := m.Called(ctx, tenantID, start, end, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*model.AuditLog), args.Error(1)
+}
+
+func (m *MockAuditRepository) CountByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
+	args := m.Called(ctx, userID)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *MockAuditRepository) CountByAction(ctx context.Context, tenantID uuid.UUID, action string) (int64, error) {
+	args := m.Called(ctx, tenantID, action)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *MockAuditRepository) CleanupOldLogs(ctx context.Context, before time.Time) error {
+	args := m.Called(ctx, before)
 	return args.Error(0)
 }
 
@@ -404,10 +535,255 @@ func TestService_ChangePassword_Success(t *testing.T) {
 	t.Logf("   新密码: %s", newPassword)
 }
 
+// TestService_Logout 测试登出
+func TestService_Logout(t *testing.T) {
+	userRepo := new(MockUserRepository)
+	sessionRepo := new(MockSessionRepository)
+	auditRepo := new(MockAuditRepository)
+
+	jwtConfig := &jwt.Config{
+		SecretKey:       "test-secret-key",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+		Issuer:          "test-issuer",
+	}
+
+	service := NewService(userRepo, sessionRepo, auditRepo, jwtConfig)
+
+	ctx := context.Background()
+	userID := uuid.New()
+	tenantID := uuid.New()
+
+	// 生成token
+	token, _ := service.jwtManager.GenerateAccessToken(userID, tenantID, "testuser", "test@example.com")
+
+	t.Run("成功登出", func(t *testing.T) {
+		session := &model.Session{
+			ID:       uuid.New(),
+			UserID:   userID,
+			TenantID: tenantID,
+			Token:    token,
+		}
+
+		sessionRepo.On("FindByToken", ctx, token).Return(session, nil).Once()
+		sessionRepo.On("RevokeSession", ctx, session.ID).Return(nil).Once()
+		auditRepo.On("Create", ctx, mock.AnythingOfType("*model.AuditLog")).Return(nil).Once()
+
+		err := service.Logout(ctx, token, "127.0.0.1", "test-agent")
+		assert.NoError(t, err)
+
+		sessionRepo.AssertExpectations(t)
+		auditRepo.AssertExpectations(t)
+	})
+
+	t.Run("会话不存在", func(t *testing.T) {
+		sessionRepo.On("FindByToken", ctx, token).Return(nil, ErrSessionNotFound).Once()
+
+		err := service.Logout(ctx, token, "127.0.0.1", "test-agent")
+		assert.Error(t, err)
+		assert.Equal(t, ErrSessionNotFound, err)
+
+		sessionRepo.AssertExpectations(t)
+	})
+}
+
+// TestService_ValidateToken 测试验证令牌
+func TestService_ValidateToken(t *testing.T) {
+	userRepo := new(MockUserRepository)
+	sessionRepo := new(MockSessionRepository)
+	auditRepo := new(MockAuditRepository)
+
+	jwtConfig := &jwt.Config{
+		SecretKey:       "test-secret-key",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+		Issuer:          "test-issuer",
+	}
+
+	service := NewService(userRepo, sessionRepo, auditRepo, jwtConfig)
+
+	ctx := context.Background()
+	userID := uuid.New()
+	tenantID := uuid.New()
+
+	// 生成token
+	token, _ := service.jwtManager.GenerateAccessToken(userID, tenantID, "testuser", "test@example.com")
+
+	t.Run("有效令牌", func(t *testing.T) {
+		session := &model.Session{
+			ID:        uuid.New(),
+			UserID:    userID,
+			TenantID:  tenantID,
+			Token:     token,
+			ExpiresAt: time.Now().Add(1 * time.Hour),
+		}
+
+		sessionRepo.On("FindByToken", ctx, token).Return(session, nil).Once()
+
+		claims, err := service.ValidateToken(ctx, token)
+		assert.NoError(t, err)
+		assert.NotNil(t, claims)
+		assert.Equal(t, userID, claims.UserID)
+		assert.Equal(t, tenantID, claims.TenantID)
+
+		sessionRepo.AssertExpectations(t)
+	})
+
+	t.Run("会话不存在", func(t *testing.T) {
+		sessionRepo.On("FindByToken", ctx, token).Return(nil, ErrSessionNotFound).Once()
+
+		_, err := service.ValidateToken(ctx, token)
+		assert.Error(t, err)
+		assert.Equal(t, ErrSessionNotFound, err)
+
+		sessionRepo.AssertExpectations(t)
+	})
+
+	t.Run("会话已过期", func(t *testing.T) {
+		expiredSession := &model.Session{
+			ID:        uuid.New(),
+			UserID:    userID,
+			TenantID:  tenantID,
+			Token:     token,
+			ExpiresAt: time.Now().Add(-1 * time.Hour), // 过期
+		}
+
+		sessionRepo.On("FindByToken", ctx, token).Return(expiredSession, nil).Once()
+
+		_, err := service.ValidateToken(ctx, token)
+		assert.Error(t, err)
+		assert.Equal(t, ErrSessionExpired, err)
+
+		sessionRepo.AssertExpectations(t)
+	})
+
+	t.Run("会话已撤销", func(t *testing.T) {
+		now := time.Now()
+		revokedSession := &model.Session{
+			ID:        uuid.New(),
+			UserID:    userID,
+			TenantID:  tenantID,
+			Token:     token,
+			ExpiresAt: time.Now().Add(1 * time.Hour),
+			RevokedAt: &now, // 已撤销
+		}
+
+		sessionRepo.On("FindByToken", ctx, token).Return(revokedSession, nil).Once()
+
+		_, err := service.ValidateToken(ctx, token)
+		assert.Error(t, err)
+		assert.Equal(t, ErrSessionRevoked, err)
+
+		sessionRepo.AssertExpectations(t)
+	})
+}
+
+// TestService_RefreshToken 测试刷新令牌
+func TestService_RefreshToken(t *testing.T) {
+	userRepo := new(MockUserRepository)
+	sessionRepo := new(MockSessionRepository)
+	auditRepo := new(MockAuditRepository)
+
+	jwtConfig := &jwt.Config{
+		SecretKey:       "test-secret-key",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+		Issuer:          "test-issuer",
+	}
+
+	service := NewService(userRepo, sessionRepo, auditRepo, jwtConfig)
+
+	ctx := context.Background()
+	userID := uuid.New()
+	tenantID := uuid.New()
+
+	user := &model.User{
+		ID:       userID,
+		TenantID: tenantID,
+		Username: "testuser",
+		Email:    "test@example.com",
+		Status:   model.UserStatusActive,
+	}
+
+	// 生成refresh token
+	refreshToken, _ := service.jwtManager.GenerateRefreshToken(userID, tenantID)
+
+	t.Run("成功刷新", func(t *testing.T) {
+		userRepo.On("FindByID", ctx, userID).Return(user, nil).Once()
+		sessionRepo.On("Create", ctx, mock.AnythingOfType("*model.Session")).Return(nil).Once()
+
+		response, err := service.RefreshToken(ctx, refreshToken)
+		assert.NoError(t, err)
+		assert.NotNil(t, response)
+		assert.NotEmpty(t, response.AccessToken)
+		assert.Equal(t, refreshToken, response.RefreshToken)
+		assert.Equal(t, user, response.User)
+
+		userRepo.AssertExpectations(t)
+		sessionRepo.AssertExpectations(t)
+	})
+
+	t.Run("无效的refresh token", func(t *testing.T) {
+		_, err := service.RefreshToken(ctx, "invalid-token")
+		assert.Error(t, err)
+	})
+
+	t.Run("用户不存在", func(t *testing.T) {
+		userRepo.On("FindByID", ctx, userID).Return(nil, errors.New("user not found")).Once()
+
+		_, err := service.RefreshToken(ctx, refreshToken)
+		assert.Error(t, err)
+
+		userRepo.AssertExpectations(t)
+	})
+}
+
+// TestService_RevokeSession 测试撤销会话
+func TestService_RevokeSession(t *testing.T) {
+	userRepo := new(MockUserRepository)
+	sessionRepo := new(MockSessionRepository)
+	auditRepo := new(MockAuditRepository)
+
+	jwtConfig := &jwt.Config{
+		SecretKey:       "test-secret-key",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+		Issuer:          "test-issuer",
+	}
+
+	service := NewService(userRepo, sessionRepo, auditRepo, jwtConfig)
+
+	ctx := context.Background()
+	sessionID := uuid.New()
+
+	t.Run("成功撤销", func(t *testing.T) {
+		sessionRepo.On("RevokeSession", ctx, sessionID).Return(nil).Once()
+
+		err := service.RevokeSession(ctx, sessionID)
+		assert.NoError(t, err)
+
+		sessionRepo.AssertExpectations(t)
+	})
+
+	t.Run("撤销失败", func(t *testing.T) {
+		sessionRepo.On("RevokeSession", ctx, sessionID).Return(ErrSessionNotFound).Once()
+
+		err := service.RevokeSession(ctx, sessionID)
+		assert.Error(t, err)
+		assert.Equal(t, ErrSessionNotFound, err)
+
+		sessionRepo.AssertExpectations(t)
+	})
+}
+
 // 运行所有测试
 func TestAll_Success(t *testing.T) {
 	t.Run("用户注册", TestService_Register_Success)
 	t.Run("用户登录", TestService_Login_Success)
+	t.Run("登出", TestService_Logout)
+	t.Run("验证令牌", TestService_ValidateToken)
+	t.Run("刷新令牌", TestService_RefreshToken)
+	t.Run("撤销会话", TestService_RevokeSession)
 	t.Run("JWT管理", TestJWT_Success)
 	t.Run("密码哈希", TestPasswordHasher_Success)
 	t.Run("密码验证", TestPasswordValidator_Success)

@@ -73,23 +73,23 @@ build:
 	@echo "  Go Version: $(GO_VERSION)"
 	@echo "  Git Commit: $(GIT_COMMIT)"
 	@echo "  Build Time: $(BUILD_TIME)"
-	go build $(LDFLAGS) -o bin/$(APP_NAME) ./cmd/server
+	go build $(LDFLAGS) -o bin/$(APP_NAME) ./cmd/api
 
 ## build-linux: 编译 Linux 版本
 build-linux:
 	@echo "${GREEN}Building $(APP_NAME) for Linux...${RESET}"
-	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o bin/$(APP_NAME)-linux-amd64 ./cmd/server
+	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o bin/$(APP_NAME)-linux-amd64 ./cmd/api
 
 ## build-darwin: 编译 macOS 版本
 build-darwin:
 	@echo "${GREEN}Building $(APP_NAME) for macOS...${RESET}"
-	GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o bin/$(APP_NAME)-darwin-amd64 ./cmd/server
-	GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o bin/$(APP_NAME)-darwin-arm64 ./cmd/server
+	GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o bin/$(APP_NAME)-darwin-amd64 ./cmd/api
+	GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o bin/$(APP_NAME)-darwin-arm64 ./cmd/api
 
 ## build-windows: 编译 Windows 版本
 build-windows:
 	@echo "${GREEN}Building $(APP_NAME) for Windows...${RESET}"
-	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o bin/$(APP_NAME)-windows-amd64.exe ./cmd/server
+	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o bin/$(APP_NAME)-windows-amd64.exe ./cmd/api
 
 ## build-all: 编译所有平台版本
 build-all: build-linux build-darwin build-windows
@@ -135,6 +135,18 @@ test-coverage: test
 test-unit:
 	@echo "${GREEN}Running unit tests...${RESET}"
 	go test -v -race ./pkg/...
+
+## test-integration: 运行集成测试
+test-integration: migrate-build
+	@echo "${GREEN}Setting up test database...${RESET}"
+	@./test/setup_test_db.sh
+	@echo "${GREEN}Running integration tests...${RESET}"
+	go test -v -race -tags=integration ./test/integration/...
+
+## test-integration-no-setup: 运行集成测试（不重建数据库）
+test-integration-no-setup:
+	@echo "${GREEN}Running integration tests...${RESET}"
+	go test -v -race -tags=integration ./test/integration/...
 
 ## bench: 运行基准测试
 bench:
@@ -318,12 +330,50 @@ tools-install:
 swag-init:
 	@echo "${GREEN}Generating Swagger documentation...${RESET}"
 	@if command -v swag >/dev/null 2>&1; then \
-		swag init -g cmd/server/main.go; \
+		swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal; \
+	else \
+		echo "${YELLOW}swag not installed. Run: make tools-install${RESET}"; \
+	fi
+
+## swag-fmt: 格式化 Swagger 注释
+swag-fmt:
+	@echo "${GREEN}Formatting Swagger comments...${RESET}"
+	@if command -v swag >/dev/null 2>&1; then \
+		swag fmt; \
 	else \
 		echo "${YELLOW}swag not installed. Run: make tools-install${RESET}"; \
 	fi
 
 ## 数据库相关:
+
+## db-create: 创建数据库
+db-create:
+	@echo "${GREEN}Creating database...${RESET}"
+	@PGPASSWORD=postgres psql -U postgres -c "CREATE DATABASE erp;" || echo "${YELLOW}Database may already exist${RESET}"
+
+## db-drop: 删除数据库
+db-drop:
+	@echo "${GREEN}Dropping database...${RESET}"
+	@PGPASSWORD=postgres psql -U postgres -c "DROP DATABASE IF EXISTS erp;"
+
+## migrate-build: 编译迁移工具
+migrate-build:
+	@echo "${GREEN}Building migration tool...${RESET}"
+	go build -o bin/migrate ./cmd/migrate
+
+## migrate-up: 执行所有数据库迁移
+migrate-up: migrate-build
+	@echo "${GREEN}Running database migrations...${RESET}"
+	./bin/migrate up
+
+## migrate-status: 查看迁移状态
+migrate-status: migrate-build
+	@echo "${GREEN}Checking migration status...${RESET}"
+	./bin/migrate status
+
+## db-reset: 重置数据库（删除、创建、迁移）
+db-reset: db-drop db-create migrate-up
+	@echo "${GREEN}Database reset completed!${RESET}"
 
 ## db-migrate-up: 运行数据库迁移（需要 migrate 工具）
 db-migrate-up:

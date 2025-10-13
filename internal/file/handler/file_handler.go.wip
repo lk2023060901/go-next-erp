@@ -1,0 +1,304 @@
+package handler
+
+import (
+	"context"
+	"io"
+
+	"github.com/google/uuid"
+	filev1 "github.com/lk2023060901/go-next-erp/api/file/v1"
+	"github.com/lk2023060901/go-next-erp/internal/file/model"
+	"github.com/lk2023060901/go-next-erp/internal/file/service"
+	"github.com/lk2023060901/go-next-erp/pkg/logger"
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
+
+type FileHandler struct {
+	filev1.UnimplementedFileServiceServer
+	uploadService   service.UploadService
+	downloadService service.DownloadService
+	fileService     service.FileService
+	quotaService    service.QuotaService
+	logger          *logger.Logger
+}
+
+func NewFileHandler(
+	uploadService service.UploadService,
+	downloadService service.DownloadService,
+	fileService service.FileService,
+	quotaService service.QuotaService,
+	logger *logger.Logger,
+) *FileHandler {
+	return &FileHandler{
+		uploadService:   uploadService,
+		downloadService: downloadService,
+		fileService:     fileService,
+		quotaService:    quotaService,
+		logger:          logger.With(zap.String("handler", "file")),
+	}
+}
+
+// Upload 上传文件
+func (h *FileHandler) Upload(ctx context.Context, req *filev1.UploadRequest) (*filev1.UploadResponse, error) {
+	tenantID, err := uuid.Parse(req.TenantId)
+	if err != nil {
+		return nil, err
+	}
+
+	uploadedBy, err := uuid.Parse(req.UploadedBy)
+	if err != nil {
+		return nil, err
+	}
+
+	// 创建 io.Reader 从 bytes
+	reader := io.NopCloser(io.Reader(nil)) // TODO: 需要从实际请求中获取文件流
+
+	uploadReq := &service.UploadRequest{
+		TenantID:    tenantID,
+		UploadedBy:  uploadedBy,
+		Filename:    req.Filename,
+		Reader:      reader,
+		Size:        req.Size,
+		ContentType: req.ContentType,
+		IsTemporary: req.IsTemporary,
+		Tags:        req.Tags,
+		Metadata:    req.Metadata,
+		AccessLevel: model.AccessLevel(req.AccessLevel),
+	}
+
+	if req.ExpiresAt != nil {
+		expiresAt := req.ExpiresAt.AsTime()
+		uploadReq.ExpiresAt = &expiresAt
+	}
+
+	if req.Category != nil {
+		category := *req.Category
+		uploadReq.Category = &category
+	}
+
+	file, err := h.uploadService.Upload(ctx, uploadReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return &filev1.UploadResponse{
+		File: h.toProtoFileInfo(file),
+	}, nil
+}
+
+// GetFile 获取文件信息
+func (h *FileHandler) GetFile(ctx context.Context, req *filev1.GetFileRequest) (*filev1.FileInfo, error) {
+	fileID, err := uuid.Parse(req.FileId)
+	if err != nil {
+		return nil, err
+	}
+
+	file, err := h.fileService.GetFile(ctx, fileID)
+	if err != nil {
+		return nil, err
+	}
+
+	return h.toProtoFileInfo(file), nil
+}
+
+// ListFiles 获取文件列表
+func (h *FileHandler) ListFiles(ctx context.Context, req *filev1.ListFilesRequest) (*filev1.ListFilesResponse, error) {
+	tenantID, err := uuid.Parse(req.TenantId)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := &service.FileFilter{
+		TenantID:    tenantID,
+		Category:    req.Category,
+		Status:      req.Status,
+		IsTemporary: req.IsTemporary,
+		Page:        int(req.Page),
+		PageSize:    int(req.PageSize),
+	}
+
+	files, total, err := h.fileService.ListFiles(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	protoFiles := make([]*filev1.FileInfo, len(files))
+	for i, file := range files {
+		protoFiles[i] = h.toProtoFileInfo(file)
+	}
+
+	return &filev1.ListFilesResponse{
+		Files: protoFiles,
+		Total: total,
+		Page:  req.Page,
+	}, nil
+}
+
+// DeleteFile 删除文件
+func (h *FileHandler) DeleteFile(ctx context.Context, req *filev1.DeleteFileRequest) (*emptypb.Empty, error) {
+	fileID, err := uuid.Parse(req.FileId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := h.fileService.DeleteFile(ctx, fileID, req.Permanent); err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+// GetDownloadURL 获取下载URL
+func (h *FileHandler) GetDownloadURL(ctx context.Context, req *filev1.GetDownloadURLRequest) (*filev1.DownloadURLResponse, error) {
+	fileID, err := uuid.Parse(req.FileId)
+	if err != nil {
+		return nil, err
+	}
+
+	url, expiresAt, err := h.downloadService.GetPresignedURL(ctx, fileID, int(req.ExpiryMinutes))
+	if err != nil {
+		return nil, err
+	}
+
+	return &filev1.DownloadURLResponse{
+		Url:       url,
+		ExpiresAt: timestamppb.New(expiresAt),
+	}, nil
+}
+
+// GetQuota 获取配额信息
+func (h *FileHandler) GetQuota(ctx context.Context, _ *emptypb.Empty) (*filev1.QuotaInfo, error) {
+	// TODO: 从上下文获取 tenantID
+	tenantID := uuid.New() // Placeholder
+
+	quota, err := h.quotaService.GetQuota(ctx, tenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &filev1.QuotaInfo{
+		TenantId:       quota.TenantID.String(),
+		MaxQuota:       quota.MaxQuota,
+		UsedQuota:      quota.UsedQuota,
+		ReservedQuota:  quota.ReservedQuota,
+		AvailableQuota: quota.GetAvailableQuota(),
+	}, nil
+}
+
+// InitiateMultipartUpload 初始化分片上传
+func (h *FileHandler) InitiateMultipartUpload(ctx context.Context, req *filev1.InitiateMultipartRequest) (*filev1.InitiateMultipartResponse, error) {
+	tenantID, err := uuid.Parse(req.TenantId)
+	if err != nil {
+		return nil, err
+	}
+
+	uploadedBy, err := uuid.Parse(req.UploadedBy)
+	if err != nil {
+		return nil, err
+	}
+
+	uploadReq := &service.InitiateMultipartRequest{
+		TenantID:    tenantID,
+		UploadedBy:  uploadedBy,
+		Filename:    req.Filename,
+		TotalSize:   req.TotalSize,
+		ContentType: req.ContentType,
+		IsTemporary: req.IsTemporary,
+	}
+
+	if req.ExpiresAt != nil {
+		expiresAt := req.ExpiresAt.AsTime()
+		uploadReq.ExpiresAt = &expiresAt
+	}
+
+	info, err := h.uploadService.InitiateMultipartUpload(ctx, uploadReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return &filev1.InitiateMultipartResponse{
+		UploadId:   info.UploadID,
+		StorageKey: info.StorageKey,
+		PartSize:   info.PartSize,
+		TotalParts: int32(info.TotalParts),
+	}, nil
+}
+
+// CompleteMultipartUpload 完成分片上传
+func (h *FileHandler) CompleteMultipartUpload(ctx context.Context, req *filev1.CompleteMultipartRequest) (*filev1.UploadResponse, error) {
+	tenantID, err := uuid.Parse(req.TenantId)
+	if err != nil {
+		return nil, err
+	}
+
+	uploadedBy, err := uuid.Parse(req.UploadedBy)
+	if err != nil {
+		return nil, err
+	}
+
+	parts := make([]service.PartUploadResult, len(req.Parts))
+	for i, part := range req.Parts {
+		parts[i] = service.PartUploadResult{
+			PartNumber: int(part.PartNumber),
+			ETag:       part.Etag,
+			Size:       part.Size,
+		}
+	}
+
+	completeReq := &service.CompleteMultipartRequest{
+		UploadID:   req.UploadId,
+		TenantID:   tenantID,
+		UploadedBy: uploadedBy,
+		Parts:      parts,
+	}
+
+	file, err := h.uploadService.CompleteMultipartUpload(ctx, completeReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return &filev1.UploadResponse{
+		File: h.toProtoFileInfo(file),
+	}, nil
+}
+
+// toProtoFileInfo 转换为 Proto FileInfo
+func (h *FileHandler) toProtoFileInfo(file *model.File) *filev1.FileInfo {
+	info := &filev1.FileInfo{
+		FileId:        file.ID.String(),
+		TenantId:      file.TenantID.String(),
+		Filename:      file.Filename,
+		Size:          file.Size,
+		MimeType:      file.MimeType,
+		ContentType:   file.ContentType,
+		Checksum:      file.Checksum,
+		Extension:     file.Extension,
+		Category:      file.Category,
+		Tags:          file.Tags,
+		Metadata:      file.Metadata,
+		Status:        string(file.Status),
+		IsTemporary:   file.IsTemporary,
+		IsPublic:      file.IsPublic,
+		VersionNumber: int32(file.VersionNumber),
+		UploadedBy:    file.UploadedBy.String(),
+		AccessLevel:   string(file.AccessLevel),
+		CreatedAt:     timestamppb.New(file.CreatedAt),
+		UpdatedAt:     timestamppb.New(file.UpdatedAt),
+	}
+
+	if file.ParentID != nil {
+		parentID := file.ParentID.String()
+		info.ParentId = &parentID
+	}
+
+	if file.ExpiresAt != nil {
+		info.ExpiresAt = timestamppb.New(*file.ExpiresAt)
+	}
+
+	if file.DeletedAt != nil {
+		info.DeletedAt = timestamppb.New(*file.DeletedAt)
+	}
+
+	return info
+}

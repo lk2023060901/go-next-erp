@@ -7,24 +7,26 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lk2023060901/go-next-erp/pkg/database"
 )
 
 // PostgresPersistence PostgreSQL 持久化实现
 // 企业级特性：
 // - 完整的 ACID 事务支持
 // - 高性能批量操作
-// - 连接池管理
+// - 连接池管理（通过 database.DB 抽象层）
+// - 主从分离和读写路由
+// - 负载均衡
 // - 自动重连机制
 // - 查询优化和索引
 type PostgresPersistence struct {
-	pool *pgxpool.Pool
+	db *database.DB
 }
 
 // NewPostgresPersistence 创建 PostgreSQL 持久化
-func NewPostgresPersistence(pool *pgxpool.Pool) (*PostgresPersistence, error) {
+func NewPostgresPersistence(db *database.DB) (*PostgresPersistence, error) {
 	p := &PostgresPersistence{
-		pool: pool,
+		db: db,
 	}
 
 	// 初始化表结构
@@ -99,7 +101,7 @@ func (p *PostgresPersistence) initSchema(ctx context.Context) error {
 	CREATE INDEX IF NOT EXISTS idx_node_states_status ON node_states(status);
 	`
 
-	_, err := p.pool.Exec(ctx, schema)
+	_, err := p.db.Exec(ctx, schema)
 	return err
 }
 
@@ -142,7 +144,7 @@ func (p *PostgresPersistence) SaveWorkflow(ctx context.Context, def *WorkflowDef
 			updated_at = EXCLUDED.updated_at
 	`
 
-	_, err = p.pool.Exec(ctx, query,
+	_, err = p.db.Exec(ctx, query,
 		def.ID, def.Name, def.Description, def.Version, def.Status,
 		nodesJSON, edgesJSON, variablesJSON, settingsJSON,
 		def.CreatedAt, def.UpdatedAt, def.CreatedBy,
@@ -167,7 +169,7 @@ func (p *PostgresPersistence) GetWorkflow(ctx context.Context, workflowID string
 	var def WorkflowDefinition
 	var nodesJSON, edgesJSON, variablesJSON, settingsJSON []byte
 
-	err := p.pool.QueryRow(ctx, query, workflowID).Scan(
+	err := p.db.QueryRow(ctx, query, workflowID).Scan(
 		&def.ID, &def.Name, &def.Description, &def.Version, &def.Status,
 		&nodesJSON, &edgesJSON, &variablesJSON, &settingsJSON,
 		&def.CreatedAt, &def.UpdatedAt, &def.CreatedBy,
@@ -250,7 +252,7 @@ func (p *PostgresPersistence) ListWorkflows(ctx context.Context, filter *Workflo
 		argIndex++
 	}
 
-	rows, err := p.pool.Query(ctx, query, args...)
+	rows, err := p.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list workflows: %w", err)
 	}
@@ -287,7 +289,7 @@ func (p *PostgresPersistence) ListWorkflows(ctx context.Context, filter *Workflo
 func (p *PostgresPersistence) DeleteWorkflow(ctx context.Context, workflowID string) error {
 	query := `DELETE FROM workflows WHERE id = $1`
 
-	result, err := p.pool.Exec(ctx, query, workflowID)
+	result, err := p.db.Exec(ctx, query, workflowID)
 	if err != nil {
 		return fmt.Errorf("failed to delete workflow: %w", err)
 	}
@@ -303,7 +305,7 @@ func (p *PostgresPersistence) DeleteWorkflow(ctx context.Context, workflowID str
 func (p *PostgresPersistence) UpdateWorkflowStatus(ctx context.Context, workflowID string, status WorkflowStatus) error {
 	query := `UPDATE workflows SET status = $1, updated_at = $2 WHERE id = $3`
 
-	result, err := p.pool.Exec(ctx, query, status, time.Now(), workflowID)
+	result, err := p.db.Exec(ctx, query, status, time.Now(), workflowID)
 	if err != nil {
 		return fmt.Errorf("failed to update workflow status: %w", err)
 	}
@@ -335,7 +337,7 @@ func (p *PostgresPersistence) SaveExecution(ctx context.Context, execCtx *Execut
 			completed_at = EXCLUDED.completed_at
 	`
 
-	_, err := p.pool.Exec(ctx, query,
+	_, err := p.db.Exec(ctx, query,
 		execCtx.ID, execCtx.WorkflowID, execCtx.Status,
 		inputJSON, outputJSON, variablesJSON,
 		execCtx.Error, execCtx.StartedAt, execCtx.CompletedAt,
@@ -368,7 +370,7 @@ func (p *PostgresPersistence) GetExecution(ctx context.Context, executionID stri
 	var execCtx ExecutionContext
 	var inputJSON, outputJSON, variablesJSON, metadataJSON []byte
 
-	err := p.pool.QueryRow(ctx, query, executionID).Scan(
+	err := p.db.QueryRow(ctx, query, executionID).Scan(
 		&execCtx.ID, &execCtx.WorkflowID, &execCtx.Status,
 		&inputJSON, &outputJSON, &variablesJSON,
 		&execCtx.Error, &execCtx.StartedAt, &execCtx.CompletedAt,
@@ -461,7 +463,7 @@ func (p *PostgresPersistence) ListExecutions(ctx context.Context, filter *Execut
 		args = append(args, filter.Offset)
 	}
 
-	rows, err := p.pool.Query(ctx, query, args...)
+	rows, err := p.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list executions: %w", err)
 	}
@@ -498,7 +500,7 @@ func (p *PostgresPersistence) ListExecutions(ctx context.Context, filter *Execut
 func (p *PostgresPersistence) DeleteExecution(ctx context.Context, executionID string) error {
 	query := `DELETE FROM workflow_executions WHERE id = $1`
 
-	result, err := p.pool.Exec(ctx, query, executionID)
+	result, err := p.db.Exec(ctx, query, executionID)
 	if err != nil {
 		return fmt.Errorf("failed to delete execution: %w", err)
 	}
@@ -514,7 +516,7 @@ func (p *PostgresPersistence) DeleteExecution(ctx context.Context, executionID s
 func (p *PostgresPersistence) UpdateExecutionStatus(ctx context.Context, executionID string, status ExecutionStatus) error {
 	query := `UPDATE workflow_executions SET status = $1 WHERE id = $2`
 
-	result, err := p.pool.Exec(ctx, query, status, executionID)
+	result, err := p.db.Exec(ctx, query, status, executionID)
 	if err != nil {
 		return fmt.Errorf("failed to update execution status: %w", err)
 	}
@@ -544,7 +546,7 @@ func (p *PostgresPersistence) SaveNodeState(ctx context.Context, executionID str
 			completed_at = EXCLUDED.completed_at
 	`
 
-	_, err := p.pool.Exec(ctx, query,
+	_, err := p.db.Exec(ctx, query,
 		executionID, state.NodeID, state.Status,
 		inputJSON, outputJSON,
 		state.Error, state.Attempts, state.StartedAt, state.CompletedAt,
@@ -565,7 +567,7 @@ func (p *PostgresPersistence) GetNodeStates(ctx context.Context, executionID str
 		WHERE execution_id = $1
 	`
 
-	rows, err := p.pool.Query(ctx, query, executionID)
+	rows, err := p.db.Query(ctx, query, executionID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get node states: %w", err)
 	}
@@ -618,7 +620,7 @@ func (p *PostgresPersistence) GetWorkflowStats(ctx context.Context, workflowID s
 	var lastExecuted *time.Time
 	var avgDurationSeconds *float64
 
-	err := p.pool.QueryRow(ctx, query, args...).Scan(
+	err := p.db.QueryRow(ctx, query, args...).Scan(
 		&stats.TotalExecutions,
 		&stats.SuccessExecutions,
 		&stats.FailedExecutions,
@@ -651,7 +653,7 @@ func (p *PostgresPersistence) GetExecutionHistory(ctx context.Context, workflowI
 		LIMIT $2
 	`
 
-	rows, err := p.pool.Query(ctx, query, workflowID, limit)
+	rows, err := p.db.Query(ctx, query, workflowID, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get execution history: %w", err)
 	}
@@ -686,7 +688,7 @@ func (p *PostgresPersistence) GetExecutionHistory(ctx context.Context, workflowI
 func (p *PostgresPersistence) CleanupOldExecutions(ctx context.Context, olderThan time.Time) (int, error) {
 	query := `DELETE FROM workflow_executions WHERE started_at < $1`
 
-	result, err := p.pool.Exec(ctx, query, olderThan)
+	result, err := p.db.Exec(ctx, query, olderThan)
 	if err != nil {
 		return 0, fmt.Errorf("failed to cleanup old executions: %w", err)
 	}
@@ -696,11 +698,11 @@ func (p *PostgresPersistence) CleanupOldExecutions(ctx context.Context, olderTha
 
 // Ping 健康检查
 func (p *PostgresPersistence) Ping(ctx context.Context) error {
-	return p.pool.Ping(ctx)
+	return p.db.Ping(ctx)
 }
 
 // Close 关闭连接
 func (p *PostgresPersistence) Close() error {
-	p.pool.Close()
+	p.db.Close()
 	return nil
 }
