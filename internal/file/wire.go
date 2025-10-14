@@ -17,6 +17,7 @@ var ProviderSet = wire.NewSet(
 	repository.NewDownloadStatsRepository,
 	repository.NewFileRelationRepository,
 	repository.NewFileAccessLogRepository,
+	repository.NewVersionRepository,
 
 	// Service 层
 	service.NewUploadService,
@@ -27,6 +28,9 @@ var ProviderSet = wire.NewSet(
 	service.NewFileManagementService,
 	service.NewFileRelationService,
 	service.NewCleanupService,
+	service.NewThumbnailService,
+	service.NewCompressionService,
+	service.NewFileVersionService,
 
 	// Service 配置
 	ProvideUploadServiceConfig,

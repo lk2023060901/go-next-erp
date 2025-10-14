@@ -34,5 +34,30 @@ go.work.sum
 docker-compose.yml
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+.claude/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Test coverage
+*.coverprofile
+adapter_coverage.out
+
+# Compiled binaries
+migrate
+
+# Temporary files
+*.tmp
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local

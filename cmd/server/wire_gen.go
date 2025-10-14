@@ -9,7 +9,6 @@ package main
 import (
 	"context"
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/lk2023060901/go-next-erp/internal/adapter"
 	"github.com/lk2023060901/go-next-erp/internal/approval"
@@ -19,6 +18,7 @@ import (
 	"github.com/lk2023060901/go-next-erp/internal/auth/authentication"
 	"github.com/lk2023060901/go-next-erp/internal/auth/authorization"
 	"github.com/lk2023060901/go-next-erp/internal/auth/repository"
+	"github.com/lk2023060901/go-next-erp/internal/conf"
 	"github.com/lk2023060901/go-next-erp/internal/file"
 	repository6 "github.com/lk2023060901/go-next-erp/internal/file/repository"
 	service4 "github.com/lk2023060901/go-next-erp/internal/file/service"
@@ -35,12 +35,14 @@ import (
 // Injectors from wire.go:
 
 // wireApp 通过 Wire 进行依赖注入
-func wireApp(contextContext context.Context, configConfig config.Config, logger log.Logger) (*kratos.App, func(), error) {
-	db, cleanup, err := pkg.ProvideDatabase(contextContext)
+func wireApp(contextContext context.Context, config *conf.Config, logger log.Logger) (*kratos.App, func(), error) {
+	jwtConfig := auth.ProvideJWTConfig(config)
+	manager := auth.ProvideJWTManager(jwtConfig)
+	db, cleanup, err := pkg.ProvideDatabase(contextContext, config)
 	if err != nil {
 		return nil, nil, err
 	}
-	redis, cleanup2, err := pkg.ProvideCache(contextContext)
+	redis, cleanup2, err := pkg.ProvideCache(contextContext, config)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -48,7 +50,6 @@ func wireApp(contextContext context.Context, configConfig config.Config, logger 
 	userRepository := repository.NewUserRepository(db, redis)
 	sessionRepository := repository.NewSessionRepository(db, redis)
 	auditLogRepository := repository.NewAuditLogRepository(db)
-	jwtConfig := auth.ProvideJWTConfig()
 	authenticationService := authentication.NewService(userRepository, sessionRepository, auditLogRepository, jwtConfig)
 	authAdapter := adapter.NewAuthAdapter(authenticationService, userRepository)
 	roleRepository := repository.NewRoleRepository(db, redis)
@@ -83,7 +84,7 @@ func wireApp(contextContext context.Context, configConfig config.Config, logger 
 	approvalAdapter := adapter.NewApprovalAdapter(approvalService)
 	fileRepository := repository6.NewFileRepository(db, redis)
 	quotaRepository := repository6.NewQuotaRepository(db)
-	storage, cleanup3, err := pkg.ProvideStorage(contextContext)
+	storage, cleanup3, err := pkg.ProvideStorage(contextContext, config)
 	if err != nil {
 		cleanup2()
 		cleanup()
@@ -106,8 +107,8 @@ func wireApp(contextContext context.Context, configConfig config.Config, logger 
 	multipartUploadServiceConfig := file.ProvideMultipartUploadServiceConfig()
 	multipartUploadService := service4.NewMultipartUploadService(fileRepository, quotaRepository, multipartUploadRepository, storage, loggerLogger, multipartUploadServiceConfig)
 	fileAdapter := adapter.NewFileAdapter(fileRepository, uploadService, downloadService, quotaService, multipartUploadService)
-	httpServer := server.NewHTTPServer(authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, logger)
-	grpcServer := server.NewGRPCServer(authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, logger)
+	httpServer := server.NewHTTPServer(config, manager, authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, logger)
+	grpcServer := server.NewGRPCServer(config, manager, authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, logger)
 	app := newApp(logger, httpServer, grpcServer)
 	return app, func() {
 		cleanup4()

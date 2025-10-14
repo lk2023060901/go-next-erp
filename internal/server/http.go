@@ -1,8 +1,12 @@
 package server
 
 import (
+	"context"
+	"time"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	approvalv1 "github.com/lk2023060901/go-next-erp/api/approval/v1"
 	authv1 "github.com/lk2023060901/go-next-erp/api/auth/v1"
@@ -11,10 +15,15 @@ import (
 	notifyv1 "github.com/lk2023060901/go-next-erp/api/notification/v1"
 	orgv1 "github.com/lk2023060901/go-next-erp/api/organization/v1"
 	"github.com/lk2023060901/go-next-erp/internal/adapter"
+	"github.com/lk2023060901/go-next-erp/internal/auth/authentication/jwt"
+	"github.com/lk2023060901/go-next-erp/internal/conf"
+	"github.com/lk2023060901/go-next-erp/pkg/middleware"
 )
 
 // NewHTTPServer 创建 HTTP 服务器
 func NewHTTPServer(
+	cfg *conf.Config,
+	jwtManager *jwt.Manager,
 	authAdapter *adapter.AuthAdapter,
 	userAdapter *adapter.UserAdapter,
 	roleAdapter *adapter.RoleAdapter,
@@ -25,9 +34,39 @@ func NewHTTPServer(
 	fileAdapter *adapter.FileAdapter,
 	logger log.Logger,
 ) *http.Server {
+	// 解析超时配置
+	timeout := 30 * time.Second
+	if cfg.Server.HTTP.Timeout != "" {
+		if t, err := time.ParseDuration(cfg.Server.HTTP.Timeout); err == nil {
+			timeout = t
+		}
+	}
+
+	// 不需要认证的接口列表（使用 protobuf operation 格式）
+	noAuthPaths := []string{
+		"/api.auth.v1.AuthService/Login",
+		"/api.auth.v1.AuthService/Register",
+		"/api.auth.v1.AuthService/RefreshToken",
+	}
+
 	var opts = []http.ServerOption{
+		http.Address(cfg.Server.HTTP.Addr),
+		http.Network(cfg.Server.HTTP.Network),
+		http.Timeout(timeout),
 		http.Middleware(
 			recovery.Recovery(),
+			middleware.Logging(logger),
+			selector.Server(
+				middleware.Auth(jwtManager),
+			).Match(func(ctx context.Context, operation string) bool {
+				// 检查是否为不需要认证的接口
+				for _, path := range noAuthPaths {
+					if operation == path {
+						return false // 不需要认证
+					}
+				}
+				return true // 需要认证
+			}).Build(),
 		),
 	}
 

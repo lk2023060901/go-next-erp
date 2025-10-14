@@ -6,12 +6,11 @@ import (
 	"os"
 
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/file"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/lk2023060901/go-next-erp/internal/conf"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -48,14 +47,8 @@ func main() {
 	flag.Parse()
 
 	// 加载配置
-	c := config.New(
-		config.WithSource(
-			file.NewSource(flagconf),
-		),
-	)
-	defer c.Close()
-
-	if err := c.Load(); err != nil {
+	cfg, err := conf.Load(flagconf)
+	if err != nil {
 		panic(err)
 	}
 
@@ -71,7 +64,7 @@ func main() {
 	)
 
 	// 依赖注入
-	app, cleanup, err := wireApp(context.Background(), c, logger)
+	app, cleanup, err := wireApp(context.Background(), cfg, logger)
 	if err != nil {
 		panic(err)
 	}

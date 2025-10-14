@@ -12,6 +12,7 @@ type Config struct {
 	Server   ServerConfig   `yaml:"server"`
 	Database DatabaseConfig `yaml:"database"`
 	Redis    RedisConfig    `yaml:"redis"`
+	MinIO    MinIOConfig    `yaml:"minio"`
 	JWT      JWTConfig      `yaml:"jwt"`
 	Log      LogConfig      `yaml:"log"`
 }
@@ -38,12 +39,12 @@ type GRPCConfig struct {
 
 // DatabaseConfig 数据库配置
 type DatabaseConfig struct {
-	Driver          string `yaml:"driver"`
-	Master          string `yaml:"master"`
+	Driver          string   `yaml:"driver"`
+	Master          string   `yaml:"master"`
 	Slaves          []string `yaml:"slaves"`
-	MaxOpenConns    int    `yaml:"max_open_conns"`
-	MaxIdleConns    int    `yaml:"max_idle_conns"`
-	ConnMaxLifetime string `yaml:"conn_max_lifetime"`
+	MaxOpenConns    int      `yaml:"max_open_conns"`
+	MaxIdleConns    int      `yaml:"max_idle_conns"`
+	ConnMaxLifetime string   `yaml:"conn_max_lifetime"`
 }
 
 // RedisConfig Redis 配置
@@ -53,11 +54,21 @@ type RedisConfig struct {
 	DB       int    `yaml:"db"`
 }
 
+// MinIOConfig MinIO 配置
+type MinIOConfig struct {
+	Endpoint        string `yaml:"endpoint"`
+	AccessKeyID     string `yaml:"access_key_id"`
+	SecretAccessKey string `yaml:"secret_access_key"`
+	UseSSL          bool   `yaml:"use_ssl"`
+	BucketName      string `yaml:"bucket_name"`
+	Region          string `yaml:"region"`
+}
+
 // JWTConfig JWT 配置
 type JWTConfig struct {
-	Secret           string `yaml:"secret"`
-	AccessExpire     int    `yaml:"access_expire"`
-	RefreshExpire    int    `yaml:"refresh_expire"`
+	Secret        string `yaml:"secret"`
+	AccessExpire  int    `yaml:"access_expire"`
+	RefreshExpire int    `yaml:"refresh_expire"`
 }
 
 // LogConfig 日志配置

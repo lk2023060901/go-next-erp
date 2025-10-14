@@ -10,16 +10,24 @@ server:
 
 database:
   driver: postgres
-  master: postgres://postgres:postgres123@localhost:15000/erp?sslmode=disable
+  master: postgres://postgres:postgres123@localhost:16000/erp?sslmode=disable
   slaves: []
   max_open_conns: 100
   max_idle_conns: 10
   conn_max_lifetime: 3600s
 
 redis:
-  addr: localhost:15001
+  addr: localhost:16001
   password: redis123
   db: 0
+
+minio:
+  endpoint: localhost:16002
+  access_key_id: minioadmin
+  secret_access_key: minioadmin123
+  use_ssl: false
+  bucket_name: erp-files
+  region: us-east-1
 
 jwt:
   secret: your-secret-key-change-this-in-production
