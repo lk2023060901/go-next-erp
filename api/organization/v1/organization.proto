@@ -16,6 +16,13 @@ service OrganizationService {
     };
   }
 
+  // 获取组织树
+  rpc GetOrganizationTree (GetOrganizationTreeRequest) returns (OrganizationTreeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/organizations/tree"
+    };
+  }
+
   // 获取组织
   rpc GetOrganization (GetOrganizationRequest) returns (OrganizationResponse) {
     option (google.api.http) = {
@@ -42,13 +49,6 @@ service OrganizationService {
   rpc ListOrganizations (ListOrganizationsRequest) returns (ListOrganizationsResponse) {
     option (google.api.http) = {
       get: "/api/v1/organizations"
-    };
-  }
-
-  // 获取组织树
-  rpc GetOrganizationTree (GetOrganizationTreeRequest) returns (OrganizationTreeResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/organizations/tree"
     };
   }
 }

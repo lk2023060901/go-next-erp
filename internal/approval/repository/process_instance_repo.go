@@ -95,9 +95,10 @@ func (r *processInstanceRepo) Update(ctx context.Context, instance *model.Proces
 
 func (r *processInstanceRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.ProcessInstance, error) {
 	sql := `
-		SELECT id, tenant_id, process_def_id, workflow_instance_id, form_data_id,
-		       applicant_id, status, current_node_id, variables, started_at,
-		       completed_at, created_at, updated_at
+		SELECT id, tenant_id, process_def_id, process_def_code, process_def_name,
+		       workflow_instance_id, form_data_id, applicant_id, applicant_name,
+		       title, status, current_node_id, current_node_name,
+		       variables, started_at, completed_at, created_at, updated_at
 		FROM approval_process_instances
 		WHERE id = $1
 	`
@@ -109,11 +110,16 @@ func (r *processInstanceRepo) FindByID(ctx context.Context, id uuid.UUID) (*mode
 		&instance.ID,
 		&instance.TenantID,
 		&instance.ProcessDefID,
+		&instance.ProcessDefCode,
+		&instance.ProcessDefName,
 		&instance.WorkflowInstanceID,
 		&instance.FormDataID,
 		&instance.ApplicantID,
+		&instance.ApplicantName,
+		&instance.Title,
 		&instance.Status,
 		&instance.CurrentNodeID,
+		&instance.CurrentNodeName,
 		&varsJSON,
 		&instance.StartedAt,
 		&instance.CompletedAt,
@@ -134,9 +140,10 @@ func (r *processInstanceRepo) FindByID(ctx context.Context, id uuid.UUID) (*mode
 
 func (r *processInstanceRepo) FindByWorkflowInstanceID(ctx context.Context, workflowInstanceID uuid.UUID) (*model.ProcessInstance, error) {
 	sql := `
-		SELECT id, tenant_id, process_def_id, workflow_instance_id, form_data_id,
-		       applicant_id, status, current_node_id, variables, started_at,
-		       completed_at, created_at, updated_at
+		SELECT id, tenant_id, process_def_id, process_def_code, process_def_name,
+		       workflow_instance_id, form_data_id, applicant_id, applicant_name,
+		       title, status, current_node_id, current_node_name,
+		       variables, started_at, completed_at, created_at, updated_at
 		FROM approval_process_instances
 		WHERE workflow_instance_id = $1
 	`
@@ -148,11 +155,16 @@ func (r *processInstanceRepo) FindByWorkflowInstanceID(ctx context.Context, work
 		&instance.ID,
 		&instance.TenantID,
 		&instance.ProcessDefID,
+		&instance.ProcessDefCode,
+		&instance.ProcessDefName,
 		&instance.WorkflowInstanceID,
 		&instance.FormDataID,
 		&instance.ApplicantID,
+		&instance.ApplicantName,
+		&instance.Title,
 		&instance.Status,
 		&instance.CurrentNodeID,
+		&instance.CurrentNodeName,
 		&varsJSON,
 		&instance.StartedAt,
 		&instance.CompletedAt,
@@ -173,9 +185,10 @@ func (r *processInstanceRepo) FindByWorkflowInstanceID(ctx context.Context, work
 
 func (r *processInstanceRepo) ListByApplicant(ctx context.Context, applicantID uuid.UUID, limit, offset int) ([]*model.ProcessInstance, error) {
 	sql := `
-		SELECT id, tenant_id, process_def_id, workflow_instance_id, form_data_id,
-		       applicant_id, status, current_node_id, variables, started_at,
-		       completed_at, created_at, updated_at
+		SELECT id, tenant_id, process_def_id, process_def_code, process_def_name,
+		       workflow_instance_id, form_data_id, applicant_id, applicant_name,
+		       title, status, current_node_id, current_node_name,
+		       variables, started_at, completed_at, created_at, updated_at
 		FROM approval_process_instances
 		WHERE applicant_id = $1
 		ORDER BY started_at DESC
@@ -197,11 +210,16 @@ func (r *processInstanceRepo) ListByApplicant(ctx context.Context, applicantID u
 			&instance.ID,
 			&instance.TenantID,
 			&instance.ProcessDefID,
+			&instance.ProcessDefCode,
+			&instance.ProcessDefName,
 			&instance.WorkflowInstanceID,
 			&instance.FormDataID,
 			&instance.ApplicantID,
+			&instance.ApplicantName,
+			&instance.Title,
 			&instance.Status,
 			&instance.CurrentNodeID,
+			&instance.CurrentNodeName,
 			&varsJSON,
 			&instance.StartedAt,
 			&instance.CompletedAt,
@@ -225,9 +243,10 @@ func (r *processInstanceRepo) ListByApplicant(ctx context.Context, applicantID u
 
 func (r *processInstanceRepo) ListByStatus(ctx context.Context, tenantID uuid.UUID, status model.ProcessStatus, limit, offset int) ([]*model.ProcessInstance, error) {
 	sql := `
-		SELECT id, tenant_id, process_def_id, workflow_instance_id, form_data_id,
-		       applicant_id, status, current_node_id, variables, started_at,
-		       completed_at, created_at, updated_at
+		SELECT id, tenant_id, process_def_id, process_def_code, process_def_name,
+		       workflow_instance_id, form_data_id, applicant_id, applicant_name,
+		       title, status, current_node_id, current_node_name,
+		       variables, started_at, completed_at, created_at, updated_at
 		FROM approval_process_instances
 		WHERE tenant_id = $1 AND status = $2
 		ORDER BY started_at DESC
@@ -249,11 +268,16 @@ func (r *processInstanceRepo) ListByStatus(ctx context.Context, tenantID uuid.UU
 			&instance.ID,
 			&instance.TenantID,
 			&instance.ProcessDefID,
+			&instance.ProcessDefCode,
+			&instance.ProcessDefName,
 			&instance.WorkflowInstanceID,
 			&instance.FormDataID,
 			&instance.ApplicantID,
+			&instance.ApplicantName,
+			&instance.Title,
 			&instance.Status,
 			&instance.CurrentNodeID,
+			&instance.CurrentNodeName,
 			&varsJSON,
 			&instance.StartedAt,
 			&instance.CompletedAt,
@@ -277,9 +301,10 @@ func (r *processInstanceRepo) ListByStatus(ctx context.Context, tenantID uuid.UU
 
 func (r *processInstanceRepo) ListByProcessDef(ctx context.Context, processDefID uuid.UUID, limit, offset int) ([]*model.ProcessInstance, error) {
 	sql := `
-		SELECT id, tenant_id, process_def_id, workflow_instance_id, form_data_id,
-		       applicant_id, status, current_node_id, variables, started_at,
-		       completed_at, created_at, updated_at
+		SELECT id, tenant_id, process_def_id, process_def_code, process_def_name,
+		       workflow_instance_id, form_data_id, applicant_id, applicant_name,
+		       title, status, current_node_id, current_node_name,
+		       variables, started_at, completed_at, created_at, updated_at
 		FROM approval_process_instances
 		WHERE process_def_id = $1
 		ORDER BY started_at DESC
@@ -301,11 +326,16 @@ func (r *processInstanceRepo) ListByProcessDef(ctx context.Context, processDefID
 			&instance.ID,
 			&instance.TenantID,
 			&instance.ProcessDefID,
+			&instance.ProcessDefCode,
+			&instance.ProcessDefName,
 			&instance.WorkflowInstanceID,
 			&instance.FormDataID,
 			&instance.ApplicantID,
+			&instance.ApplicantName,
+			&instance.Title,
 			&instance.Status,
 			&instance.CurrentNodeID,
+			&instance.CurrentNodeName,
 			&varsJSON,
 			&instance.StartedAt,
 			&instance.CompletedAt,

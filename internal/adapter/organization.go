@@ -2,11 +2,13 @@ package adapter
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	orgv1 "github.com/lk2023060901/go-next-erp/api/organization/v1"
 	"github.com/lk2023060901/go-next-erp/internal/organization/model"
+	"github.com/lk2023060901/go-next-erp/internal/organization/repository"
 	"github.com/lk2023060901/go-next-erp/internal/organization/service"
 )
 
@@ -15,12 +17,14 @@ type OrganizationAdapter struct {
 	orgv1.UnimplementedOrganizationServiceServer
 	orgv1.UnimplementedEmployeeServiceServer
 	orgService service.OrganizationService
+	typeRepo   repository.OrganizationTypeRepository
 }
 
 // NewOrganizationAdapter 创建组织适配器
-func NewOrganizationAdapter(orgService service.OrganizationService) *OrganizationAdapter {
+func NewOrganizationAdapter(orgService service.OrganizationService, typeRepo repository.OrganizationTypeRepository) *OrganizationAdapter {
 	return &OrganizationAdapter{
 		orgService: orgService,
+		typeRepo:   typeRepo,
 	}
 }
 
@@ -46,10 +50,13 @@ func (a *OrganizationAdapter) CreateOrganization(ctx context.Context, req *orgv1
 		CreatedBy: createdBy,
 	}
 
-	// 设置 TypeID（简化处理，实际应该从类型代码映射）
+	// 设置 TypeID（根据 type 字符串查找对应的 TypeID）
 	if req.Type != "" {
-		// TODO: 根据 type 字符串查找对应的 TypeID
-		createReq.TypeID = uuid.New() // 临时处理
+		orgType, err := a.typeRepo.GetByCode(ctx, tenantID, req.Type)
+		if err != nil {
+			return nil, fmt.Errorf("get organization type failed: %w", err)
+		}
+		createReq.TypeID = orgType.ID
 	}
 
 	org, err := a.orgService.Create(ctx, createReq)

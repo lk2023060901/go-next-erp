@@ -8,6 +8,7 @@ package organizationv1
 
 import (
 	context "context"
+
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 )
@@ -44,11 +45,11 @@ type OrganizationServiceHTTPServer interface {
 func RegisterOrganizationServiceHTTPServer(s *http.Server, srv OrganizationServiceHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/v1/organizations", _OrganizationService_CreateOrganization0_HTTP_Handler(srv))
+	r.GET("/api/v1/organizations/tree", _OrganizationService_GetOrganizationTree0_HTTP_Handler(srv))
 	r.GET("/api/v1/organizations/{id}", _OrganizationService_GetOrganization0_HTTP_Handler(srv))
 	r.PUT("/api/v1/organizations/{id}", _OrganizationService_UpdateOrganization0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/organizations/{id}", _OrganizationService_DeleteOrganization0_HTTP_Handler(srv))
 	r.GET("/api/v1/organizations", _OrganizationService_ListOrganizations0_HTTP_Handler(srv))
-	r.GET("/api/v1/organizations/tree", _OrganizationService_GetOrganizationTree0_HTTP_Handler(srv))
 }
 
 func _OrganizationService_CreateOrganization0_HTTP_Handler(srv OrganizationServiceHTTPServer) func(ctx http.Context) error {

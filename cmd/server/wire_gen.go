@@ -67,7 +67,7 @@ func wireApp(contextContext context.Context, config *conf.Config, logger log.Log
 	organizationTypeRepository := repository3.NewOrganizationTypeRepository(db)
 	employeeRepository := repository3.NewEmployeeRepository(db)
 	organizationService := service.NewOrganizationService(db, organizationRepository, closureRepository, organizationTypeRepository, employeeRepository)
-	organizationAdapter := adapter.NewOrganizationAdapter(organizationService)
+	organizationAdapter := adapter.NewOrganizationAdapter(organizationService, organizationTypeRepository)
 	notificationRepository := repository4.NewNotificationRepository(db)
 	emailConfig := notification.ProvideEmailConfig()
 	notificationService := service2.NewNotificationService(notificationRepository, emailConfig)
