@@ -26,6 +26,7 @@ import (
 	"github.com/lk2023060901/go-next-erp/internal/notification"
 	repository4 "github.com/lk2023060901/go-next-erp/internal/notification/repository"
 	service2 "github.com/lk2023060901/go-next-erp/internal/notification/service"
+	"github.com/lk2023060901/go-next-erp/internal/notification/websocket"
 	repository3 "github.com/lk2023060901/go-next-erp/internal/organization/repository"
 	"github.com/lk2023060901/go-next-erp/internal/organization/service"
 	"github.com/lk2023060901/go-next-erp/internal/server"
@@ -107,7 +108,9 @@ func wireApp(contextContext context.Context, config *conf.Config, logger log.Log
 	multipartUploadServiceConfig := file.ProvideMultipartUploadServiceConfig()
 	multipartUploadService := service4.NewMultipartUploadService(fileRepository, quotaRepository, multipartUploadRepository, storage, loggerLogger, multipartUploadServiceConfig)
 	fileAdapter := adapter.NewFileAdapter(fileRepository, uploadService, downloadService, quotaService, multipartUploadService)
-	httpServer := server.NewHTTPServer(config, manager, authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, logger)
+	hub := websocket.NewHub()
+	handler := websocket.NewHandler(hub, manager, notificationService)
+	httpServer := server.NewHTTPServer(config, manager, authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, notificationService, hub, handler, logger)
 	grpcServer := server.NewGRPCServer(config, manager, authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, logger)
 	app := newApp(logger, httpServer, grpcServer)
 	return app, func() {

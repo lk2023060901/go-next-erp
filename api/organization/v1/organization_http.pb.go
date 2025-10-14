@@ -8,7 +8,6 @@ package organizationv1
 
 import (
 	context "context"
-
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 )
@@ -70,6 +69,25 @@ func _OrganizationService_CreateOrganization0_HTTP_Handler(srv OrganizationServi
 			return err
 		}
 		reply := out.(*OrganizationResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _OrganizationService_GetOrganizationTree0_HTTP_Handler(srv OrganizationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetOrganizationTreeRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationOrganizationServiceGetOrganizationTree)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetOrganizationTree(ctx, req.(*GetOrganizationTreeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*OrganizationTreeResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -158,25 +176,6 @@ func _OrganizationService_ListOrganizations0_HTTP_Handler(srv OrganizationServic
 			return err
 		}
 		reply := out.(*ListOrganizationsResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _OrganizationService_GetOrganizationTree0_HTTP_Handler(srv OrganizationServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetOrganizationTreeRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationOrganizationServiceGetOrganizationTree)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetOrganizationTree(ctx, req.(*GetOrganizationTreeRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*OrganizationTreeResponse)
 		return ctx.Result(200, reply)
 	}
 }

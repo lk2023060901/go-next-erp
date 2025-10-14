@@ -1356,3 +1356,244 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = UnreadCountResponseValidationError{}
+
+// Validate checks the field values on SubscribeRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *SubscribeRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on SubscribeRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// SubscribeRequestMultiError, or nil if none found.
+func (m *SubscribeRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *SubscribeRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	// no validation rules for Token
+
+	if len(errors) > 0 {
+		return SubscribeRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// SubscribeRequestMultiError is an error wrapping multiple validation errors
+// returned by SubscribeRequest.ValidateAll() if the designated constraints
+// aren't met.
+type SubscribeRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SubscribeRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SubscribeRequestMultiError) AllErrors() []error { return m }
+
+// SubscribeRequestValidationError is the validation error returned by
+// SubscribeRequest.Validate if the designated constraints aren't met.
+type SubscribeRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SubscribeRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SubscribeRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SubscribeRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SubscribeRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SubscribeRequestValidationError) ErrorName() string { return "SubscribeRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e SubscribeRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSubscribeRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SubscribeRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SubscribeRequestValidationError{}
+
+// Validate checks the field values on NotificationMessage with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *NotificationMessage) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on NotificationMessage with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// NotificationMessageMultiError, or nil if none found.
+func (m *NotificationMessage) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *NotificationMessage) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Type
+
+	if all {
+		switch v := interface{}(m.GetNotification()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, NotificationMessageValidationError{
+					field:  "Notification",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, NotificationMessageValidationError{
+					field:  "Notification",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetNotification()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return NotificationMessageValidationError{
+				field:  "Notification",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UnreadCount
+
+	// no validation rules for Message
+
+	if len(errors) > 0 {
+		return NotificationMessageMultiError(errors)
+	}
+
+	return nil
+}
+
+// NotificationMessageMultiError is an error wrapping multiple validation
+// errors returned by NotificationMessage.ValidateAll() if the designated
+// constraints aren't met.
+type NotificationMessageMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m NotificationMessageMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m NotificationMessageMultiError) AllErrors() []error { return m }
+
+// NotificationMessageValidationError is the validation error returned by
+// NotificationMessage.Validate if the designated constraints aren't met.
+type NotificationMessageValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e NotificationMessageValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e NotificationMessageValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e NotificationMessageValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e NotificationMessageValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e NotificationMessageValidationError) ErrorName() string {
+	return "NotificationMessageValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e NotificationMessageValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sNotificationMessage.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = NotificationMessageValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = NotificationMessageValidationError{}

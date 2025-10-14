@@ -4,6 +4,7 @@ import (
 	"github.com/google/wire"
 	"github.com/lk2023060901/go-next-erp/internal/notification/repository"
 	"github.com/lk2023060901/go-next-erp/internal/notification/service"
+	"github.com/lk2023060901/go-next-erp/internal/notification/websocket"
 )
 
 // ProvideEmailConfig 提供邮件配置（临时返回 nil，后续从配置文件读取）
@@ -18,4 +19,5 @@ var ProviderSet = wire.NewSet(
 	repository.NewNotificationRepository,
 	ProvideEmailConfig,
 	service.NewNotificationService,
+	websocket.ProviderSet, // WebSocket 支持
 )

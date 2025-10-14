@@ -17,6 +17,9 @@ import (
 	"github.com/lk2023060901/go-next-erp/internal/adapter"
 	"github.com/lk2023060901/go-next-erp/internal/auth/authentication/jwt"
 	"github.com/lk2023060901/go-next-erp/internal/conf"
+	"github.com/lk2023060901/go-next-erp/internal/notification"
+	"github.com/lk2023060901/go-next-erp/internal/notification/service"
+	ws "github.com/lk2023060901/go-next-erp/internal/notification/websocket"
 	"github.com/lk2023060901/go-next-erp/pkg/middleware"
 )
 
@@ -32,8 +35,16 @@ func NewHTTPServer(
 	notifyAdapter *adapter.NotificationAdapter,
 	approvalAdapter *adapter.ApprovalAdapter,
 	fileAdapter *adapter.FileAdapter,
+	notifService service.NotificationService, // 通知服务
+	wsHub *ws.Hub, // WebSocket Hub
+	wsHandler *ws.Handler, // WebSocket 处理器
 	logger log.Logger,
 ) *http.Server {
+	// 启动 WebSocket Hub
+	go wsHub.Run()
+
+	// 初始化 WebSocket 支持
+	notification.InitNotificationWebSocket(notifService, wsHandler)
 	// 解析超时配置
 	timeout := 30 * time.Second
 	if cfg.Server.HTTP.Timeout != "" {
@@ -97,8 +108,11 @@ func NewHTTPServer(
 	approvalv1.RegisterProcessInstanceServiceHTTPServer(srv, approvalAdapter)
 	approvalv1.RegisterApprovalTaskServiceHTTPServer(srv, approvalAdapter)
 
-	// 注册 File 服务
+	// 注分 File 服务
 	filev1.RegisterFileServiceHTTPServer(srv, fileAdapter)
+
+	// 注册 WebSocket 通知推送路由
+	srv.HandleFunc("/api/v1/notifications/ws", wsHandler.ServeHTTP)
 
 	return srv
 }

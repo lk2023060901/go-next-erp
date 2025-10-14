@@ -1408,12 +1408,12 @@ const file_api_organization_v1_organization_proto_rawDesc = "" +
 	"\x05items\x18\x01 \x03(\v2%.api.organization.v1.EmployeeResponseR\x05items\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total2\x9e\a\n" +
 	"\x13OrganizationService\x12\x91\x01\n" +
-	"\x12CreateOrganization\x12..api.organization.v1.CreateOrganizationRequest\x1a).api.organization.v1.OrganizationResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/organizations\x12\x8d\x01\n" +
+	"\x12CreateOrganization\x12..api.organization.v1.CreateOrganizationRequest\x1a).api.organization.v1.OrganizationResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/organizations\x12\x99\x01\n" +
+	"\x13GetOrganizationTree\x12/.api.organization.v1.GetOrganizationTreeRequest\x1a-.api.organization.v1.OrganizationTreeResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/organizations/tree\x12\x8d\x01\n" +
 	"\x0fGetOrganization\x12+.api.organization.v1.GetOrganizationRequest\x1a).api.organization.v1.OrganizationResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/organizations/{id}\x12\x96\x01\n" +
 	"\x12UpdateOrganization\x12..api.organization.v1.UpdateOrganizationRequest\x1a).api.organization.v1.OrganizationResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\x1a\x1a/api/v1/organizations/{id}\x12\x99\x01\n" +
 	"\x12DeleteOrganization\x12..api.organization.v1.DeleteOrganizationRequest\x1a/.api.organization.v1.DeleteOrganizationResponse\"\"\x82\xd3\xe4\x93\x02\x1c*\x1a/api/v1/organizations/{id}\x12\x91\x01\n" +
-	"\x11ListOrganizations\x12-.api.organization.v1.ListOrganizationsRequest\x1a..api.organization.v1.ListOrganizationsResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/organizations\x12\x99\x01\n" +
-	"\x13GetOrganizationTree\x12/.api.organization.v1.GetOrganizationTreeRequest\x1a-.api.organization.v1.OrganizationTreeResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/organizations/tree2\xad\x05\n" +
+	"\x11ListOrganizations\x12-.api.organization.v1.ListOrganizationsRequest\x1a..api.organization.v1.ListOrganizationsResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/organizations2\xad\x05\n" +
 	"\x0fEmployeeService\x12\x81\x01\n" +
 	"\x0eCreateEmployee\x12*.api.organization.v1.CreateEmployeeRequest\x1a%.api.organization.v1.EmployeeResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/api/v1/employees\x12}\n" +
 	"\vGetEmployee\x12'.api.organization.v1.GetEmployeeRequest\x1a%.api.organization.v1.EmployeeResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/employees/{id}\x12\x86\x01\n" +
@@ -1462,22 +1462,22 @@ var file_api_organization_v1_organization_proto_depIdxs = []int32{
 	9,  // 2: api.organization.v1.OrganizationTreeResponse.nodes:type_name -> api.organization.v1.OrganizationTreeNode
 	16, // 3: api.organization.v1.ListEmployeesResponse.items:type_name -> api.organization.v1.EmployeeResponse
 	0,  // 4: api.organization.v1.OrganizationService.CreateOrganization:input_type -> api.organization.v1.CreateOrganizationRequest
-	1,  // 5: api.organization.v1.OrganizationService.GetOrganization:input_type -> api.organization.v1.GetOrganizationRequest
-	2,  // 6: api.organization.v1.OrganizationService.UpdateOrganization:input_type -> api.organization.v1.UpdateOrganizationRequest
-	3,  // 7: api.organization.v1.OrganizationService.DeleteOrganization:input_type -> api.organization.v1.DeleteOrganizationRequest
-	4,  // 8: api.organization.v1.OrganizationService.ListOrganizations:input_type -> api.organization.v1.ListOrganizationsRequest
-	5,  // 9: api.organization.v1.OrganizationService.GetOrganizationTree:input_type -> api.organization.v1.GetOrganizationTreeRequest
+	5,  // 5: api.organization.v1.OrganizationService.GetOrganizationTree:input_type -> api.organization.v1.GetOrganizationTreeRequest
+	1,  // 6: api.organization.v1.OrganizationService.GetOrganization:input_type -> api.organization.v1.GetOrganizationRequest
+	2,  // 7: api.organization.v1.OrganizationService.UpdateOrganization:input_type -> api.organization.v1.UpdateOrganizationRequest
+	3,  // 8: api.organization.v1.OrganizationService.DeleteOrganization:input_type -> api.organization.v1.DeleteOrganizationRequest
+	4,  // 9: api.organization.v1.OrganizationService.ListOrganizations:input_type -> api.organization.v1.ListOrganizationsRequest
 	11, // 10: api.organization.v1.EmployeeService.CreateEmployee:input_type -> api.organization.v1.CreateEmployeeRequest
 	12, // 11: api.organization.v1.EmployeeService.GetEmployee:input_type -> api.organization.v1.GetEmployeeRequest
 	13, // 12: api.organization.v1.EmployeeService.UpdateEmployee:input_type -> api.organization.v1.UpdateEmployeeRequest
 	14, // 13: api.organization.v1.EmployeeService.DeleteEmployee:input_type -> api.organization.v1.DeleteEmployeeRequest
 	15, // 14: api.organization.v1.EmployeeService.ListEmployees:input_type -> api.organization.v1.ListEmployeesRequest
 	6,  // 15: api.organization.v1.OrganizationService.CreateOrganization:output_type -> api.organization.v1.OrganizationResponse
-	6,  // 16: api.organization.v1.OrganizationService.GetOrganization:output_type -> api.organization.v1.OrganizationResponse
-	6,  // 17: api.organization.v1.OrganizationService.UpdateOrganization:output_type -> api.organization.v1.OrganizationResponse
-	7,  // 18: api.organization.v1.OrganizationService.DeleteOrganization:output_type -> api.organization.v1.DeleteOrganizationResponse
-	8,  // 19: api.organization.v1.OrganizationService.ListOrganizations:output_type -> api.organization.v1.ListOrganizationsResponse
-	10, // 20: api.organization.v1.OrganizationService.GetOrganizationTree:output_type -> api.organization.v1.OrganizationTreeResponse
+	10, // 16: api.organization.v1.OrganizationService.GetOrganizationTree:output_type -> api.organization.v1.OrganizationTreeResponse
+	6,  // 17: api.organization.v1.OrganizationService.GetOrganization:output_type -> api.organization.v1.OrganizationResponse
+	6,  // 18: api.organization.v1.OrganizationService.UpdateOrganization:output_type -> api.organization.v1.OrganizationResponse
+	7,  // 19: api.organization.v1.OrganizationService.DeleteOrganization:output_type -> api.organization.v1.DeleteOrganizationResponse
+	8,  // 20: api.organization.v1.OrganizationService.ListOrganizations:output_type -> api.organization.v1.ListOrganizationsResponse
 	16, // 21: api.organization.v1.EmployeeService.CreateEmployee:output_type -> api.organization.v1.EmployeeResponse
 	16, // 22: api.organization.v1.EmployeeService.GetEmployee:output_type -> api.organization.v1.EmployeeResponse
 	16, // 23: api.organization.v1.EmployeeService.UpdateEmployee:output_type -> api.organization.v1.EmployeeResponse

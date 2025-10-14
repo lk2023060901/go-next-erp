@@ -41,11 +41,20 @@ type NotificationService interface {
 
 	// 统计未读数量
 	CountUnread(ctx context.Context, recipientID uuid.UUID) (int, error)
+
+	// 设置 WebSocket 推送处理器
+	SetPushHandler(handler PushHandler)
 }
 
 type notificationService struct {
 	repo        repository.NotificationRepository
 	emailSender *EmailSender
+	pushHandler PushHandler // WebSocket 推送处理器
+}
+
+// PushHandler WebSocket 推送处理器接口
+type PushHandler interface {
+	SendNotificationToUser(userID uuid.UUID, notification map[string]interface{}) error
 }
 
 // NewNotificationService 创建通知服务
@@ -58,7 +67,13 @@ func NewNotificationService(repo repository.NotificationRepository, emailConfig 
 	return &notificationService{
 		repo:        repo,
 		emailSender: emailSender,
+		pushHandler: nil, // 稍后通过 SetPushHandler 设置
 	}
+}
+
+// SetPushHandler 设置 WebSocket 推送处理器
+func (s *notificationService) SetPushHandler(handler PushHandler) {
+	s.pushHandler = handler
 }
 
 func (s *notificationService) SendNotification(ctx context.Context, tenantID uuid.UUID, req *dto.SendNotificationRequest) (*dto.NotificationResponse, error) {
@@ -221,6 +236,22 @@ func (s *notificationService) sendNotification(ctx context.Context, notification
 		notification.Status = model.NotificationStatusSent
 		notification.SentAt = &now
 		s.repo.Update(ctx, notification)
+
+		// 通过 WebSocket 推送
+		if s.pushHandler != nil {
+			notifData := map[string]interface{}{
+				"id":         notification.ID.String(),
+				"type":       string(notification.Type),
+				"title":      notification.Title,
+				"content":    notification.Content,
+				"priority":   string(notification.Priority),
+				"created_at": notification.CreatedAt.Format(time.RFC3339),
+			}
+			if notification.Data != nil {
+				notifData["data"] = notification.Data
+			}
+			s.pushHandler.SendNotificationToUser(notification.RecipientID, notifData)
+		}
 
 	case model.NotificationChannelEmail:
 		// 发送邮件

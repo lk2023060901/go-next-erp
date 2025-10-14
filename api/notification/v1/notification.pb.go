@@ -726,6 +726,128 @@ func (x *UnreadCountResponse) GetCount() int32 {
 	return 0
 }
 
+// SubscribeRequest WebSocket订阅请求
+type SubscribeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"` // JWT token 用于认证
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubscribeRequest) Reset() {
+	*x = SubscribeRequest{}
+	mi := &file_api_notification_v1_notification_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubscribeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeRequest) ProtoMessage() {}
+
+func (x *SubscribeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_notification_v1_notification_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeRequest.ProtoReflect.Descriptor instead.
+func (*SubscribeRequest) Descriptor() ([]byte, []int) {
+	return file_api_notification_v1_notification_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *SubscribeRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *SubscribeRequest) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+// NotificationMessage WebSocket消息
+type NotificationMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`                                   // 消息类型: notification, ping, error
+	Notification  *NotificationResponse  `protobuf:"bytes,2,opt,name=notification,proto3" json:"notification,omitempty"`                   // 通知内容
+	UnreadCount   int32                  `protobuf:"varint,3,opt,name=unread_count,json=unreadCount,proto3" json:"unread_count,omitempty"` // 未读数量
+	Message       string                 `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`                             // 附加消息
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NotificationMessage) Reset() {
+	*x = NotificationMessage{}
+	mi := &file_api_notification_v1_notification_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NotificationMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NotificationMessage) ProtoMessage() {}
+
+func (x *NotificationMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_api_notification_v1_notification_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NotificationMessage.ProtoReflect.Descriptor instead.
+func (*NotificationMessage) Descriptor() ([]byte, []int) {
+	return file_api_notification_v1_notification_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *NotificationMessage) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *NotificationMessage) GetNotification() *NotificationResponse {
+	if x != nil {
+		return x.Notification
+	}
+	return nil
+}
+
+func (x *NotificationMessage) GetUnreadCount() int32 {
+	if x != nil {
+		return x.UnreadCount
+	}
+	return 0
+}
+
+func (x *NotificationMessage) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_api_notification_v1_notification_proto protoreflect.FileDescriptor
 
 const file_api_notification_v1_notification_proto_rawDesc = "" +
@@ -779,7 +901,15 @@ const file_api_notification_v1_notification_proto_rawDesc = "" +
 	"\x1aDeleteNotificationResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"+\n" +
 	"\x13UnreadCountResponse\x12\x14\n" +
-	"\x05count\x18\x01 \x01(\x05R\x05count2\x9e\b\n" +
+	"\x05count\x18\x01 \x01(\x05R\x05count\"A\n" +
+	"\x10SubscribeRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
+	"\x05token\x18\x02 \x01(\tR\x05token\"\xb5\x01\n" +
+	"\x13NotificationMessage\x12\x12\n" +
+	"\x04type\x18\x01 \x01(\tR\x04type\x12M\n" +
+	"\fnotification\x18\x02 \x01(\v2).api.notification.v1.NotificationResponseR\fnotification\x12!\n" +
+	"\funread_count\x18\x03 \x01(\x05R\vunreadCount\x12\x18\n" +
+	"\amessage\x18\x04 \x01(\tR\amessage2\xfe\b\n" +
 	"\x13NotificationService\x12\x8d\x01\n" +
 	"\x10SendNotification\x12,.api.notification.v1.SendNotificationRequest\x1a).api.notification.v1.NotificationResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/notifications\x12\x8d\x01\n" +
 	"\x0fGetNotification\x12+.api.notification.v1.GetNotificationRequest\x1a).api.notification.v1.NotificationResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/notifications/{id}\x12\x91\x01\n" +
@@ -788,7 +918,8 @@ const file_api_notification_v1_notification_proto_rawDesc = "" +
 	"MarkAsRead\x12&.api.notification.v1.MarkAsReadRequest\x1a).api.notification.v1.NotificationResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\x1a\x1f/api/v1/notifications/{id}/read\x12\x93\x01\n" +
 	"\x0fBatchMarkAsRead\x12+.api.notification.v1.BatchMarkAsReadRequest\x1a,.api.notification.v1.BatchMarkAsReadResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\x1a\x1a/api/v1/notifications/read\x12\x99\x01\n" +
 	"\x12DeleteNotification\x12..api.notification.v1.DeleteNotificationRequest\x1a/.api.notification.v1.DeleteNotificationResponse\"\"\x82\xd3\xe4\x93\x02\x1c*\x1a/api/v1/notifications/{id}\x12\x92\x01\n" +
-	"\x0eGetUnreadCount\x12*.api.notification.v1.GetUnreadCountRequest\x1a(.api.notification.v1.UnreadCountResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/api/v1/notifications/unread-countB\xe2\x01\n" +
+	"\x0eGetUnreadCount\x12*.api.notification.v1.GetUnreadCountRequest\x1a(.api.notification.v1.UnreadCountResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/api/v1/notifications/unread-count\x12^\n" +
+	"\tSubscribe\x12%.api.notification.v1.SubscribeRequest\x1a(.api.notification.v1.NotificationMessage0\x01B\xe2\x01\n" +
 	"\x17com.api.notification.v1B\x11NotificationProtoP\x01ZFgithub.com/lk2023060901/go-next-erp/api/notification/v1;notificationv1\xa2\x02\x03ANX\xaa\x02\x13Api.Notification.V1\xca\x02\x13Api\\Notification\\V1\xe2\x02\x1fApi\\Notification\\V1\\GPBMetadata\xea\x02\x15Api::Notification::V1b\x06proto3"
 
 var (
@@ -803,7 +934,7 @@ func file_api_notification_v1_notification_proto_rawDescGZIP() []byte {
 	return file_api_notification_v1_notification_proto_rawDescData
 }
 
-var file_api_notification_v1_notification_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_api_notification_v1_notification_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_api_notification_v1_notification_proto_goTypes = []any{
 	(*SendNotificationRequest)(nil),    // 0: api.notification.v1.SendNotificationRequest
 	(*GetNotificationRequest)(nil),     // 1: api.notification.v1.GetNotificationRequest
@@ -817,28 +948,33 @@ var file_api_notification_v1_notification_proto_goTypes = []any{
 	(*BatchMarkAsReadResponse)(nil),    // 9: api.notification.v1.BatchMarkAsReadResponse
 	(*DeleteNotificationResponse)(nil), // 10: api.notification.v1.DeleteNotificationResponse
 	(*UnreadCountResponse)(nil),        // 11: api.notification.v1.UnreadCountResponse
+	(*SubscribeRequest)(nil),           // 12: api.notification.v1.SubscribeRequest
+	(*NotificationMessage)(nil),        // 13: api.notification.v1.NotificationMessage
 }
 var file_api_notification_v1_notification_proto_depIdxs = []int32{
 	7,  // 0: api.notification.v1.ListNotificationsResponse.items:type_name -> api.notification.v1.NotificationResponse
-	0,  // 1: api.notification.v1.NotificationService.SendNotification:input_type -> api.notification.v1.SendNotificationRequest
-	1,  // 2: api.notification.v1.NotificationService.GetNotification:input_type -> api.notification.v1.GetNotificationRequest
-	2,  // 3: api.notification.v1.NotificationService.ListNotifications:input_type -> api.notification.v1.ListNotificationsRequest
-	3,  // 4: api.notification.v1.NotificationService.MarkAsRead:input_type -> api.notification.v1.MarkAsReadRequest
-	4,  // 5: api.notification.v1.NotificationService.BatchMarkAsRead:input_type -> api.notification.v1.BatchMarkAsReadRequest
-	5,  // 6: api.notification.v1.NotificationService.DeleteNotification:input_type -> api.notification.v1.DeleteNotificationRequest
-	6,  // 7: api.notification.v1.NotificationService.GetUnreadCount:input_type -> api.notification.v1.GetUnreadCountRequest
-	7,  // 8: api.notification.v1.NotificationService.SendNotification:output_type -> api.notification.v1.NotificationResponse
-	7,  // 9: api.notification.v1.NotificationService.GetNotification:output_type -> api.notification.v1.NotificationResponse
-	8,  // 10: api.notification.v1.NotificationService.ListNotifications:output_type -> api.notification.v1.ListNotificationsResponse
-	7,  // 11: api.notification.v1.NotificationService.MarkAsRead:output_type -> api.notification.v1.NotificationResponse
-	9,  // 12: api.notification.v1.NotificationService.BatchMarkAsRead:output_type -> api.notification.v1.BatchMarkAsReadResponse
-	10, // 13: api.notification.v1.NotificationService.DeleteNotification:output_type -> api.notification.v1.DeleteNotificationResponse
-	11, // 14: api.notification.v1.NotificationService.GetUnreadCount:output_type -> api.notification.v1.UnreadCountResponse
-	8,  // [8:15] is the sub-list for method output_type
-	1,  // [1:8] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	7,  // 1: api.notification.v1.NotificationMessage.notification:type_name -> api.notification.v1.NotificationResponse
+	0,  // 2: api.notification.v1.NotificationService.SendNotification:input_type -> api.notification.v1.SendNotificationRequest
+	1,  // 3: api.notification.v1.NotificationService.GetNotification:input_type -> api.notification.v1.GetNotificationRequest
+	2,  // 4: api.notification.v1.NotificationService.ListNotifications:input_type -> api.notification.v1.ListNotificationsRequest
+	3,  // 5: api.notification.v1.NotificationService.MarkAsRead:input_type -> api.notification.v1.MarkAsReadRequest
+	4,  // 6: api.notification.v1.NotificationService.BatchMarkAsRead:input_type -> api.notification.v1.BatchMarkAsReadRequest
+	5,  // 7: api.notification.v1.NotificationService.DeleteNotification:input_type -> api.notification.v1.DeleteNotificationRequest
+	6,  // 8: api.notification.v1.NotificationService.GetUnreadCount:input_type -> api.notification.v1.GetUnreadCountRequest
+	12, // 9: api.notification.v1.NotificationService.Subscribe:input_type -> api.notification.v1.SubscribeRequest
+	7,  // 10: api.notification.v1.NotificationService.SendNotification:output_type -> api.notification.v1.NotificationResponse
+	7,  // 11: api.notification.v1.NotificationService.GetNotification:output_type -> api.notification.v1.NotificationResponse
+	8,  // 12: api.notification.v1.NotificationService.ListNotifications:output_type -> api.notification.v1.ListNotificationsResponse
+	7,  // 13: api.notification.v1.NotificationService.MarkAsRead:output_type -> api.notification.v1.NotificationResponse
+	9,  // 14: api.notification.v1.NotificationService.BatchMarkAsRead:output_type -> api.notification.v1.BatchMarkAsReadResponse
+	10, // 15: api.notification.v1.NotificationService.DeleteNotification:output_type -> api.notification.v1.DeleteNotificationResponse
+	11, // 16: api.notification.v1.NotificationService.GetUnreadCount:output_type -> api.notification.v1.UnreadCountResponse
+	13, // 17: api.notification.v1.NotificationService.Subscribe:output_type -> api.notification.v1.NotificationMessage
+	10, // [10:18] is the sub-list for method output_type
+	2,  // [2:10] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_api_notification_v1_notification_proto_init() }
@@ -852,7 +988,7 @@ func file_api_notification_v1_notification_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_notification_v1_notification_proto_rawDesc), len(file_api_notification_v1_notification_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

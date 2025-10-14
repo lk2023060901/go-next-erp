@@ -36,6 +36,8 @@ type NotificationServiceClient interface {
 	DeleteNotification(ctx context.Context, in *DeleteNotificationRequest, opts ...grpc.CallOption) (*DeleteNotificationResponse, error)
 	// 获取未读数量
 	GetUnreadCount(ctx context.Context, in *GetUnreadCountRequest, opts ...grpc.CallOption) (*UnreadCountResponse, error)
+	// WebSocket 订阅通知流（服务器推送）
+	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (NotificationService_SubscribeClient, error)
 }
 
 type notificationServiceClient struct {
@@ -109,6 +111,38 @@ func (c *notificationServiceClient) GetUnreadCount(ctx context.Context, in *GetU
 	return out, nil
 }
 
+func (c *notificationServiceClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (NotificationService_SubscribeClient, error) {
+	stream, err := c.cc.NewStream(ctx, &NotificationService_ServiceDesc.Streams[0], "/api.notification.v1.NotificationService/Subscribe", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &notificationServiceSubscribeClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type NotificationService_SubscribeClient interface {
+	Recv() (*NotificationMessage, error)
+	grpc.ClientStream
+}
+
+type notificationServiceSubscribeClient struct {
+	grpc.ClientStream
+}
+
+func (x *notificationServiceSubscribeClient) Recv() (*NotificationMessage, error) {
+	m := new(NotificationMessage)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations should embed UnimplementedNotificationServiceServer
 // for forward compatibility
@@ -127,6 +161,8 @@ type NotificationServiceServer interface {
 	DeleteNotification(context.Context, *DeleteNotificationRequest) (*DeleteNotificationResponse, error)
 	// 获取未读数量
 	GetUnreadCount(context.Context, *GetUnreadCountRequest) (*UnreadCountResponse, error)
+	// WebSocket 订阅通知流（服务器推送）
+	Subscribe(*SubscribeRequest, NotificationService_SubscribeServer) error
 }
 
 // UnimplementedNotificationServiceServer should be embedded to have forward compatible implementations.
@@ -153,6 +189,9 @@ func (UnimplementedNotificationServiceServer) DeleteNotification(context.Context
 }
 func (UnimplementedNotificationServiceServer) GetUnreadCount(context.Context, *GetUnreadCountRequest) (*UnreadCountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUnreadCount not implemented")
+}
+func (UnimplementedNotificationServiceServer) Subscribe(*SubscribeRequest, NotificationService_SubscribeServer) error {
+	return status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
 }
 
 // UnsafeNotificationServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -292,6 +331,27 @@ func _NotificationService_GetUnreadCount_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_Subscribe_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SubscribeRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(NotificationServiceServer).Subscribe(m, &notificationServiceSubscribeServer{stream})
+}
+
+type NotificationService_SubscribeServer interface {
+	Send(*NotificationMessage) error
+	grpc.ServerStream
+}
+
+type notificationServiceSubscribeServer struct {
+	grpc.ServerStream
+}
+
+func (x *notificationServiceSubscribeServer) Send(m *NotificationMessage) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -328,6 +388,12 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NotificationService_GetUnreadCount_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Subscribe",
+			Handler:       _NotificationService_Subscribe_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "api/notification/v1/notification.proto",
 }

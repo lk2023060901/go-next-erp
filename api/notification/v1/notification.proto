@@ -59,6 +59,9 @@ service NotificationService {
       get: "/api/v1/notifications/unread-count"
     };
   }
+
+  // WebSocket 订阅通知流（服务器推送）
+  rpc Subscribe (SubscribeRequest) returns (stream NotificationMessage);
 }
 
 // ========== 消息定义 ==========
@@ -131,4 +134,18 @@ message DeleteNotificationResponse {
 
 message UnreadCountResponse {
   int32 count = 1;
+}
+
+// SubscribeRequest WebSocket订阅请求
+message SubscribeRequest {
+  string user_id = 1;
+  string token = 2;  // JWT token 用于认证
+}
+
+// NotificationMessage WebSocket消息
+message NotificationMessage {
+  string type = 1;  // 消息类型: notification, ping, error
+  NotificationResponse notification = 2;  // 通知内容
+  int32 unread_count = 3;  // 未读数量
+  string message = 4;  // 附加消息
 }
