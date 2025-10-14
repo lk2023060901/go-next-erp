@@ -6,17 +6,25 @@ info:
     title: ""
     version: 0.0.1
 paths:
-    /api/v1/forms:
+    /api/v1/hrm/attendance-rules:
         get:
             tags:
-                - FormDefinitionService
-            description: 列出表单定义
-            operationId: FormDefinitionService_ListFormDefinitions
+                - AttendanceRuleService
+            description: 列出考勤规则
+            operationId: AttendanceRuleService_ListAttendanceRules
             parameters:
                 - name: tenantId
                   in: query
                   schema:
                     type: string
+                - name: applyType
+                  in: query
+                  schema:
+                    type: string
+                - name: isActive
+                  in: query
+                  schema:
+                    type: boolean
                 - name: page
                   in: query
                   schema:
@@ -33,7 +41,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ListFormDefinitionsResponse'
+                                $ref: '#/components/schemas/ListAttendanceRulesResponse'
                 default:
                     description: Default error response
                     content:
@@ -42,14 +50,14 @@ paths:
                                 $ref: '#/components/schemas/Status'
         post:
             tags:
-                - FormDefinitionService
-            description: 创建表单定义
-            operationId: FormDefinitionService_CreateFormDefinition
+                - AttendanceRuleService
+            description: 创建考勤规则
+            operationId: AttendanceRuleService_CreateAttendanceRule
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateFormDefinitionRequest'
+                            $ref: '#/components/schemas/CreateAttendanceRuleRequest'
                 required: true
             responses:
                 "200":
@@ -57,94 +65,20 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/FormDefinitionResponse'
+                                $ref: '#/components/schemas/AttendanceRuleResponse'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/v1/forms/{formId}/data:
+    /api/v1/hrm/attendance-rules/{id}:
         get:
             tags:
-                - FormDataService
-            description: 查询表单数据列表
-            operationId: FormDataService_ListFormData
+                - AttendanceRuleService
+            description: 获取考勤规则
+            operationId: AttendanceRuleService_GetAttendanceRule
             parameters:
-                - name: formId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
-                - name: page
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: pageSize
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListFormDataResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        post:
-            tags:
-                - FormDataService
-            description: 提交表单数据
-            operationId: FormDataService_SubmitFormData
-            parameters:
-                - name: formId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/SubmitFormDataRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/FormDataResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/forms/{formId}/data/{id}:
-        get:
-            tags:
-                - FormDataService
-            description: 获取表单数据
-            operationId: FormDataService_GetFormData
-            parameters:
-                - name: formId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
                 - name: id
                   in: path
                   required: true
@@ -156,7 +90,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/FormDataResponse'
+                                $ref: '#/components/schemas/AttendanceRuleResponse'
                 default:
                     description: Default error response
                     content:
@@ -165,69 +99,9 @@ paths:
                                 $ref: '#/components/schemas/Status'
         put:
             tags:
-                - FormDataService
-            description: 更新表单数据
-            operationId: FormDataService_UpdateFormData
-            parameters:
-                - name: formId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateFormDataRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/FormDataResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/forms/{id}:
-        get:
-            tags:
-                - FormDefinitionService
-            description: 获取表单定义
-            operationId: FormDefinitionService_GetFormDefinition
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/FormDefinitionResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        put:
-            tags:
-                - FormDefinitionService
-            description: 更新表单定义
-            operationId: FormDefinitionService_UpdateFormDefinition
+                - AttendanceRuleService
+            description: 更新考勤规则
+            operationId: AttendanceRuleService_UpdateAttendanceRule
             parameters:
                 - name: id
                   in: path
@@ -238,7 +112,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/UpdateFormDefinitionRequest'
+                            $ref: '#/components/schemas/UpdateAttendanceRuleRequest'
                 required: true
             responses:
                 "200":
@@ -246,7 +120,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/FormDefinitionResponse'
+                                $ref: '#/components/schemas/AttendanceRuleResponse'
                 default:
                     description: Default error response
                     content:
@@ -255,9 +129,9 @@ paths:
                                 $ref: '#/components/schemas/Status'
         delete:
             tags:
-                - FormDefinitionService
-            description: 删除表单定义
-            operationId: FormDefinitionService_DeleteFormDefinition
+                - AttendanceRuleService
+            description: 删除考勤规则
+            operationId: AttendanceRuleService_DeleteAttendanceRule
             parameters:
                 - name: id
                   in: path
@@ -270,7 +144,597 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/DeleteFormDefinitionResponse'
+                                $ref: '#/components/schemas/DeleteAttendanceRuleResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/attendance/clock-in:
+        post:
+            tags:
+                - AttendanceService
+            description: 打卡
+            operationId: AttendanceService_ClockIn
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ClockInRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ClockInResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/attendance/department/{departmentId}:
+        get:
+            tags:
+                - AttendanceService
+            description: 查询部门考勤记录
+            operationId: AttendanceService_ListDepartmentAttendance
+            parameters:
+                - name: departmentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: tenantId
+                  in: query
+                  schema:
+                    type: string
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListAttendanceRecordResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/attendance/employee/{employeeId}:
+        get:
+            tags:
+                - AttendanceService
+            description: 查询员工考勤记录
+            operationId: AttendanceService_ListEmployeeAttendance
+            parameters:
+                - name: employeeId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: tenantId
+                  in: query
+                  schema:
+                    type: string
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListAttendanceRecordResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/attendance/exceptions:
+        get:
+            tags:
+                - AttendanceService
+            description: 查询异常考勤
+            operationId: AttendanceService_ListExceptionAttendance
+            parameters:
+                - name: tenantId
+                  in: query
+                  schema:
+                    type: string
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListAttendanceRecordResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/attendance/records/{id}:
+        get:
+            tags:
+                - AttendanceService
+            description: 获取考勤记录
+            operationId: AttendanceService_GetAttendanceRecord
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AttendanceRecordResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/attendance/statistics:
+        get:
+            tags:
+                - AttendanceService
+            description: 考勤统计
+            operationId: AttendanceService_GetAttendanceStatistics
+            parameters:
+                - name: tenantId
+                  in: query
+                  schema:
+                    type: string
+                - name: employeeId
+                  in: query
+                  schema:
+                    type: string
+                - name: departmentId
+                  in: query
+                  schema:
+                    type: string
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AttendanceStatisticsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/schedules:
+        post:
+            tags:
+                - ScheduleService
+            description: 创建排班
+            operationId: ScheduleService_CreateSchedule
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateScheduleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ScheduleResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/schedules/batch:
+        post:
+            tags:
+                - ScheduleService
+            description: 批量创建排班
+            operationId: ScheduleService_BatchCreateSchedules
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/BatchCreateSchedulesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchCreateSchedulesResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/schedules/department/{departmentId}:
+        get:
+            tags:
+                - ScheduleService
+            description: 查询部门排班
+            operationId: ScheduleService_ListDepartmentSchedules
+            parameters:
+                - name: departmentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: tenantId
+                  in: query
+                  schema:
+                    type: string
+                - name: month
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListSchedulesResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/schedules/employee/{employeeId}:
+        get:
+            tags:
+                - ScheduleService
+            description: 查询员工排班
+            operationId: ScheduleService_ListEmployeeSchedules
+            parameters:
+                - name: employeeId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: tenantId
+                  in: query
+                  schema:
+                    type: string
+                - name: month
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListSchedulesResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/schedules/{id}:
+        get:
+            tags:
+                - ScheduleService
+            description: 获取排班
+            operationId: ScheduleService_GetSchedule
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ScheduleResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        put:
+            tags:
+                - ScheduleService
+            description: 更新排班
+            operationId: ScheduleService_UpdateSchedule
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateScheduleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ScheduleResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - ScheduleService
+            description: 删除排班
+            operationId: ScheduleService_DeleteSchedule
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteScheduleResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/shifts:
+        get:
+            tags:
+                - ShiftService
+            description: 列出班次
+            operationId: ShiftService_ListShifts
+            parameters:
+                - name: tenantId
+                  in: query
+                  schema:
+                    type: string
+                - name: type
+                  in: query
+                  schema:
+                    type: string
+                - name: isActive
+                  in: query
+                  schema:
+                    type: boolean
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListShiftsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - ShiftService
+            description: 创建班次
+            operationId: ShiftService_CreateShift
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateShiftRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ShiftResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/shifts/active:
+        get:
+            tags:
+                - ShiftService
+            description: 列出启用的班次（必须在 GetShift 之前，避免路由冲突）
+            operationId: ShiftService_ListActiveShifts
+            parameters:
+                - name: tenantId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListShiftsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/hrm/shifts/{id}:
+        get:
+            tags:
+                - ShiftService
+            description: 获取班次
+            operationId: ShiftService_GetShift
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ShiftResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        put:
+            tags:
+                - ShiftService
+            description: 更新班次
+            operationId: ShiftService_UpdateShift
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateShiftRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ShiftResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - ShiftService
+            description: 删除班次
+            operationId: ShiftService_DeleteShift
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteShiftResponse'
                 default:
                     description: Default error response
                     content:
@@ -279,75 +743,353 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
-        CreateFormDefinitionRequest:
+        AllowedLocationInfo:
             type: object
             properties:
-                tenantId:
-                    type: string
                 name:
                     type: string
-                code:
+                latitude:
+                    type: number
+                    format: double
+                longitude:
+                    type: number
+                    format: double
+                radius:
+                    type: integer
+                    format: int32
+                address:
                     type: string
-                description:
-                    type: string
-                category:
-                    type: string
-                schema:
-                    type: string
-                uiSchema:
-                    type: string
-            description: CreateFormDefinitionRequest 创建表单定义请求
-        DeleteFormDefinitionResponse:
-            type: object
-            properties:
-                success:
-                    type: boolean
-            description: DeleteFormDefinitionResponse 删除表单定义响应
-        FormDataResponse:
+        AttendanceRecordResponse:
             type: object
             properties:
                 id:
                     type: string
-                formId:
-                    type: string
                 tenantId:
                     type: string
-                userId:
+                employeeId:
                     type: string
-                data:
+                employeeName:
+                    type: string
+                departmentId:
+                    type: string
+                shiftId:
+                    type: string
+                shiftName:
+                    type: string
+                clockTime:
+                    type: string
+                clockType:
+                    type: string
+                status:
+                    type: string
+                checkInMethod:
+                    type: string
+                sourceType:
+                    type: string
+                location:
+                    $ref: '#/components/schemas/LocationInfo'
+                address:
+                    type: string
+                wifiSsid:
+                    type: string
+                photoUrl:
+                    type: string
+                faceScore:
+                    type: number
+                    format: double
+                isException:
+                    type: boolean
+                exceptionReason:
+                    type: string
+                exceptionType:
+                    type: string
+                remark:
                     type: string
                 createdAt:
                     type: string
-                updatedAt:
-                    type: string
-            description: FormDataResponse 表单数据响应
-        FormDefinitionResponse:
+        AttendanceRuleResponse:
             type: object
             properties:
                 id:
                     type: string
                 tenantId:
                     type: string
-                name:
-                    type: string
                 code:
+                    type: string
+                name:
                     type: string
                 description:
                     type: string
-                category:
+                applyType:
                     type: string
-                schema:
+                departmentIds:
+                    type: array
+                    items:
+                        type: string
+                employeeIds:
+                    type: array
+                    items:
+                        type: string
+                workdayType:
                     type: string
-                uiSchema:
+                weekendDays:
+                    type: array
+                    items:
+                        type: integer
+                        format: int32
+                defaultShiftId:
                     type: string
-                version:
+                locationRequired:
+                    type: boolean
+                allowedLocations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AllowedLocationInfo'
+                wifiRequired:
+                    type: boolean
+                allowedWifi:
+                    type: array
+                    items:
+                        type: string
+                faceRequired:
+                    type: boolean
+                faceThreshold:
+                    type: number
+                    format: double
+                allowFieldWork:
+                    type: boolean
+                isActive:
+                    type: boolean
+                priority:
                     type: integer
                     format: int32
                 createdAt:
                     type: string
                 updatedAt:
                     type: string
-            description: FormDefinitionResponse 表单定义响应
+        AttendanceStatisticsResponse:
+            type: object
+            properties:
+                totalDays:
+                    type: integer
+                    format: int32
+                normalDays:
+                    type: integer
+                    format: int32
+                lateDays:
+                    type: integer
+                    format: int32
+                earlyDays:
+                    type: integer
+                    format: int32
+                absentDays:
+                    type: integer
+                    format: int32
+                leaveDays:
+                    type: integer
+                    format: int32
+                overtimeHours:
+                    type: integer
+                    format: int32
+                statusCount:
+                    type: object
+                    additionalProperties:
+                        type: integer
+                        format: int32
+        BatchCreateSchedulesRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: string
+                schedules:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CreateScheduleRequest'
+        BatchCreateSchedulesResponse:
+            type: object
+            properties:
+                successCount:
+                    type: integer
+                    format: int32
+                failedCount:
+                    type: integer
+                    format: int32
+                errorMessages:
+                    type: array
+                    items:
+                        type: string
+        ClockInRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: string
+                employeeId:
+                    type: string
+                clockType:
+                    type: string
+                checkInMethod:
+                    type: string
+                location:
+                    $ref: '#/components/schemas/LocationInfo'
+                wifiSsid:
+                    type: string
+                wifiMac:
+                    type: string
+                photoUrl:
+                    type: string
+                faceScore:
+                    type: number
+                    format: double
+                deviceId:
+                    type: string
+                remark:
+                    type: string
+        ClockInResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                employeeId:
+                    type: string
+                employeeName:
+                    type: string
+                clockTime:
+                    type: string
+                clockType:
+                    type: string
+                status:
+                    type: string
+                shiftName:
+                    type: string
+                isException:
+                    type: boolean
+                exceptionReason:
+                    type: string
+                message:
+                    type: string
+        CreateAttendanceRuleRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: string
+                code:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                applyType:
+                    type: string
+                departmentIds:
+                    type: array
+                    items:
+                        type: string
+                employeeIds:
+                    type: array
+                    items:
+                        type: string
+                workdayType:
+                    type: string
+                weekendDays:
+                    type: array
+                    items:
+                        type: integer
+                        format: int32
+                defaultShiftId:
+                    type: string
+                locationRequired:
+                    type: boolean
+                allowedLocations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AllowedLocationInfo'
+                wifiRequired:
+                    type: boolean
+                allowedWifi:
+                    type: array
+                    items:
+                        type: string
+                faceRequired:
+                    type: boolean
+                faceThreshold:
+                    type: number
+                    format: double
+                allowFieldWork:
+                    type: boolean
+                priority:
+                    type: integer
+                    format: int32
+        CreateScheduleRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: string
+                employeeId:
+                    type: string
+                shiftId:
+                    type: string
+                scheduleDate:
+                    type: string
+                workdayType:
+                    type: string
+                remark:
+                    type: string
+        CreateShiftRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: string
+                code:
+                    type: string
+                name:
+                    type: string
+                type:
+                    type: string
+                description:
+                    type: string
+                workStart:
+                    type: string
+                workEnd:
+                    type: string
+                flexibleStart:
+                    type: string
+                flexibleEnd:
+                    type: string
+                workDuration:
+                    type: integer
+                    format: int32
+                checkInRequired:
+                    type: boolean
+                checkOutRequired:
+                    type: boolean
+                lateGracePeriod:
+                    type: integer
+                    format: int32
+                earlyGracePeriod:
+                    type: integer
+                    format: int32
+                isCrossDays:
+                    type: boolean
+                allowOvertime:
+                    type: boolean
+                sort:
+                    type: integer
+                    format: int32
+        DeleteAttendanceRuleResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        DeleteScheduleResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        DeleteShiftResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
         GoogleProtobufAny:
             type: object
             properties:
@@ -356,28 +1098,136 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        ListFormDataResponse:
+        ListAttendanceRecordResponse:
             type: object
             properties:
                 items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/FormDataResponse'
+                        $ref: '#/components/schemas/AttendanceRecordResponse'
                 total:
                     type: integer
                     format: int32
-            description: ListFormDataResponse 查询表单数据列表响应
-        ListFormDefinitionsResponse:
+        ListAttendanceRulesResponse:
             type: object
             properties:
                 items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/FormDefinitionResponse'
+                        $ref: '#/components/schemas/AttendanceRuleResponse'
                 total:
                     type: integer
                     format: int32
-            description: ListFormDefinitionsResponse 列出表单定义响应
+        ListSchedulesResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ScheduleResponse'
+                total:
+                    type: integer
+                    format: int32
+        ListShiftsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ShiftResponse'
+                total:
+                    type: integer
+                    format: int32
+        LocationInfo:
+            type: object
+            properties:
+                latitude:
+                    type: number
+                    format: double
+                longitude:
+                    type: number
+                    format: double
+                accuracy:
+                    type: number
+                    format: double
+                address:
+                    type: string
+        ScheduleResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                tenantId:
+                    type: string
+                employeeId:
+                    type: string
+                employeeName:
+                    type: string
+                departmentId:
+                    type: string
+                shiftId:
+                    type: string
+                shiftName:
+                    type: string
+                scheduleDate:
+                    type: string
+                workdayType:
+                    type: string
+                status:
+                    type: string
+                remark:
+                    type: string
+                createdAt:
+                    type: string
+        ShiftResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                tenantId:
+                    type: string
+                code:
+                    type: string
+                name:
+                    type: string
+                type:
+                    type: string
+                description:
+                    type: string
+                workStart:
+                    type: string
+                workEnd:
+                    type: string
+                flexibleStart:
+                    type: string
+                flexibleEnd:
+                    type: string
+                workDuration:
+                    type: integer
+                    format: int32
+                checkInRequired:
+                    type: boolean
+                checkOutRequired:
+                    type: boolean
+                lateGracePeriod:
+                    type: integer
+                    format: int32
+                earlyGracePeriod:
+                    type: integer
+                    format: int32
+                isCrossDays:
+                    type: boolean
+                allowOvertime:
+                    type: boolean
+                isActive:
+                    type: boolean
+                sort:
+                    type: integer
+                    format: int32
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
         Status:
             type: object
             properties:
@@ -394,29 +1244,7 @@ components:
                         $ref: '#/components/schemas/GoogleProtobufAny'
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
-        SubmitFormDataRequest:
-            type: object
-            properties:
-                formId:
-                    type: string
-                tenantId:
-                    type: string
-                userId:
-                    type: string
-                data:
-                    type: string
-            description: SubmitFormDataRequest 提交表单数据请求
-        UpdateFormDataRequest:
-            type: object
-            properties:
-                formId:
-                    type: string
-                id:
-                    type: string
-                data:
-                    type: string
-            description: UpdateFormDataRequest 更新表单数据请求
-        UpdateFormDefinitionRequest:
+        UpdateAttendanceRuleRequest:
             type: object
             properties:
                 id:
@@ -425,13 +1253,72 @@ components:
                     type: string
                 description:
                     type: string
-                schema:
+                applyType:
                     type: string
-                uiSchema:
+                departmentIds:
+                    type: array
+                    items:
+                        type: string
+                employeeIds:
+                    type: array
+                    items:
+                        type: string
+                locationRequired:
+                    type: boolean
+                wifiRequired:
+                    type: boolean
+                faceRequired:
+                    type: boolean
+                allowFieldWork:
+                    type: boolean
+                isActive:
+                    type: boolean
+                priority:
+                    type: integer
+                    format: int32
+        UpdateScheduleRequest:
+            type: object
+            properties:
+                id:
                     type: string
-            description: UpdateFormDefinitionRequest 更新表单定义请求
+                shiftId:
+                    type: string
+                workdayType:
+                    type: string
+                status:
+                    type: string
+                remark:
+                    type: string
+        UpdateShiftRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                workStart:
+                    type: string
+                workEnd:
+                    type: string
+                lateGracePeriod:
+                    type: integer
+                    format: int32
+                earlyGracePeriod:
+                    type: integer
+                    format: int32
+                isActive:
+                    type: boolean
+                sort:
+                    type: integer
+                    format: int32
 tags:
-    - name: FormDataService
-      description: FormDataService 表单数据服务
-    - name: FormDefinitionService
-      description: FormDefinitionService 表单定义服务
+    - name: AttendanceRuleService
+      description: AttendanceRuleService 考勤规则服务
+    - name: AttendanceService
+      description: AttendanceService 考勤服务
+    - name: ScheduleService
+      description: ScheduleService 排班服务
+    - name: ShiftService
+      description: ShiftService 班次服务

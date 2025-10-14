@@ -1,4 +1,3 @@
-package sse
 package sse_test
 
 import (
@@ -35,7 +34,7 @@ func TestBroker_SendToUser(t *testing.T) {
 
 	userID := uuid.New()
 	client := sse.NewClient(broker, userID, uuid.Nil, nil)
-	broker.register <- client
+	broker.Register(client)
 
 	// 等待注册完成
 	time.Sleep(50 * time.Millisecond)
@@ -46,7 +45,7 @@ func TestBroker_SendToUser(t *testing.T) {
 
 	// 接收消息
 	select {
-	case msg := <-client.send:
+	case msg := <-client.Send():
 		assert.Equal(t, "test_event", string(msg.Event))
 		assert.Equal(t, `{"message":"hello"}`, msg.Data)
 	case <-time.After(1 * time.Second):
@@ -213,16 +212,17 @@ func TestMessage_Format(t *testing.T) {
 // BenchmarkBroker_SendToUser 性能基准测试
 func BenchmarkBroker_SendToUser(b *testing.B) {
 	broker := sse.NewBroker(sse.DefaultBrokerConfig())
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	go broker.Start(ctx)
-	defer broker.Stop()
 
 	userID := uuid.New()
 	client := sse.NewClient(broker, userID, uuid.Nil, nil)
 	broker.Register(client)
 	time.Sleep(50 * time.Millisecond)
 
-	// 启动接收 goroutine
+	// 启动接收 goroutine（持续消费消息）
 	go func() {
 		for range client.Send() {
 			// 消费消息
@@ -238,16 +238,17 @@ func BenchmarkBroker_SendToUser(b *testing.B) {
 // BenchmarkBroker_Broadcast 广播性能测试
 func BenchmarkBroker_Broadcast(b *testing.B) {
 	broker := sse.NewBroker(sse.DefaultBrokerConfig())
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	go broker.Start(ctx)
-	defer broker.Stop()
 
 	// 创建100个客户端
 	for i := 0; i < 100; i++ {
 		client := sse.NewClient(broker, uuid.New(), uuid.Nil, nil)
 		broker.Register(client)
 
-		// 启动接收 goroutine
+		// 启动接收 goroutine（持续消费消息）
 		go func(c *sse.Client) {
 			for range c.Send() {
 				// 消费消息

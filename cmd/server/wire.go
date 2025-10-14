@@ -15,6 +15,7 @@ import (
 	"github.com/lk2023060901/go-next-erp/internal/conf"
 	"github.com/lk2023060901/go-next-erp/internal/file"
 	"github.com/lk2023060901/go-next-erp/internal/form"
+	"github.com/lk2023060901/go-next-erp/internal/hrm"
 	"github.com/lk2023060901/go-next-erp/internal/notification"
 	"github.com/lk2023060901/go-next-erp/internal/organization"
 	"github.com/lk2023060901/go-next-erp/internal/server"
@@ -31,6 +32,7 @@ func wireApp(context.Context, *conf.Config, log.Logger) (*kratos.App, func(), er
 		organization.ProviderSet,
 		notification.ProviderSet,
 		approval.ProviderSet,
+		hrm.ProviderSet,
 		adapter.ProviderSet,
 		server.ProviderSet,
 		newApp,

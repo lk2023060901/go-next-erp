@@ -12,6 +12,7 @@ import (
 	authv1 "github.com/lk2023060901/go-next-erp/api/auth/v1"
 	filev1 "github.com/lk2023060901/go-next-erp/api/file/v1"
 	formv1 "github.com/lk2023060901/go-next-erp/api/form/v1"
+	hrmv1 "github.com/lk2023060901/go-next-erp/api/hrm/v1"
 	notifyv1 "github.com/lk2023060901/go-next-erp/api/notification/v1"
 	orgv1 "github.com/lk2023060901/go-next-erp/api/organization/v1"
 	"github.com/lk2023060901/go-next-erp/internal/adapter"
@@ -35,6 +36,7 @@ func NewHTTPServer(
 	notifyAdapter *adapter.NotificationAdapter,
 	approvalAdapter *adapter.ApprovalAdapter,
 	fileAdapter *adapter.FileAdapter,
+	hrmAdapter *adapter.HRMAdapter,
 	notifService service.NotificationService, // 通知服务
 	wsHub *ws.Hub, // WebSocket Hub
 	wsHandler *ws.Handler, // WebSocket 处理器
@@ -110,6 +112,12 @@ func NewHTTPServer(
 
 	// 注分 File 服务
 	filev1.RegisterFileServiceHTTPServer(srv, fileAdapter)
+
+	// 注册 HRM 服务
+	hrmv1.RegisterAttendanceServiceHTTPServer(srv, hrmAdapter)
+	hrmv1.RegisterShiftServiceHTTPServer(srv, hrmAdapter)
+	hrmv1.RegisterScheduleServiceHTTPServer(srv, hrmAdapter)
+	hrmv1.RegisterAttendanceRuleServiceHTTPServer(srv, hrmAdapter)
 
 	// 注册 WebSocket 通知推送路由
 	srv.HandleFunc("/api/v1/notifications/ws", wsHandler.ServeHTTP)

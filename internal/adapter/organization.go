@@ -17,13 +17,19 @@ type OrganizationAdapter struct {
 	orgv1.UnimplementedOrganizationServiceServer
 	orgv1.UnimplementedEmployeeServiceServer
 	orgService service.OrganizationService
+	empService service.EmployeeService
 	typeRepo   repository.OrganizationTypeRepository
 }
 
 // NewOrganizationAdapter 创建组织适配器
-func NewOrganizationAdapter(orgService service.OrganizationService, typeRepo repository.OrganizationTypeRepository) *OrganizationAdapter {
+func NewOrganizationAdapter(
+	orgService service.OrganizationService,
+	empService service.EmployeeService,
+	typeRepo repository.OrganizationTypeRepository,
+) *OrganizationAdapter {
 	return &OrganizationAdapter{
 		orgService: orgService,
+		empService: empService,
 		typeRepo:   typeRepo,
 	}
 }
@@ -156,22 +162,81 @@ func (a *OrganizationAdapter) GetOrganizationTree(ctx context.Context, req *orgv
 	return &orgv1.OrganizationTreeResponse{Nodes: nodes}, nil
 }
 
-// CreateEmployee 创建员工（简化实现）
+// CreateEmployee 创建员工
 func (a *OrganizationAdapter) CreateEmployee(ctx context.Context, req *orgv1.CreateEmployeeRequest) (*orgv1.EmployeeResponse, error) {
-	// TODO: 实现员工创建逻辑
-	return &orgv1.EmployeeResponse{
-		Id:         uuid.New().String(),
-		TenantId:   req.TenantId,
-		UserId:     req.UserId,
-		OrgId:      req.OrgId,
+	tenantID, _ := uuid.Parse(req.TenantId)
+	orgID, _ := uuid.Parse(req.OrgId)
+
+	// TODO: 需要从 context 获取当前用户ID
+	createdBy := tenantID
+
+	// 创建请求
+	createReq := &service.CreateEmployeeRequest{
+		TenantID:   tenantID,
 		EmployeeNo: req.EmployeeNo,
 		Name:       req.Name,
 		Mobile:     req.Mobile,
 		Email:      req.Email,
-		Status:     req.Status,
-		CreatedAt:  time.Now().Format(time.RFC3339),
-		UpdatedAt:  time.Now().Format(time.RFC3339),
-	}, nil
+		OrgID:      orgID,
+		Status:     "active", // 默认状态
+		CreatedBy:  createdBy,
+	}
+
+	// 如果指定了 UserID 且非空，则使用它
+	if req.UserId != "" {
+		userID, err := uuid.Parse(req.UserId)
+		if err == nil {
+			createReq.UserID = userID
+		} else {
+			// 如果 UserID 解析失败，使用 UUID Nil
+			createReq.UserID = uuid.Nil
+		}
+	} else {
+		// 如果没有指定 UserID，使用 UUID Nil （表示还没有关联用户）
+		createReq.UserID = uuid.Nil
+	}
+
+	// 如果指定了 PositionID
+	if req.PositionId != "" {
+		positionID, _ := uuid.Parse(req.PositionId)
+		createReq.PositionID = &positionID
+	}
+
+	// 如果指定了 Status
+	if req.Status != "" {
+		createReq.Status = req.Status
+	}
+
+	// 调用 service 创建员工
+	emp, err := a.empService.Create(ctx, createReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return a.empToProto(emp), nil
+}
+
+// empToProto 将 model.Employee 转换为 orgv1.EmployeeResponse
+func (a *OrganizationAdapter) empToProto(emp *model.Employee) *orgv1.EmployeeResponse {
+	resp := &orgv1.EmployeeResponse{
+		Id:         emp.ID.String(),
+		TenantId:   emp.TenantID.String(),
+		UserId:     emp.UserID.String(),
+		OrgId:      emp.OrgID.String(),
+		EmployeeNo: emp.EmployeeNo,
+		Name:       emp.Name,
+		Mobile:     emp.Mobile,
+		Email:      emp.Email,
+		Status:     emp.Status,
+		CreatedAt:  emp.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:  emp.UpdatedAt.Format(time.RFC3339),
+	}
+
+	if emp.PositionID != nil {
+		resp.PositionId = emp.PositionID.String()
+	}
+
+	return resp
 }
 
 // GetEmployee 获取员工（简化实现）

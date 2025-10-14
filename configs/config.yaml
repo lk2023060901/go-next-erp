@@ -31,8 +31,8 @@ minio:
 
 jwt:
   secret: your-secret-key-change-this-in-production
-  access_expire: 86400    # 24 hours
-  refresh_expire: 604800  # 7 days
+  access_expire: 172800    # 48 hours (延长一倍用于测试)
+  refresh_expire: 1209600  # 14 days (延长一倍)
 
 log:
   level: info

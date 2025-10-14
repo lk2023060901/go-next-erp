@@ -1,0 +1,567 @@
+syntax = "proto3";
+
+package api.hrm.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/hrm/v1;v1";
+
+// AttendanceService 考勤服务
+service AttendanceService {
+  // 打卡
+  rpc ClockIn (ClockInRequest) returns (ClockInResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/attendance/clock-in"
+      body: "*"
+    };
+  }
+
+  // 获取考勤记录
+  rpc GetAttendanceRecord (GetAttendanceRecordRequest) returns (AttendanceRecordResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/attendance/records/{id}"
+    };
+  }
+
+  // 查询员工考勤记录
+  rpc ListEmployeeAttendance (ListEmployeeAttendanceRequest) returns (ListAttendanceRecordResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/attendance/employee/{employee_id}"
+    };
+  }
+
+  // 查询部门考勤记录
+  rpc ListDepartmentAttendance (ListDepartmentAttendanceRequest) returns (ListAttendanceRecordResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/attendance/department/{department_id}"
+    };
+  }
+
+  // 查询异常考勤
+  rpc ListExceptionAttendance (ListExceptionAttendanceRequest) returns (ListAttendanceRecordResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/attendance/exceptions"
+    };
+  }
+
+  // 考勤统计
+  rpc GetAttendanceStatistics (GetAttendanceStatisticsRequest) returns (AttendanceStatisticsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/attendance/statistics"
+    };
+  }
+}
+
+// ShiftService 班次服务
+service ShiftService {
+  // 创建班次
+  rpc CreateShift (CreateShiftRequest) returns (ShiftResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/shifts"
+      body: "*"
+    };
+  }
+
+  // 列出启用的班次（必须在 GetShift 之前，避免路由冲突）
+  rpc ListActiveShifts (ListActiveShiftsRequest) returns (ListShiftsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/shifts/active"
+    };
+  }
+
+  // 获取班次
+  rpc GetShift (GetShiftRequest) returns (ShiftResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/shifts/{id}"
+    };
+  }
+
+  // 更新班次
+  rpc UpdateShift (UpdateShiftRequest) returns (ShiftResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/hrm/shifts/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除班次
+  rpc DeleteShift (DeleteShiftRequest) returns (DeleteShiftResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/hrm/shifts/{id}"
+    };
+  }
+
+  // 列出班次
+  rpc ListShifts (ListShiftsRequest) returns (ListShiftsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/shifts"
+    };
+  }
+}
+
+// ScheduleService 排班服务
+service ScheduleService {
+  // 创建排班
+  rpc CreateSchedule (CreateScheduleRequest) returns (ScheduleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/schedules"
+      body: "*"
+    };
+  }
+
+  // 批量创建排班
+  rpc BatchCreateSchedules (BatchCreateSchedulesRequest) returns (BatchCreateSchedulesResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/schedules/batch"
+      body: "*"
+    };
+  }
+
+  // 获取排班
+  rpc GetSchedule (GetScheduleRequest) returns (ScheduleResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/schedules/{id}"
+    };
+  }
+
+  // 更新排班
+  rpc UpdateSchedule (UpdateScheduleRequest) returns (ScheduleResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/hrm/schedules/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除排班
+  rpc DeleteSchedule (DeleteScheduleRequest) returns (DeleteScheduleResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/hrm/schedules/{id}"
+    };
+  }
+
+  // 查询员工排班
+  rpc ListEmployeeSchedules (ListEmployeeSchedulesRequest) returns (ListSchedulesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/schedules/employee/{employee_id}"
+    };
+  }
+
+  // 查询部门排班
+  rpc ListDepartmentSchedules (ListDepartmentSchedulesRequest) returns (ListSchedulesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/schedules/department/{department_id}"
+    };
+  }
+}
+
+// AttendanceRuleService 考勤规则服务
+service AttendanceRuleService {
+  // 创建考勤规则
+  rpc CreateAttendanceRule (CreateAttendanceRuleRequest) returns (AttendanceRuleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/attendance-rules"
+      body: "*"
+    };
+  }
+
+  // 获取考勤规则
+  rpc GetAttendanceRule (GetAttendanceRuleRequest) returns (AttendanceRuleResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/attendance-rules/{id}"
+    };
+  }
+
+  // 更新考勤规则
+  rpc UpdateAttendanceRule (UpdateAttendanceRuleRequest) returns (AttendanceRuleResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/hrm/attendance-rules/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除考勤规则
+  rpc DeleteAttendanceRule (DeleteAttendanceRuleRequest) returns (DeleteAttendanceRuleResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/hrm/attendance-rules/{id}"
+    };
+  }
+
+  // 列出考勤规则
+  rpc ListAttendanceRules (ListAttendanceRulesRequest) returns (ListAttendanceRulesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/attendance-rules"
+    };
+  }
+}
+
+// ========== 考勤打卡相关消息 ==========
+
+message ClockInRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string clock_type = 3; // check_in, check_out
+  string check_in_method = 4; // device, mobile, web, face, fingerprint, card
+  LocationInfo location = 5;
+  string wifi_ssid = 6;
+  string wifi_mac = 7;
+  string photo_url = 8;
+  double face_score = 9;
+  string device_id = 10;
+  string remark = 11;
+}
+
+message LocationInfo {
+  double latitude = 1;
+  double longitude = 2;
+  double accuracy = 3;
+  string address = 4;
+}
+
+message ClockInResponse {
+  string id = 1;
+  string employee_id = 2;
+  string employee_name = 3;
+  string clock_time = 4;
+  string clock_type = 5;
+  string status = 6; // normal, late, early, absent
+  string shift_name = 7;
+  bool is_exception = 8;
+  string exception_reason = 9;
+  string message = 10;
+}
+
+message GetAttendanceRecordRequest {
+  string id = 1;
+}
+
+message ListEmployeeAttendanceRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string start_date = 3;
+  string end_date = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+message ListDepartmentAttendanceRequest {
+  string tenant_id = 1;
+  string department_id = 2;
+  string start_date = 3;
+  string end_date = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+message ListExceptionAttendanceRequest {
+  string tenant_id = 1;
+  string start_date = 2;
+  string end_date = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+message AttendanceRecordResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string employee_id = 3;
+  string employee_name = 4;
+  string department_id = 5;
+  string shift_id = 6;
+  string shift_name = 7;
+  string clock_time = 8;
+  string clock_type = 9;
+  string status = 10;
+  string check_in_method = 11;
+  string source_type = 12;
+  LocationInfo location = 13;
+  string address = 14;
+  string wifi_ssid = 15;
+  string photo_url = 16;
+  double face_score = 17;
+  bool is_exception = 18;
+  string exception_reason = 19;
+  string exception_type = 20;
+  string remark = 21;
+  string created_at = 22;
+}
+
+message ListAttendanceRecordResponse {
+  repeated AttendanceRecordResponse items = 1;
+  int32 total = 2;
+}
+
+message GetAttendanceStatisticsRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string department_id = 3;
+  string start_date = 4;
+  string end_date = 5;
+}
+
+message AttendanceStatisticsResponse {
+  int32 total_days = 1;
+  int32 normal_days = 2;
+  int32 late_days = 3;
+  int32 early_days = 4;
+  int32 absent_days = 5;
+  int32 leave_days = 6;
+  int32 overtime_hours = 7;
+  map<string, int32> status_count = 8;
+}
+
+// ========== 班次相关消息 ==========
+
+message CreateShiftRequest {
+  string tenant_id = 1;
+  string code = 2;
+  string name = 3;
+  string type = 4; // fixed, flexible, free
+  string description = 5;
+  string work_start = 6; // HH:MM
+  string work_end = 7; // HH:MM
+  string flexible_start = 8; // 弹性上班开始时间
+  string flexible_end = 9; // 弹性上班结束时间
+  int32 work_duration = 10; // 工作时长（分钟）
+  bool check_in_required = 11;
+  bool check_out_required = 12;
+  int32 late_grace_period = 13;
+  int32 early_grace_period = 14;
+  bool is_cross_days = 15;
+  bool allow_overtime = 16;
+  int32 sort = 17;
+}
+
+message GetShiftRequest {
+  string id = 1;
+}
+
+message UpdateShiftRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string work_start = 4;
+  string work_end = 5;
+  int32 late_grace_period = 6;
+  int32 early_grace_period = 7;
+  bool is_active = 8;
+  int32 sort = 9;
+}
+
+message DeleteShiftRequest {
+  string id = 1;
+}
+
+message ListShiftsRequest {
+  string tenant_id = 1;
+  string type = 2;
+  bool is_active = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+message ListActiveShiftsRequest {
+  string tenant_id = 1;
+}
+
+message ShiftResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string type = 5;
+  string description = 6;
+  string work_start = 7;
+  string work_end = 8;
+  string flexible_start = 9;
+  string flexible_end = 10;
+  int32 work_duration = 11;
+  bool check_in_required = 12;
+  bool check_out_required = 13;
+  int32 late_grace_period = 14;
+  int32 early_grace_period = 15;
+  bool is_cross_days = 16;
+  bool allow_overtime = 17;
+  bool is_active = 18;
+  int32 sort = 19;
+  string created_at = 20;
+  string updated_at = 21;
+}
+
+message DeleteShiftResponse {
+  bool success = 1;
+}
+
+message ListShiftsResponse {
+  repeated ShiftResponse items = 1;
+  int32 total = 2;
+}
+
+// ========== 排班相关消息 ==========
+
+message CreateScheduleRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string shift_id = 3;
+  string schedule_date = 4; // YYYY-MM-DD
+  string workday_type = 5; // workday, weekend, holiday
+  string remark = 6;
+}
+
+message BatchCreateSchedulesRequest {
+  string tenant_id = 1;
+  repeated CreateScheduleRequest schedules = 2;
+}
+
+message BatchCreateSchedulesResponse {
+  int32 success_count = 1;
+  int32 failed_count = 2;
+  repeated string error_messages = 3;
+}
+
+message GetScheduleRequest {
+  string id = 1;
+}
+
+message UpdateScheduleRequest {
+  string id = 1;
+  string shift_id = 2;
+  string workday_type = 3;
+  string status = 4;
+  string remark = 5;
+}
+
+message DeleteScheduleRequest {
+  string id = 1;
+}
+
+message ListEmployeeSchedulesRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string month = 3; // YYYY-MM
+}
+
+message ListDepartmentSchedulesRequest {
+  string tenant_id = 1;
+  string department_id = 2;
+  string month = 3; // YYYY-MM
+}
+
+message ScheduleResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string employee_id = 3;
+  string employee_name = 4;
+  string department_id = 5;
+  string shift_id = 6;
+  string shift_name = 7;
+  string schedule_date = 8;
+  string workday_type = 9;
+  string status = 10;
+  string remark = 11;
+  string created_at = 12;
+}
+
+message DeleteScheduleResponse {
+  bool success = 1;
+}
+
+message ListSchedulesResponse {
+  repeated ScheduleResponse items = 1;
+  int32 total = 2;
+}
+
+// ========== 考勤规则相关消息 ==========
+
+message CreateAttendanceRuleRequest {
+  string tenant_id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  string apply_type = 5; // all, department, employee
+  repeated string department_ids = 6;
+  repeated string employee_ids = 7;
+  string workday_type = 8; // five_day, six_day, custom
+  repeated int32 weekend_days = 9;
+  string default_shift_id = 10;
+  bool location_required = 11;
+  repeated AllowedLocationInfo allowed_locations = 12;
+  bool wifi_required = 13;
+  repeated string allowed_wifi = 14;
+  bool face_required = 15;
+  double face_threshold = 16;
+  bool allow_field_work = 17;
+  int32 priority = 18;
+}
+
+message AllowedLocationInfo {
+  string name = 1;
+  double latitude = 2;
+  double longitude = 3;
+  int32 radius = 4;
+  string address = 5;
+}
+
+message GetAttendanceRuleRequest {
+  string id = 1;
+}
+
+message UpdateAttendanceRuleRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string apply_type = 4;
+  repeated string department_ids = 5;
+  repeated string employee_ids = 6;
+  bool location_required = 7;
+  bool wifi_required = 8;
+  bool face_required = 9;
+  bool allow_field_work = 10;
+  bool is_active = 11;
+  int32 priority = 12;
+}
+
+message DeleteAttendanceRuleRequest {
+  string id = 1;
+}
+
+message ListAttendanceRulesRequest {
+  string tenant_id = 1;
+  string apply_type = 2;
+  bool is_active = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+message AttendanceRuleResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string description = 5;
+  string apply_type = 6;
+  repeated string department_ids = 7;
+  repeated string employee_ids = 8;
+  string workday_type = 9;
+  repeated int32 weekend_days = 10;
+  string default_shift_id = 11;
+  bool location_required = 12;
+  repeated AllowedLocationInfo allowed_locations = 13;
+  bool wifi_required = 14;
+  repeated string allowed_wifi = 15;
+  bool face_required = 16;
+  double face_threshold = 17;
+  bool allow_field_work = 18;
+  bool is_active = 19;
+  int32 priority = 20;
+  string created_at = 21;
+  string updated_at = 22;
+}
+
+message DeleteAttendanceRuleResponse {
+  bool success = 1;
+}
+
+message ListAttendanceRulesResponse {
+  repeated AttendanceRuleResponse items = 1;
+  int32 total = 2;
+}

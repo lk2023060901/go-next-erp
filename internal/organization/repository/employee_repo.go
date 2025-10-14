@@ -80,21 +80,18 @@ func (r *employeeRepo) Create(ctx context.Context, emp *model.Employee) error {
 	sql := `
 		INSERT INTO employees (
 			id, tenant_id, user_id, employee_no, name, gender, mobile, email, avatar,
-			org_id, org_path, position_id, direct_leader_id,
-			join_date, probation_end, formal_date, leave_date,
+			org_id, org_path, position_id, superior_id,
 			status, created_by, updated_by, created_at, updated_at
 		) VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8, $9,
 			$10, $11, $12, $13,
-			$14, $15, $16, $17,
-			$18, $19, $20, $21, $22
+			$14, $15, $16, $17, $18
 		)
 	`
 
 	_, err := r.db.Exec(ctx, sql,
 		emp.ID, emp.TenantID, emp.UserID, emp.EmployeeNo, emp.Name, emp.Gender, emp.Mobile, emp.Email, emp.Avatar,
 		emp.OrgID, emp.OrgPath, emp.PositionID, emp.DirectLeaderID,
-		emp.JoinDate, emp.ProbationEnd, emp.FormalDate, emp.LeaveDate,
 		emp.Status, emp.CreatedBy, emp.UpdatedBy, emp.CreatedAt, emp.UpdatedAt,
 	)
 

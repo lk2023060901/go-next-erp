@@ -102,6 +102,118 @@ func (m *MockOrganizationService) UpdateStatus(ctx context.Context, orgID uuid.U
 	return args.Error(0)
 }
 
+// MockEmployeeService mocks the employee service
+type MockEmployeeService struct {
+	mock.Mock
+}
+
+func (m *MockEmployeeService) Create(ctx context.Context, req *service.CreateEmployeeRequest) (*model.Employee, error) {
+	args := m.Called(ctx, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.Employee), args.Error(1)
+}
+
+func (m *MockEmployeeService) Update(ctx context.Context, id uuid.UUID, req *service.UpdateEmployeeRequest) (*model.Employee, error) {
+	args := m.Called(ctx, id, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.Employee), args.Error(1)
+}
+
+func (m *MockEmployeeService) Delete(ctx context.Context, id uuid.UUID) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
+func (m *MockEmployeeService) GetByID(ctx context.Context, id uuid.UUID) (*model.Employee, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.Employee), args.Error(1)
+}
+
+func (m *MockEmployeeService) GetByUserID(ctx context.Context, tenantID, userID uuid.UUID) (*model.Employee, error) {
+	args := m.Called(ctx, tenantID, userID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.Employee), args.Error(1)
+}
+
+func (m *MockEmployeeService) GetByEmployeeNo(ctx context.Context, tenantID uuid.UUID, employeeNo string) (*model.Employee, error) {
+	args := m.Called(ctx, tenantID, employeeNo)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.Employee), args.Error(1)
+}
+
+func (m *MockEmployeeService) List(ctx context.Context, tenantID uuid.UUID) ([]*model.Employee, error) {
+	args := m.Called(ctx, tenantID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*model.Employee), args.Error(1)
+}
+
+func (m *MockEmployeeService) ListByOrg(ctx context.Context, orgID uuid.UUID) ([]*model.Employee, error) {
+	args := m.Called(ctx, orgID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*model.Employee), args.Error(1)
+}
+
+func (m *MockEmployeeService) ListByPosition(ctx context.Context, positionID uuid.UUID) ([]*model.Employee, error) {
+	args := m.Called(ctx, positionID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*model.Employee), args.Error(1)
+}
+
+func (m *MockEmployeeService) ListByStatus(ctx context.Context, tenantID uuid.UUID, status string) ([]*model.Employee, error) {
+	args := m.Called(ctx, tenantID, status)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*model.Employee), args.Error(1)
+}
+
+func (m *MockEmployeeService) Transfer(ctx context.Context, empID, newOrgID uuid.UUID, newPositionID *uuid.UUID, operatorID uuid.UUID) error {
+	args := m.Called(ctx, empID, newOrgID, newPositionID, operatorID)
+	return args.Error(0)
+}
+
+func (m *MockEmployeeService) ChangePosition(ctx context.Context, empID uuid.UUID, newPositionID uuid.UUID, operatorID uuid.UUID) error {
+	args := m.Called(ctx, empID, newPositionID, operatorID)
+	return args.Error(0)
+}
+
+func (m *MockEmployeeService) ChangeLeader(ctx context.Context, empID, newLeaderID uuid.UUID, operatorID uuid.UUID) error {
+	args := m.Called(ctx, empID, newLeaderID, operatorID)
+	return args.Error(0)
+}
+
+func (m *MockEmployeeService) Regularize(ctx context.Context, empID uuid.UUID, formalDate time.Time, operatorID uuid.UUID) error {
+	args := m.Called(ctx, empID, formalDate, operatorID)
+	return args.Error(0)
+}
+
+func (m *MockEmployeeService) Resign(ctx context.Context, empID uuid.UUID, leaveDate time.Time, operatorID uuid.UUID) error {
+	args := m.Called(ctx, empID, leaveDate, operatorID)
+	return args.Error(0)
+}
+
+func (m *MockEmployeeService) Reinstate(ctx context.Context, empID uuid.UUID, operatorID uuid.UUID) error {
+	args := m.Called(ctx, empID, operatorID)
+	return args.Error(0)
+}
+
 // MockOrganizationTypeRepository mocks the organization type repository
 type MockOrganizationTypeRepository struct {
 	mock.Mock
@@ -163,8 +275,9 @@ func (m *MockOrganizationTypeRepository) Exists(ctx context.Context, tenantID uu
 func TestOrganizationAdapter_CreateOrganization(t *testing.T) {
 	t.Run("CreateOrganization successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		tenantID := uuid.New()
 		orgID := uuid.New()
@@ -215,8 +328,9 @@ func TestOrganizationAdapter_CreateOrganization(t *testing.T) {
 
 	t.Run("CreateOrganization with parent", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		tenantID := uuid.New()
 		parentID := uuid.New()
@@ -260,8 +374,9 @@ func TestOrganizationAdapter_CreateOrganization(t *testing.T) {
 func TestOrganizationAdapter_GetOrganization(t *testing.T) {
 	t.Run("GetOrganization successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		orgID := uuid.New()
 		tenantID := uuid.New()
@@ -299,8 +414,9 @@ func TestOrganizationAdapter_GetOrganization(t *testing.T) {
 func TestOrganizationAdapter_UpdateOrganization(t *testing.T) {
 	t.Run("UpdateOrganization successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		orgID := uuid.New()
 		tenantID := uuid.New()
@@ -341,8 +457,9 @@ func TestOrganizationAdapter_UpdateOrganization(t *testing.T) {
 func TestOrganizationAdapter_DeleteOrganization(t *testing.T) {
 	t.Run("DeleteOrganization successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		orgID := uuid.New()
 
@@ -366,8 +483,9 @@ func TestOrganizationAdapter_DeleteOrganization(t *testing.T) {
 func TestOrganizationAdapter_ListOrganizations(t *testing.T) {
 	t.Run("ListOrganizations successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		tenantID := uuid.New()
 
@@ -414,8 +532,9 @@ func TestOrganizationAdapter_ListOrganizations(t *testing.T) {
 
 	t.Run("ListOrganizations with parent filter", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		tenantID := uuid.New()
 		parentID := uuid.New()
@@ -456,8 +575,9 @@ func TestOrganizationAdapter_ListOrganizations(t *testing.T) {
 func TestOrganizationAdapter_GetOrganizationTree(t *testing.T) {
 	t.Run("GetOrganizationTree successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		tenantID := uuid.New()
 		rootID := uuid.New()
@@ -518,13 +638,36 @@ func TestOrganizationAdapter_GetOrganizationTree(t *testing.T) {
 func TestOrganizationAdapter_CreateEmployee(t *testing.T) {
 	t.Run("CreateEmployee successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
+
+		tenantID := uuid.New()
+		userID := uuid.New()
+		orgID := uuid.New()
+		empID := uuid.New()
+
+		expectedEmp := &model.Employee{
+			ID:         empID,
+			TenantID:   tenantID,
+			UserID:     userID,
+			OrgID:      orgID,
+			EmployeeNo: "EMP001",
+			Name:       "张三",
+			Mobile:     "13800138000",
+			Email:      "zhangsan@example.com",
+			Status:     "active",
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
+		}
+
+		mockEmpService.On("Create", mock.Anything, mock.AnythingOfType("*service.CreateEmployeeRequest")).
+			Return(expectedEmp, nil).Once()
 
 		req := &orgv1.CreateEmployeeRequest{
-			TenantId:   uuid.New().String(),
-			UserId:     uuid.New().String(),
-			OrgId:      uuid.New().String(),
+			TenantId:   tenantID.String(),
+			UserId:     userID.String(),
+			OrgId:      orgID.String(),
 			EmployeeNo: "EMP001",
 			Name:       "张三",
 			Mobile:     "13800138000",
@@ -536,8 +679,10 @@ func TestOrganizationAdapter_CreateEmployee(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
+		assert.Equal(t, empID.String(), resp.Id)
 		assert.Equal(t, "张三", resp.Name)
 		assert.Equal(t, "EMP001", resp.EmployeeNo)
+		mockEmpService.AssertExpectations(t)
 	})
 }
 
@@ -545,8 +690,9 @@ func TestOrganizationAdapter_CreateEmployee(t *testing.T) {
 func TestOrganizationAdapter_GetEmployee(t *testing.T) {
 	t.Run("GetEmployee successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		empID := uuid.New()
 
@@ -566,8 +712,9 @@ func TestOrganizationAdapter_GetEmployee(t *testing.T) {
 func TestOrganizationAdapter_UpdateEmployee(t *testing.T) {
 	t.Run("UpdateEmployee successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		empID := uuid.New()
 
@@ -592,8 +739,9 @@ func TestOrganizationAdapter_UpdateEmployee(t *testing.T) {
 func TestOrganizationAdapter_DeleteEmployee(t *testing.T) {
 	t.Run("DeleteEmployee successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		req := &orgv1.DeleteEmployeeRequest{
 			Id: uuid.New().String(),
@@ -611,8 +759,9 @@ func TestOrganizationAdapter_DeleteEmployee(t *testing.T) {
 func TestOrganizationAdapter_ListEmployees(t *testing.T) {
 	t.Run("ListEmployees successfully", func(t *testing.T) {
 		mockService := new(MockOrganizationService)
+		mockEmpService := new(MockEmployeeService)
 		mockTypeRepo := new(MockOrganizationTypeRepository)
-		adapter := NewOrganizationAdapter(mockService, mockTypeRepo)
+		adapter := NewOrganizationAdapter(mockService, mockEmpService, mockTypeRepo)
 
 		req := &orgv1.ListEmployeesRequest{
 			OrgId: uuid.New().String(),

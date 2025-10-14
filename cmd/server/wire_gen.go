@@ -23,6 +23,9 @@ import (
 	repository6 "github.com/lk2023060901/go-next-erp/internal/file/repository"
 	service4 "github.com/lk2023060901/go-next-erp/internal/file/service"
 	repository2 "github.com/lk2023060901/go-next-erp/internal/form/repository"
+	"github.com/lk2023060901/go-next-erp/internal/hrm/handler"
+	"github.com/lk2023060901/go-next-erp/internal/hrm/repository/postgres"
+	service5 "github.com/lk2023060901/go-next-erp/internal/hrm/service"
 	"github.com/lk2023060901/go-next-erp/internal/notification"
 	repository4 "github.com/lk2023060901/go-next-erp/internal/notification/repository"
 	service2 "github.com/lk2023060901/go-next-erp/internal/notification/service"
@@ -68,7 +71,9 @@ func wireApp(contextContext context.Context, config *conf.Config, logger log.Log
 	organizationTypeRepository := repository3.NewOrganizationTypeRepository(db)
 	employeeRepository := repository3.NewEmployeeRepository(db)
 	organizationService := service.NewOrganizationService(db, organizationRepository, closureRepository, organizationTypeRepository, employeeRepository)
-	organizationAdapter := adapter.NewOrganizationAdapter(organizationService, organizationTypeRepository)
+	positionRepository := repository3.NewPositionRepository(db)
+	employeeService := service.NewEmployeeService(employeeRepository, organizationRepository, positionRepository)
+	organizationAdapter := adapter.NewOrganizationAdapter(organizationService, employeeService, organizationTypeRepository)
 	notificationRepository := repository4.NewNotificationRepository(db)
 	emailConfig := notification.ProvideEmailConfig()
 	notificationService := service2.NewNotificationService(notificationRepository, emailConfig)
@@ -78,8 +83,6 @@ func wireApp(contextContext context.Context, config *conf.Config, logger log.Log
 	approvalTaskRepository := repository5.NewApprovalTaskRepository(db)
 	processHistoryRepository := repository5.NewProcessHistoryRepository(db)
 	engine := approval.ProvideWorkflowEngine()
-	positionRepository := repository3.NewPositionRepository(db)
-	employeeService := service.NewEmployeeService(employeeRepository, organizationRepository, positionRepository)
 	assigneeResolver := service3.NewAssigneeResolver(userRepository, employeeService, organizationService)
 	approvalService := service3.NewApprovalService(processDefinitionRepository, processInstanceRepository, approvalTaskRepository, processHistoryRepository, formDefinitionRepository, formDataRepository, engine, assigneeResolver, authorizationService, notificationService)
 	approvalAdapter := adapter.NewApprovalAdapter(approvalService)
@@ -108,9 +111,23 @@ func wireApp(contextContext context.Context, config *conf.Config, logger log.Log
 	multipartUploadServiceConfig := file.ProvideMultipartUploadServiceConfig()
 	multipartUploadService := service4.NewMultipartUploadService(fileRepository, quotaRepository, multipartUploadRepository, storage, loggerLogger, multipartUploadServiceConfig)
 	fileAdapter := adapter.NewFileAdapter(fileRepository, uploadService, downloadService, quotaService, multipartUploadService)
+	attendanceRecordRepository := postgres.NewAttendanceRecordRepository(db)
+	shiftRepository := postgres.NewShiftRepository(db)
+	scheduleRepository := postgres.NewScheduleRepository(db)
+	attendanceRuleRepository := postgres.NewAttendanceRuleRepository(db)
+	hrmEmployeeRepository := postgres.NewHRMEmployeeRepository(db)
+	attendanceService := service5.NewAttendanceService(attendanceRecordRepository, shiftRepository, scheduleRepository, attendanceRuleRepository, hrmEmployeeRepository)
+	attendanceHandler := handler.NewAttendanceHandler(attendanceService)
+	shiftService := service5.NewShiftService(shiftRepository)
+	shiftHandler := handler.NewShiftHandler(shiftService)
+	scheduleService := service5.NewScheduleService(scheduleRepository, shiftRepository, hrmEmployeeRepository, db)
+	scheduleHandler := handler.NewScheduleHandler(scheduleService)
+	attendanceRuleService := service5.NewAttendanceRuleService(attendanceRuleRepository)
+	attendanceRuleHandler := handler.NewAttendanceRuleHandler(attendanceRuleService)
+	hrmAdapter := adapter.NewHRMAdapter(attendanceHandler, shiftHandler, scheduleHandler, attendanceRuleHandler)
 	hub := websocket.NewHub()
-	handler := websocket.NewHandler(hub, manager, notificationService)
-	httpServer := server.NewHTTPServer(config, manager, authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, notificationService, hub, handler, logger)
+	websocketHandler := websocket.NewHandler(hub, manager, notificationService)
+	httpServer := server.NewHTTPServer(config, manager, authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, hrmAdapter, notificationService, hub, websocketHandler, logger)
 	grpcServer := server.NewGRPCServer(config, manager, authAdapter, userAdapter, roleAdapter, formAdapter, organizationAdapter, notificationAdapter, approvalAdapter, fileAdapter, logger)
 	app := newApp(logger, httpServer, grpcServer)
 	return app, func() {

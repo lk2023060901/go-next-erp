@@ -386,6 +386,16 @@ func (b *Broker) getTotalConnections() int {
 	return total
 }
 
+// Register 注册客户端（公开方法，供测试使用）
+func (b *Broker) Register(client *Client) {
+	b.register <- client
+}
+
+// Unregister 注销客户端（公开方法，供测试使用）
+func (b *Broker) Unregister(client *Client) {
+	b.unregister <- client
+}
+
 // IsUserOnline 检查用户是否在线
 func (b *Broker) IsUserOnline(userID uuid.UUID) bool {
 	b.mu.RLock()

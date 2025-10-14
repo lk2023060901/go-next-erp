@@ -67,6 +67,11 @@ func NewClient(broker *Broker, userID, tenantID uuid.UUID, topics []string) *Cli
 	}
 }
 
+// Send 获取消息发送通道（公开方法，供测试使用）
+func (c *Client) Send() <-chan *Message {
+	return c.send
+}
+
 // close 关闭客户端连接
 func (c *Client) close() {
 	select {
