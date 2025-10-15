@@ -1,0 +1,280 @@
+syntax = "proto3";
+
+package hrm.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/hrm/v1;hrmv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// PunchCardSupplementService 补卡申请服务
+service PunchCardSupplementService {
+  // CreatePunchCardSupplement 创建补卡申请
+  rpc CreatePunchCardSupplement(CreatePunchCardSupplementRequest) returns (PunchCardSupplementResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/punch-card-supplements"
+      body: "*"
+    };
+  }
+
+  // UpdatePunchCardSupplement 更新补卡申请
+  rpc UpdatePunchCardSupplement(UpdatePunchCardSupplementRequest) returns (PunchCardSupplementResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/hrm/punch-card-supplements/{id}"
+      body: "*"
+    };
+  }
+
+  // DeletePunchCardSupplement 删除补卡申请
+  rpc DeletePunchCardSupplement(DeletePunchCardSupplementRequest) returns (DeletePunchCardSupplementResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/hrm/punch-card-supplements/{id}"
+    };
+  }
+
+  // GetPunchCardSupplement 获取补卡申请详情
+  rpc GetPunchCardSupplement(GetPunchCardSupplementRequest) returns (PunchCardSupplementResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/punch-card-supplements/{id}"
+    };
+  }
+
+  // ListPunchCardSupplements 列表查询补卡申请
+  rpc ListPunchCardSupplements(ListPunchCardSupplementsRequest) returns (ListPunchCardSupplementsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/punch-card-supplements"
+    };
+  }
+
+  // ListEmployeePunchCardSupplements 查询员工补卡申请记录
+  rpc ListEmployeePunchCardSupplements(ListEmployeePunchCardSupplementsRequest) returns (ListPunchCardSupplementsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/employees/{employee_id}/punch-card-supplements"
+    };
+  }
+
+  // ListPendingPunchCardSupplements 查询待审批的补卡申请
+  rpc ListPendingPunchCardSupplements(ListPendingPunchCardSupplementsRequest) returns (ListPunchCardSupplementsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/punch-card-supplements/pending"
+    };
+  }
+
+  // SubmitPunchCardSupplement 提交补卡申请审批
+  rpc SubmitPunchCardSupplement(SubmitPunchCardSupplementRequest) returns (SubmitPunchCardSupplementResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/punch-card-supplements/{supplement_id}/submit"
+      body: "*"
+    };
+  }
+
+  // ApprovePunchCardSupplement 批准补卡申请
+  rpc ApprovePunchCardSupplement(ApprovePunchCardSupplementRequest) returns (ApprovePunchCardSupplementResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/punch-card-supplements/{supplement_id}/approve"
+      body: "*"
+    };
+  }
+
+  // RejectPunchCardSupplement 拒绝补卡申请
+  rpc RejectPunchCardSupplement(RejectPunchCardSupplementRequest) returns (RejectPunchCardSupplementResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/punch-card-supplements/{supplement_id}/reject"
+      body: "*"
+    };
+  }
+
+  // ProcessPunchCardSupplement 处理补卡（生成补卡记录）
+  rpc ProcessPunchCardSupplement(ProcessPunchCardSupplementRequest) returns (ProcessPunchCardSupplementResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/punch-card-supplements/{supplement_id}/process"
+      body: "*"
+    };
+  }
+
+  // CancelPunchCardSupplement 取消补卡申请
+  rpc CancelPunchCardSupplement(CancelPunchCardSupplementRequest) returns (CancelPunchCardSupplementResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/punch-card-supplements/{supplement_id}/cancel"
+      body: "*"
+    };
+  }
+}
+
+// CreatePunchCardSupplementRequest 创建补卡申请请求
+message CreatePunchCardSupplementRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string employee_name = 3;
+  string department_id = 4;
+  google.protobuf.Timestamp supplement_date = 5;
+  string supplement_type = 6; // checkin/checkout
+  google.protobuf.Timestamp supplement_time = 7;
+  string missing_type = 8; // forgot/malfunction/outside/other
+  string reason = 9;
+  repeated SupplementEvidence evidence = 10;
+  string remark = 11;
+}
+
+// UpdatePunchCardSupplementRequest 更新补卡申请请求
+message UpdatePunchCardSupplementRequest {
+  string id = 1;
+  google.protobuf.Timestamp supplement_date = 2;
+  string supplement_type = 3;
+  google.protobuf.Timestamp supplement_time = 4;
+  string missing_type = 5;
+  string reason = 6;
+  repeated SupplementEvidence evidence = 7;
+  string remark = 8;
+}
+
+// DeletePunchCardSupplementRequest 删除补卡申请请求
+message DeletePunchCardSupplementRequest {
+  string id = 1;
+}
+
+// DeletePunchCardSupplementResponse 删除补卡申请响应
+message DeletePunchCardSupplementResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// GetPunchCardSupplementRequest 获取补卡申请请求
+message GetPunchCardSupplementRequest {
+  string id = 1;
+}
+
+// ListPunchCardSupplementsRequest 列表查询补卡申请请求
+message ListPunchCardSupplementsRequest {
+  string tenant_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  string employee_id = 4;
+  string department_id = 5;
+  string supplement_type = 6;
+  string missing_type = 7;
+  string approval_status = 8;
+  string process_status = 9;
+  google.protobuf.Timestamp start_date = 10;
+  google.protobuf.Timestamp end_date = 11;
+  string keyword = 12;
+}
+
+// ListPunchCardSupplementsResponse 列表查询补卡申请响应
+message ListPunchCardSupplementsResponse {
+  repeated PunchCardSupplementResponse items = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// ListEmployeePunchCardSupplementsRequest 查询员工补卡申请请求
+message ListEmployeePunchCardSupplementsRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  int32 year = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+// ListPendingPunchCardSupplementsRequest 查询待审批的补卡申请请求
+message ListPendingPunchCardSupplementsRequest {
+  string tenant_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+// SubmitPunchCardSupplementRequest 提交补卡申请请求
+message SubmitPunchCardSupplementRequest {
+  string supplement_id = 1;
+  string submitter_id = 2;
+}
+
+// SubmitPunchCardSupplementResponse 提交补卡申请响应
+message SubmitPunchCardSupplementResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ApprovePunchCardSupplementRequest 批准补卡申请请求
+message ApprovePunchCardSupplementRequest {
+  string supplement_id = 1;
+  string approver_id = 2;
+  string comment = 3;
+}
+
+// ApprovePunchCardSupplementResponse 批准补卡申请响应
+message ApprovePunchCardSupplementResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// RejectPunchCardSupplementRequest 拒绝补卡申请请求
+message RejectPunchCardSupplementRequest {
+  string supplement_id = 1;
+  string approver_id = 2;
+  string reason = 3;
+}
+
+// RejectPunchCardSupplementResponse 拒绝补卡申请响应
+message RejectPunchCardSupplementResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ProcessPunchCardSupplementRequest 处理补卡请求
+message ProcessPunchCardSupplementRequest {
+  string supplement_id = 1;
+  string processor_id = 2;
+}
+
+// ProcessPunchCardSupplementResponse 处理补卡响应
+message ProcessPunchCardSupplementResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// CancelPunchCardSupplementRequest 取消补卡申请请求
+message CancelPunchCardSupplementRequest {
+  string supplement_id = 1;
+}
+
+// CancelPunchCardSupplementResponse 取消补卡申请响应
+message CancelPunchCardSupplementResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// PunchCardSupplementResponse 补卡申请响应
+message PunchCardSupplementResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string employee_id = 3;
+  string employee_name = 4;
+  string department_id = 5;
+  google.protobuf.Timestamp supplement_date = 6;
+  string supplement_type = 7;
+  google.protobuf.Timestamp supplement_time = 8;
+  string missing_type = 9;
+  string reason = 10;
+  repeated SupplementEvidence evidence = 11;
+  string attendance_record_id = 12;
+  string approval_id = 13;
+  string approval_status = 14;
+  string approved_by = 15;
+  google.protobuf.Timestamp approved_at = 16;
+  string reject_reason = 17;
+  string process_status = 18;
+  google.protobuf.Timestamp processed_at = 19;
+  string processed_by = 20;
+  string remark = 21;
+  google.protobuf.Timestamp created_at = 22;
+  google.protobuf.Timestamp updated_at = 23;
+}
+
+// SupplementEvidence 补卡证明材料
+message SupplementEvidence {
+  string type = 1; // image/document/other
+  string url = 2;
+  string description = 3;
+}

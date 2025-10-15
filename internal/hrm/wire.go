@@ -27,6 +27,7 @@ var ProviderSet = wire.NewSet(
 	postgres.NewOvertimeRepository,
 	postgres.NewBusinessTripRepository,
 	postgres.NewLeaveOfficeRepository,
+	postgres.NewPunchCardSupplementRepo,
 
 	// Service
 	service.NewAttendanceService,
@@ -37,6 +38,7 @@ var ProviderSet = wire.NewSet(
 	service.NewOvertimeService,
 	service.NewBusinessTripService,
 	service.NewLeaveOfficeService,
+	service.NewPunchCardSupplementService,
 
 	// Handler
 	handler.NewAttendanceHandler,
@@ -47,6 +49,7 @@ var ProviderSet = wire.NewSet(
 	handler.NewOvertimeHandler,
 	handler.NewBusinessTripHandler,
 	handler.NewLeaveOfficeHandler,
+	handler.NewPunchCardSupplementHandler,
 )
 
 // InitHRMModule initializes the HRM module
@@ -56,12 +59,13 @@ func InitHRMModule(db *database.DB, workflowEngine *workflow.Engine) (*HRMModule
 
 // HRMModule represents the HRM module
 type HRMModule struct {
-	AttendanceHandler     *handler.AttendanceHandler
-	ShiftHandler          *handler.ShiftHandler
-	ScheduleHandler       *handler.ScheduleHandler
-	AttendanceRuleHandler *handler.AttendanceRuleHandler
-	LeaveHandler          *handler.LeaveHandler
-	OvertimeHandler       *handler.OvertimeHandler
-	BusinessTripHandler   *handler.BusinessTripHandler
-	LeaveOfficeHandler    *handler.LeaveOfficeHandler
+	AttendanceHandler          *handler.AttendanceHandler
+	ShiftHandler               *handler.ShiftHandler
+	ScheduleHandler            *handler.ScheduleHandler
+	AttendanceRuleHandler      *handler.AttendanceRuleHandler
+	LeaveHandler               *handler.LeaveHandler
+	OvertimeHandler            *handler.OvertimeHandler
+	BusinessTripHandler        *handler.BusinessTripHandler
+	LeaveOfficeHandler         *handler.LeaveOfficeHandler
+	PunchCardSupplementHandler *handler.PunchCardSupplementHandler
 }

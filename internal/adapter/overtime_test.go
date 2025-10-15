@@ -102,7 +102,7 @@ func TestOvertimeAdapter_CreateOvertime(t *testing.T) {
 	t.Run("创建成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		tenantID := uuid.New()
 		employeeID := uuid.New()
@@ -135,7 +135,7 @@ func TestOvertimeAdapter_ApproveOvertime(t *testing.T) {
 	t.Run("批准成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		overtimeID := uuid.New()
 		approverID := uuid.New()
@@ -160,7 +160,7 @@ func TestOvertimeAdapter_UseCompOffDays(t *testing.T) {
 	t.Run("使用调休成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		tenantID := uuid.New()
 		employeeID := uuid.New()
@@ -188,7 +188,7 @@ func TestOvertimeAdapter_ListOvertimes(t *testing.T) {
 	t.Run("列表查询成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		tenantID := uuid.New()
 		overtimes := []*model.Overtime{
@@ -226,7 +226,7 @@ func TestOvertimeAdapter_GetOvertime(t *testing.T) {
 	t.Run("获取详情成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		overtimeID := uuid.New()
 		overtime := &model.Overtime{
@@ -261,7 +261,7 @@ func TestOvertimeAdapter_RejectOvertime(t *testing.T) {
 	t.Run("拒绝成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		overtimeID := uuid.New()
 		approverID := uuid.New()
@@ -287,7 +287,7 @@ func TestOvertimeAdapter_Security_InvalidUUID(t *testing.T) {
 	t.Run("CreateOvertime_无效TenantID", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		req := &hrmv1.CreateOvertimeRequest{
 			TenantId:   "invalid-uuid",
@@ -304,7 +304,7 @@ func TestOvertimeAdapter_Security_InvalidUUID(t *testing.T) {
 	t.Run("GetOvertime_无效ID", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		req := &hrmv1.GetOvertimeRequest{
 			Id: "not-a-uuid",
@@ -322,7 +322,7 @@ func TestOvertimeAdapter_Security_BoundaryValues(t *testing.T) {
 	t.Run("UseCompOffDays_负数天数", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		tenantID := uuid.New()
 		employeeID := uuid.New()
@@ -348,7 +348,7 @@ func TestOvertimeAdapter_UpdateOvertime(t *testing.T) {
 	t.Run("更新成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		overtimeID := uuid.New()
 		existingOvertime := &model.Overtime{
@@ -382,7 +382,7 @@ func TestOvertimeAdapter_UpdateOvertime(t *testing.T) {
 	t.Run("更新失败_无效ID", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		req := &hrmv1.UpdateOvertimeRequest{
 			Id:       "invalid-uuid",
@@ -401,7 +401,7 @@ func TestOvertimeAdapter_DeleteOvertime(t *testing.T) {
 	t.Run("删除成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		overtimeID := uuid.New()
 
@@ -422,7 +422,7 @@ func TestOvertimeAdapter_DeleteOvertime(t *testing.T) {
 	t.Run("删除失败_无效ID", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		req := &hrmv1.DeleteOvertimeRequest{
 			Id: "invalid-uuid",
@@ -440,7 +440,7 @@ func TestOvertimeAdapter_ListEmployeeOvertimes(t *testing.T) {
 	t.Run("查询成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		tenantID := uuid.New()
 		employeeID := uuid.New()
@@ -471,7 +471,7 @@ func TestOvertimeAdapter_ListPendingOvertimes(t *testing.T) {
 	t.Run("查询成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		tenantID := uuid.New()
 		pendingOvertimes := []*model.Overtime{
@@ -498,7 +498,7 @@ func TestOvertimeAdapter_SubmitOvertime(t *testing.T) {
 	t.Run("提交成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		overtimeID := uuid.New()
 		submitterID := uuid.New()
@@ -520,7 +520,7 @@ func TestOvertimeAdapter_SubmitOvertime(t *testing.T) {
 	t.Run("提交失败_无效OvertimeID", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		req := &hrmv1.SubmitOvertimeRequest{
 			OvertimeId:  "invalid",
@@ -540,7 +540,7 @@ func TestOvertimeAdapter_SumOvertimeHours(t *testing.T) {
 	t.Run("统计成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		tenantID := uuid.New()
 		employeeID := uuid.New()
@@ -569,7 +569,7 @@ func TestOvertimeAdapter_GetCompOffDays(t *testing.T) {
 	t.Run("统计成功", func(t *testing.T) {
 		mockService := new(MockOvertimeService)
 		overtimeHandler := handler.NewOvertimeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, overtimeHandler, nil, nil, nil, nil)
 
 		tenantID := uuid.New()
 		employeeID := uuid.New()

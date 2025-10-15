@@ -204,3 +204,70 @@ type LeaveOffice struct {
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 }
+
+// PunchCardSupplement 补卡申请记录
+type PunchCardSupplement struct {
+	ID       uuid.UUID `json:"id"`
+	TenantID uuid.UUID `json:"tenant_id"`
+
+	// 申请人信息（关联 organization.employees）
+	EmployeeID   uuid.UUID `json:"employee_id"`   // 对应 organization.employees.id
+	EmployeeName string    `json:"employee_name"` // 冗余
+	DepartmentID uuid.UUID `json:"department_id"` // 冗余
+
+	// 补卡信息
+	SupplementDate time.Time            `json:"supplement_date"` // 补卡日期
+	SupplementType SupplementType       `json:"supplement_type"` // 补卡类型：checkin/checkout
+	SupplementTime time.Time            `json:"supplement_time"` // 补卡时间
+	MissingType    PunchCardMissingType `json:"missing_type"`    // 缺卡类型：forgot/malfunction/other
+	Reason         string               `json:"reason"`          // 补卡原因
+	Evidence       []SupplementEvidence `json:"evidence"`        // 证明材料
+
+	// 关联的考勤记录
+	AttendanceRecordID *uuid.UUID `json:"attendance_record_id,omitempty"` // 关联的考勤记录ID
+
+	// 审批信息
+	ApprovalID     *uuid.UUID `json:"approval_id,omitempty"`
+	ApprovalStatus string     `json:"approval_status"` // pending, approved, rejected
+	ApprovedBy     *uuid.UUID `json:"approved_by,omitempty"`
+	ApprovedAt     *time.Time `json:"approved_at,omitempty"`
+	RejectReason   string     `json:"reject_reason,omitempty"`
+
+	// 处理状态
+	ProcessStatus string     `json:"process_status"` // pending, processed（已补卡）, cancelled
+	ProcessedAt   *time.Time `json:"processed_at,omitempty"`
+	ProcessedBy   *uuid.UUID `json:"processed_by,omitempty"`
+
+	// 备注
+	Remark string `json:"remark,omitempty"`
+
+	// 审计字段
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+}
+
+// SupplementType 补卡类型
+type SupplementType string
+
+const (
+	SupplementTypeCheckIn  SupplementType = "checkin"  // 上班打卡
+	SupplementTypeCheckOut SupplementType = "checkout" // 下班打卡
+)
+
+// PunchCardMissingType 缺卡类型
+type PunchCardMissingType string
+
+const (
+	MissingTypeForgot      PunchCardMissingType = "forgot"      // 忘记打卡
+	MissingTypeMalfunction PunchCardMissingType = "malfunction" // 设备故障
+	MissingTypeOutside     PunchCardMissingType = "outside"     // 外出办公
+	MissingTypeOther       PunchCardMissingType = "other"       // 其他原因
+)
+
+// SupplementEvidence 补卡证明材料
+type SupplementEvidence struct {
+	Type        string `json:"type"`        // 类型：image/document/other
+	URL         string `json:"url"`         // 文件URL
+	Description string `json:"description"` // 描述
+}

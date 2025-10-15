@@ -19,15 +19,17 @@ type HRMAdapter struct {
 	hrmv1.UnimplementedLeaveQuotaServiceServer
 	hrmv1.UnimplementedBusinessTripServiceServer
 	hrmv1.UnimplementedLeaveOfficeServiceServer
+	hrmv1.UnimplementedPunchCardSupplementServiceServer
 
-	attendanceHandler     *handler.AttendanceHandler
-	shiftHandler          *handler.ShiftHandler
-	scheduleHandler       *handler.ScheduleHandler
-	attendanceRuleHandler *handler.AttendanceRuleHandler
-	overtimeHandler       *handler.OvertimeHandler
-	leaveHandler          *handler.LeaveHandler
-	businessTripHandler   *handler.BusinessTripHandler
-	leaveOfficeHandler    *handler.LeaveOfficeHandler
+	attendanceHandler          *handler.AttendanceHandler
+	shiftHandler               *handler.ShiftHandler
+	scheduleHandler            *handler.ScheduleHandler
+	attendanceRuleHandler      *handler.AttendanceRuleHandler
+	overtimeHandler            *handler.OvertimeHandler
+	leaveHandler               *handler.LeaveHandler
+	businessTripHandler        *handler.BusinessTripHandler
+	leaveOfficeHandler         *handler.LeaveOfficeHandler
+	punchCardSupplementHandler *handler.PunchCardSupplementHandler
 }
 
 // NewHRMAdapter 创建 HRM 适配器
@@ -40,16 +42,18 @@ func NewHRMAdapter(
 	leaveHandler *handler.LeaveHandler,
 	businessTripHandler *handler.BusinessTripHandler,
 	leaveOfficeHandler *handler.LeaveOfficeHandler,
+	punchCardSupplementHandler *handler.PunchCardSupplementHandler,
 ) *HRMAdapter {
 	return &HRMAdapter{
-		attendanceHandler:     attendanceHandler,
-		shiftHandler:          shiftHandler,
-		scheduleHandler:       scheduleHandler,
-		attendanceRuleHandler: attendanceRuleHandler,
-		overtimeHandler:       overtimeHandler,
-		leaveHandler:          leaveHandler,
-		businessTripHandler:   businessTripHandler,
-		leaveOfficeHandler:    leaveOfficeHandler,
+		attendanceHandler:          attendanceHandler,
+		shiftHandler:               shiftHandler,
+		scheduleHandler:            scheduleHandler,
+		attendanceRuleHandler:      attendanceRuleHandler,
+		overtimeHandler:            overtimeHandler,
+		leaveHandler:               leaveHandler,
+		businessTripHandler:        businessTripHandler,
+		leaveOfficeHandler:         leaveOfficeHandler,
+		punchCardSupplementHandler: punchCardSupplementHandler,
 	}
 }
 
@@ -373,4 +377,53 @@ func (a *HRMAdapter) ApproveLeaveOffice(ctx context.Context, req *hrmv1.ApproveL
 
 func (a *HRMAdapter) RejectLeaveOffice(ctx context.Context, req *hrmv1.RejectLeaveOfficeRequest) (*hrmv1.RejectLeaveOfficeResponse, error) {
 	return a.leaveOfficeHandler.RejectLeaveOffice(ctx, req)
+}
+
+// PunchCardSupplementService methods (delegate to handler)
+func (a *HRMAdapter) CreatePunchCardSupplement(ctx context.Context, req *hrmv1.CreatePunchCardSupplementRequest) (*hrmv1.PunchCardSupplementResponse, error) {
+	return a.punchCardSupplementHandler.CreatePunchCardSupplement(ctx, req)
+}
+
+func (a *HRMAdapter) UpdatePunchCardSupplement(ctx context.Context, req *hrmv1.UpdatePunchCardSupplementRequest) (*hrmv1.PunchCardSupplementResponse, error) {
+	return a.punchCardSupplementHandler.UpdatePunchCardSupplement(ctx, req)
+}
+
+func (a *HRMAdapter) DeletePunchCardSupplement(ctx context.Context, req *hrmv1.DeletePunchCardSupplementRequest) (*hrmv1.DeletePunchCardSupplementResponse, error) {
+	return a.punchCardSupplementHandler.DeletePunchCardSupplement(ctx, req)
+}
+
+func (a *HRMAdapter) GetPunchCardSupplement(ctx context.Context, req *hrmv1.GetPunchCardSupplementRequest) (*hrmv1.PunchCardSupplementResponse, error) {
+	return a.punchCardSupplementHandler.GetPunchCardSupplement(ctx, req)
+}
+
+func (a *HRMAdapter) ListPunchCardSupplements(ctx context.Context, req *hrmv1.ListPunchCardSupplementsRequest) (*hrmv1.ListPunchCardSupplementsResponse, error) {
+	return a.punchCardSupplementHandler.ListPunchCardSupplements(ctx, req)
+}
+
+func (a *HRMAdapter) ListEmployeePunchCardSupplements(ctx context.Context, req *hrmv1.ListEmployeePunchCardSupplementsRequest) (*hrmv1.ListPunchCardSupplementsResponse, error) {
+	return a.punchCardSupplementHandler.ListEmployeePunchCardSupplements(ctx, req)
+}
+
+func (a *HRMAdapter) ListPendingPunchCardSupplements(ctx context.Context, req *hrmv1.ListPendingPunchCardSupplementsRequest) (*hrmv1.ListPunchCardSupplementsResponse, error) {
+	return a.punchCardSupplementHandler.ListPendingPunchCardSupplements(ctx, req)
+}
+
+func (a *HRMAdapter) SubmitPunchCardSupplement(ctx context.Context, req *hrmv1.SubmitPunchCardSupplementRequest) (*hrmv1.SubmitPunchCardSupplementResponse, error) {
+	return a.punchCardSupplementHandler.SubmitPunchCardSupplement(ctx, req)
+}
+
+func (a *HRMAdapter) ApprovePunchCardSupplement(ctx context.Context, req *hrmv1.ApprovePunchCardSupplementRequest) (*hrmv1.ApprovePunchCardSupplementResponse, error) {
+	return a.punchCardSupplementHandler.ApprovePunchCardSupplement(ctx, req)
+}
+
+func (a *HRMAdapter) RejectPunchCardSupplement(ctx context.Context, req *hrmv1.RejectPunchCardSupplementRequest) (*hrmv1.RejectPunchCardSupplementResponse, error) {
+	return a.punchCardSupplementHandler.RejectPunchCardSupplement(ctx, req)
+}
+
+func (a *HRMAdapter) ProcessPunchCardSupplement(ctx context.Context, req *hrmv1.ProcessPunchCardSupplementRequest) (*hrmv1.ProcessPunchCardSupplementResponse, error) {
+	return a.punchCardSupplementHandler.ProcessPunchCardSupplement(ctx, req)
+}
+
+func (a *HRMAdapter) CancelPunchCardSupplement(ctx context.Context, req *hrmv1.CancelPunchCardSupplementRequest) (*hrmv1.CancelPunchCardSupplementResponse, error) {
+	return a.punchCardSupplementHandler.CancelPunchCardSupplement(ctx, req)
 }

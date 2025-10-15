@@ -113,6 +113,7 @@ func NewGRPCServer(
 	hrmv1.RegisterLeaveQuotaServiceServer(srv, hrmAdapter)
 	hrmv1.RegisterBusinessTripServiceServer(srv, hrmAdapter)
 	hrmv1.RegisterLeaveOfficeServiceServer(srv, hrmAdapter)
+	hrmv1.RegisterPunchCardSupplementServiceServer(srv, hrmAdapter)
 
 	return srv
 }

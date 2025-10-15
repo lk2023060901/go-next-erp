@@ -162,3 +162,46 @@ type AttendanceSummaryFilter struct {
 	Status       *string
 	Keyword      string
 }
+
+// PunchCardSupplementRepository 补卡申请仓储接口
+type PunchCardSupplementRepository interface {
+	// Create 创建补卡申请
+	Create(ctx context.Context, supplement *model.PunchCardSupplement) error
+
+	// FindByID 根据ID查找
+	FindByID(ctx context.Context, id uuid.UUID) (*model.PunchCardSupplement, error)
+
+	// Update 更新补卡申请
+	Update(ctx context.Context, supplement *model.PunchCardSupplement) error
+
+	// Delete 删除补卡申请
+	Delete(ctx context.Context, id uuid.UUID) error
+
+	// List 列表查询（分页）
+	List(ctx context.Context, tenantID uuid.UUID, filter *PunchCardSupplementFilter, offset, limit int) ([]*model.PunchCardSupplement, int, error)
+
+	// FindByEmployee 查询员工补卡申请记录
+	FindByEmployee(ctx context.Context, tenantID, employeeID uuid.UUID, year int) ([]*model.PunchCardSupplement, error)
+
+	// FindPending 查询待审批的补卡申请
+	FindPending(ctx context.Context, tenantID uuid.UUID) ([]*model.PunchCardSupplement, error)
+
+	// FindByDate 查询指定日期的补卡申请
+	FindByDate(ctx context.Context, tenantID, employeeID uuid.UUID, date time.Time, supplementType model.SupplementType) (*model.PunchCardSupplement, error)
+
+	// CountByEmployee 统计员工补卡次数
+	CountByEmployee(ctx context.Context, tenantID, employeeID uuid.UUID, startDate, endDate time.Time) (int, error)
+}
+
+// PunchCardSupplementFilter 补卡申请查询过滤器
+type PunchCardSupplementFilter struct {
+	EmployeeID     *uuid.UUID
+	DepartmentID   *uuid.UUID
+	SupplementType *model.SupplementType
+	MissingType    *model.PunchCardMissingType
+	ApprovalStatus *string
+	ProcessStatus  *string
+	StartDate      *time.Time
+	EndDate        *time.Time
+	Keyword        string
+}

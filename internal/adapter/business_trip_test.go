@@ -102,7 +102,7 @@ func TestBusinessTripAdapter_CreateBusinessTrip(t *testing.T) {
 	t.Run("创建成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tenantID := uuid.New()
 		employeeID := uuid.New()
@@ -140,7 +140,7 @@ func TestBusinessTripAdapter_CreateBusinessTrip(t *testing.T) {
 	t.Run("创建失败_无效TenantID", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		req := &hrmv1.CreateBusinessTripRequest{
 			TenantId:   "invalid-uuid",
@@ -160,7 +160,7 @@ func TestBusinessTripAdapter_UpdateBusinessTrip(t *testing.T) {
 	t.Run("更新成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tripID := uuid.New()
 		existingTrip := &model.BusinessTrip{
@@ -193,7 +193,7 @@ func TestBusinessTripAdapter_UpdateBusinessTrip(t *testing.T) {
 	t.Run("更新失败_无效ID", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		req := &hrmv1.UpdateBusinessTripRequest{
 			Id: "invalid-uuid",
@@ -211,7 +211,7 @@ func TestBusinessTripAdapter_DeleteBusinessTrip(t *testing.T) {
 	t.Run("删除成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tripID := uuid.New()
 
@@ -232,7 +232,7 @@ func TestBusinessTripAdapter_DeleteBusinessTrip(t *testing.T) {
 	t.Run("删除失败_服务错误", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tripID := uuid.New()
 
@@ -255,7 +255,7 @@ func TestBusinessTripAdapter_GetBusinessTrip(t *testing.T) {
 	t.Run("获取成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tripID := uuid.New()
 		trip := &model.BusinessTrip{
@@ -291,7 +291,7 @@ func TestBusinessTripAdapter_ListBusinessTrips(t *testing.T) {
 	t.Run("列表查询成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tenantID := uuid.New()
 		trips := []*model.BusinessTrip{
@@ -333,7 +333,7 @@ func TestBusinessTripAdapter_ListBusinessTrips(t *testing.T) {
 	t.Run("列表查询_带过滤条件", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tenantID := uuid.New()
 		employeeID := uuid.New()
@@ -364,7 +364,7 @@ func TestBusinessTripAdapter_SubmitBusinessTrip(t *testing.T) {
 	t.Run("提交成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tripID := uuid.New()
 		submitterID := uuid.New()
@@ -387,7 +387,7 @@ func TestBusinessTripAdapter_SubmitBusinessTrip(t *testing.T) {
 	t.Run("提交失败_无效ID", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		req := &hrmv1.SubmitBusinessTripRequest{
 			BusinessTripId: "invalid",
@@ -406,7 +406,7 @@ func TestBusinessTripAdapter_ApproveBusinessTrip(t *testing.T) {
 	t.Run("批准成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tripID := uuid.New()
 		approverID := uuid.New()
@@ -432,7 +432,7 @@ func TestBusinessTripAdapter_RejectBusinessTrip(t *testing.T) {
 	t.Run("拒绝成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tripID := uuid.New()
 		approverID := uuid.New()
@@ -458,7 +458,7 @@ func TestBusinessTripAdapter_SubmitTripReport(t *testing.T) {
 	t.Run("提交报告成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tripID := uuid.New()
 		trip := &model.BusinessTrip{
@@ -490,7 +490,7 @@ func TestBusinessTripAdapter_Security_BoundaryValues(t *testing.T) {
 	t.Run("EstimatedCost_负数", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		mockService.On("Create", mock.Anything, mock.MatchedBy(func(trip *model.BusinessTrip) bool {
 			return trip.EstimatedCost == -1000.0
@@ -516,7 +516,7 @@ func TestBusinessTripAdapter_Security_BoundaryValues(t *testing.T) {
 	t.Run("Duration_零值", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		now := time.Now()
 		mockService.On("Create", mock.Anything, mock.Anything).Return(assert.AnError).Once()
@@ -543,7 +543,7 @@ func TestBusinessTripAdapter_ListEmployeeBusinessTrips(t *testing.T) {
 	t.Run("查询成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		employeeID := uuid.New()
 		trips := []*model.BusinessTrip{
@@ -572,7 +572,7 @@ func TestBusinessTripAdapter_ListPendingBusinessTrips(t *testing.T) {
 	t.Run("查询成功", func(t *testing.T) {
 		mockService := new(MockBusinessTripService)
 		tripHandler := handler.NewBusinessTripHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, tripHandler, nil, nil)
 
 		tenantID := uuid.New()
 		pendingTrips := []*model.BusinessTrip{

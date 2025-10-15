@@ -84,7 +84,7 @@ func TestLeaveOfficeAdapter_CreateLeaveOffice(t *testing.T) {
 	t.Run("创建成功", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		tenantID := uuid.New()
 		employeeID := uuid.New()
@@ -121,7 +121,7 @@ func TestLeaveOfficeAdapter_CreateLeaveOffice(t *testing.T) {
 	t.Run("创建失败_无效EmployeeID", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		req := &hrmv1.CreateLeaveOfficeRequest{
 			TenantId:   uuid.New().String(),
@@ -141,7 +141,7 @@ func TestLeaveOfficeAdapter_UpdateLeaveOffice(t *testing.T) {
 	t.Run("更新成功", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		leaveOfficeID := uuid.New()
 		existingLeaveOffice := &model.LeaveOffice{
@@ -173,7 +173,7 @@ func TestLeaveOfficeAdapter_UpdateLeaveOffice(t *testing.T) {
 	t.Run("更新失败_无效ID", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		req := &hrmv1.UpdateLeaveOfficeRequest{
 			Id: "invalid-uuid",
@@ -191,7 +191,7 @@ func TestLeaveOfficeAdapter_DeleteLeaveOffice(t *testing.T) {
 	t.Run("删除成功", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		leaveOfficeID := uuid.New()
 
@@ -212,7 +212,7 @@ func TestLeaveOfficeAdapter_DeleteLeaveOffice(t *testing.T) {
 	t.Run("删除失败_服务错误", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		leaveOfficeID := uuid.New()
 
@@ -235,7 +235,7 @@ func TestLeaveOfficeAdapter_GetLeaveOffice(t *testing.T) {
 	t.Run("获取成功", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		leaveOfficeID := uuid.New()
 		leaveOffice := &model.LeaveOffice{
@@ -271,7 +271,7 @@ func TestLeaveOfficeAdapter_ListLeaveOffices(t *testing.T) {
 	t.Run("列表查询成功", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		tenantID := uuid.New()
 		leaveOffices := []*model.LeaveOffice{
@@ -313,7 +313,7 @@ func TestLeaveOfficeAdapter_ListLeaveOffices(t *testing.T) {
 	t.Run("列表查询_带过滤条件", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		tenantID := uuid.New()
 		departmentID := uuid.New()
@@ -344,7 +344,7 @@ func TestLeaveOfficeAdapter_SubmitLeaveOffice(t *testing.T) {
 	t.Run("提交成功", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		leaveOfficeID := uuid.New()
 		submitterID := uuid.New()
@@ -367,7 +367,7 @@ func TestLeaveOfficeAdapter_SubmitLeaveOffice(t *testing.T) {
 	t.Run("提交失败_无效ID", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		req := &hrmv1.SubmitLeaveOfficeRequest{
 			LeaveOfficeId: "invalid",
@@ -386,7 +386,7 @@ func TestLeaveOfficeAdapter_ApproveLeaveOffice(t *testing.T) {
 	t.Run("批准成功", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		leaveOfficeID := uuid.New()
 		approverID := uuid.New()
@@ -412,7 +412,7 @@ func TestLeaveOfficeAdapter_RejectLeaveOffice(t *testing.T) {
 	t.Run("拒绝成功", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		leaveOfficeID := uuid.New()
 		approverID := uuid.New()
@@ -438,7 +438,7 @@ func TestLeaveOfficeAdapter_Security_DurationLimit(t *testing.T) {
 	t.Run("Duration_超过24小时", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		now := time.Now()
 		mockService.On("Create", mock.Anything, mock.Anything).Return(assert.AnError).Once()
@@ -463,7 +463,7 @@ func TestLeaveOfficeAdapter_Security_DurationLimit(t *testing.T) {
 	t.Run("Duration_正常范围", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		now := time.Now()
 		mockService.On("Create", mock.Anything, mock.MatchedBy(func(lo *model.LeaveOffice) bool {
@@ -494,7 +494,7 @@ func TestLeaveOfficeAdapter_ListEmployeeLeaveOffices(t *testing.T) {
 	t.Run("查询成功", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		employeeID := uuid.New()
 		leaveOffices := []*model.LeaveOffice{
@@ -523,7 +523,7 @@ func TestLeaveOfficeAdapter_ListPendingLeaveOffices(t *testing.T) {
 	t.Run("查询成功", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		tenantID := uuid.New()
 		pendingLeaveOffices := []*model.LeaveOffice{
@@ -555,7 +555,7 @@ func TestLeaveOfficeAdapter_Security_InvalidUUID(t *testing.T) {
 	t.Run("CreateLeaveOffice_无效DepartmentID", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		req := &hrmv1.CreateLeaveOfficeRequest{
 			TenantId:     uuid.New().String(),
@@ -573,7 +573,7 @@ func TestLeaveOfficeAdapter_Security_InvalidUUID(t *testing.T) {
 	t.Run("GetLeaveOffice_无效ID", func(t *testing.T) {
 		mockService := new(MockLeaveOfficeService)
 		leaveOfficeHandler := handler.NewLeaveOfficeHandler(mockService)
-		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler)
+		adapter := NewHRMAdapter(nil, nil, nil, nil, nil, nil, nil, leaveOfficeHandler, nil)
 
 		req := &hrmv1.GetLeaveOfficeRequest{
 			Id: "not-a-uuid",
