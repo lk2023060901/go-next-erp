@@ -1,0 +1,285 @@
+syntax = "proto3";
+
+package api.hrm.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/hrm/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// 加班服务
+service OvertimeService {
+  // 创建加班申请
+  rpc CreateOvertime(CreateOvertimeRequest) returns (OvertimeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/overtimes"
+      body: "*"
+    };
+  }
+  
+  // 更新加班申请
+  rpc UpdateOvertime(UpdateOvertimeRequest) returns (OvertimeResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/hrm/overtimes/{id}"
+      body: "*"
+    };
+  }
+  
+  // 删除加班申请
+  rpc DeleteOvertime(DeleteOvertimeRequest) returns (DeleteOvertimeResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/hrm/overtimes/{id}"
+    };
+  }
+  
+  // 获取加班详情
+  rpc GetOvertime(GetOvertimeRequest) returns (OvertimeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/overtimes/{id}"
+    };
+  }
+  
+  // 列表查询加班记录
+  rpc ListOvertimes(ListOvertimesRequest) returns (ListOvertimesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/overtimes"
+    };
+  }
+  
+  // 查询员工加班记录
+  rpc ListEmployeeOvertimes(ListEmployeeOvertimesRequest) returns (ListOvertimesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/employees/{employee_id}/overtimes"
+    };
+  }
+  
+  // 查询待审批的加班
+  rpc ListPendingOvertimes(ListPendingOvertimesRequest) returns (ListOvertimesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/overtimes/pending"
+    };
+  }
+  
+  // 提交加班审批
+  rpc SubmitOvertime(SubmitOvertimeRequest) returns (SubmitOvertimeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/overtimes/{overtime_id}/submit"
+      body: "*"
+    };
+  }
+  
+  // 批准加班
+  rpc ApproveOvertime(ApproveOvertimeRequest) returns (ApproveOvertimeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/overtimes/{overtime_id}/approve"
+      body: "*"
+    };
+  }
+  
+  // 拒绝加班
+  rpc RejectOvertime(RejectOvertimeRequest) returns (RejectOvertimeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/overtimes/{overtime_id}/reject"
+      body: "*"
+    };
+  }
+  
+  // 统计员工加班时长
+  rpc SumOvertimeHours(SumOvertimeHoursRequest) returns (SumOvertimeHoursResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/employees/{employee_id}/overtime-hours"
+    };
+  }
+  
+  // 统计可调休天数
+  rpc GetCompOffDays(GetCompOffDaysRequest) returns (GetCompOffDaysResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/employees/{employee_id}/comp-off-days"
+    };
+  }
+  
+  // 使用调休
+  rpc UseCompOffDays(UseCompOffDaysRequest) returns (UseCompOffDaysResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/employees/{employee_id}/comp-off-days/use"
+      body: "*"
+    };
+  }
+}
+
+// ==================== 消息定义 ====================
+
+// 加班记录
+message OvertimeResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string employee_id = 3;
+  string employee_name = 4;
+  string department_id = 5;
+  google.protobuf.Timestamp start_time = 6;
+  google.protobuf.Timestamp end_time = 7;
+  double duration = 8;
+  string overtime_type = 9;  // workday, weekend, holiday
+  string pay_type = 10;      // money, leave
+  double pay_rate = 11;
+  string reason = 12;
+  repeated string tasks = 13;
+  string approval_status = 14;  // pending, approved, rejected
+  string approved_by = 15;
+  google.protobuf.Timestamp approved_at = 16;
+  string reject_reason = 17;
+  double comp_off_days = 18;
+  double comp_off_used = 19;
+  google.protobuf.Timestamp comp_off_expire_at = 20;
+  string remark = 21;
+  google.protobuf.Timestamp created_at = 22;
+  google.protobuf.Timestamp updated_at = 23;
+}
+
+// ==================== 请求定义 ====================
+
+// 创建加班申请
+message CreateOvertimeRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string employee_name = 3;
+  string department_id = 4;
+  google.protobuf.Timestamp start_time = 5;
+  google.protobuf.Timestamp end_time = 6;
+  double duration = 7;
+  string overtime_type = 8;  // workday, weekend, holiday
+  string pay_type = 9;       // money, leave
+  string reason = 10;
+  repeated string tasks = 11;
+  string remark = 12;
+}
+
+// 更新加班申请
+message UpdateOvertimeRequest {
+  string id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  double duration = 4;
+  string overtime_type = 5;
+  string pay_type = 6;
+  string reason = 7;
+  repeated string tasks = 8;
+  string remark = 9;
+}
+
+// 删除加班申请
+message DeleteOvertimeRequest {
+  string id = 1;
+}
+
+message DeleteOvertimeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 获取加班详情
+message GetOvertimeRequest {
+  string id = 1;
+}
+
+// 列表查询加班记录
+message ListOvertimesRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string department_id = 3;
+  string overtime_type = 4;
+  string approval_status = 5;
+  google.protobuf.Timestamp start_date = 6;
+  google.protobuf.Timestamp end_date = 7;
+  string keyword = 8;
+  int32 page = 9;
+  int32 page_size = 10;
+}
+
+message ListOvertimesResponse {
+  repeated OvertimeResponse items = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 查询员工加班记录
+message ListEmployeeOvertimesRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  int32 year = 3;
+}
+
+// 查询待审批的加班
+message ListPendingOvertimesRequest {
+  string tenant_id = 1;
+}
+
+// 提交加班审批
+message SubmitOvertimeRequest {
+  string overtime_id = 1;
+  string submitter_id = 2;
+}
+
+message SubmitOvertimeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 批准加班
+message ApproveOvertimeRequest {
+  string overtime_id = 1;
+  string approver_id = 2;
+}
+
+message ApproveOvertimeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 拒绝加班
+message RejectOvertimeRequest {
+  string overtime_id = 1;
+  string approver_id = 2;
+  string reason = 3;
+}
+
+message RejectOvertimeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 统计员工加班时长
+message SumOvertimeHoursRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+}
+
+message SumOvertimeHoursResponse {
+  double total_hours = 1;
+}
+
+// 统计可调休天数
+message GetCompOffDaysRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+}
+
+message GetCompOffDaysResponse {
+  double available_days = 1;
+}
+
+// 使用调休
+message UseCompOffDaysRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  double days = 3;
+}
+
+message UseCompOffDaysResponse {
+  bool success = 1;
+  string message = 2;
+  double remaining_days = 3;
+}

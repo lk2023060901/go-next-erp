@@ -12,6 +12,7 @@ import (
 	authv1 "github.com/lk2023060901/go-next-erp/api/auth/v1"
 	filev1 "github.com/lk2023060901/go-next-erp/api/file/v1"
 	formv1 "github.com/lk2023060901/go-next-erp/api/form/v1"
+	hrmv1 "github.com/lk2023060901/go-next-erp/api/hrm/v1"
 	notifyv1 "github.com/lk2023060901/go-next-erp/api/notification/v1"
 	orgv1 "github.com/lk2023060901/go-next-erp/api/organization/v1"
 	"github.com/lk2023060901/go-next-erp/internal/adapter"
@@ -32,6 +33,7 @@ func NewGRPCServer(
 	notifyAdapter *adapter.NotificationAdapter,
 	approvalAdapter *adapter.ApprovalAdapter,
 	fileAdapter *adapter.FileAdapter,
+	hrmAdapter *adapter.HRMAdapter,
 	logger log.Logger,
 ) *grpc.Server {
 	// 解析超时配置
@@ -99,6 +101,18 @@ func NewGRPCServer(
 
 	// 注册 File 服务
 	filev1.RegisterFileServiceServer(srv, fileAdapter)
+
+	// 注册 HRM 服务
+	hrmv1.RegisterAttendanceServiceServer(srv, hrmAdapter)
+	hrmv1.RegisterShiftServiceServer(srv, hrmAdapter)
+	hrmv1.RegisterScheduleServiceServer(srv, hrmAdapter)
+	hrmv1.RegisterAttendanceRuleServiceServer(srv, hrmAdapter)
+	hrmv1.RegisterOvertimeServiceServer(srv, hrmAdapter)
+	hrmv1.RegisterLeaveTypeServiceServer(srv, hrmAdapter)
+	hrmv1.RegisterLeaveRequestServiceServer(srv, hrmAdapter)
+	hrmv1.RegisterLeaveQuotaServiceServer(srv, hrmAdapter)
+	hrmv1.RegisterBusinessTripServiceServer(srv, hrmAdapter)
+	hrmv1.RegisterLeaveOfficeServiceServer(srv, hrmAdapter)
 
 	return srv
 }

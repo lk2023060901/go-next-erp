@@ -4,58 +4,167 @@ package api.hrm.v1;
 
 option go_package = "github.com/lk2023060901/go-next-erp/api/hrm/v1;v1";
 
+import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
 // 请假类型服务
 service LeaveTypeService {
   // 创建请假类型
-  rpc CreateLeaveType(CreateLeaveTypeRequest) returns (LeaveTypeResponse);
+  rpc CreateLeaveType(CreateLeaveTypeRequest) returns (LeaveTypeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-types"
+      body: "*"
+    };
+  }
+  
   // 更新请假类型
-  rpc UpdateLeaveType(UpdateLeaveTypeRequest) returns (LeaveTypeResponse);
+  rpc UpdateLeaveType(UpdateLeaveTypeRequest) returns (LeaveTypeResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/hrm/leave-types/{id}"
+      body: "*"
+    };
+  }
+  
   // 删除请假类型
-  rpc DeleteLeaveType(DeleteLeaveTypeRequest) returns (DeleteLeaveTypeResponse);
+  rpc DeleteLeaveType(DeleteLeaveTypeRequest) returns (DeleteLeaveTypeResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/hrm/leave-types/{id}"
+    };
+  }
+  
   // 获取请假类型详情
-  rpc GetLeaveType(GetLeaveTypeRequest) returns (LeaveTypeResponse);
+  rpc GetLeaveType(GetLeaveTypeRequest) returns (LeaveTypeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/leave-types/{id}"
+    };
+  }
+  
   // 列表查询请假类型
-  rpc ListLeaveTypes(ListLeaveTypesRequest) returns (ListLeaveTypesResponse);
+  rpc ListLeaveTypes(ListLeaveTypesRequest) returns (ListLeaveTypesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/leave-types"
+    };
+  }
+  
   // 获取启用的请假类型
-  rpc ListActiveLeaveTypes(ListActiveLeaveTypesRequest) returns (ListActiveLeaveTypesResponse);
+  rpc ListActiveLeaveTypes(ListActiveLeaveTypesRequest) returns (ListActiveLeaveTypesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/leave-types/active"
+    };
+  }
 }
 
 // 请假申请服务
 service LeaveRequestService {
   // 创建请假申请
-  rpc CreateLeaveRequest(CreateLeaveRequestRequest) returns (LeaveRequestResponse);
+  rpc CreateLeaveRequest(CreateLeaveRequestRequest) returns (LeaveRequestResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-requests"
+      body: "*"
+    };
+  }
+  
   // 更新请假申请
-  rpc UpdateLeaveRequest(UpdateLeaveRequestRequest) returns (LeaveRequestResponse);
+  rpc UpdateLeaveRequest(UpdateLeaveRequestRequest) returns (LeaveRequestResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/hrm/leave-requests/{id}"
+      body: "*"
+    };
+  }
+  
   // 提交请假申请
-  rpc SubmitLeaveRequest(SubmitLeaveRequestRequest) returns (SubmitLeaveRequestResponse);
+  rpc SubmitLeaveRequest(SubmitLeaveRequestRequest) returns (SubmitLeaveRequestResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-requests/{request_id}/submit"
+      body: "*"
+    };
+  }
+  
   // 撤回请假申请
-  rpc WithdrawLeaveRequest(WithdrawLeaveRequestRequest) returns (WithdrawLeaveRequestResponse);
+  rpc WithdrawLeaveRequest(WithdrawLeaveRequestRequest) returns (WithdrawLeaveRequestResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-requests/{request_id}/withdraw"
+      body: "*"
+    };
+  }
+  
   // 取消请假
-  rpc CancelLeaveRequest(CancelLeaveRequestRequest) returns (CancelLeaveRequestResponse);
+  rpc CancelLeaveRequest(CancelLeaveRequestRequest) returns (CancelLeaveRequestResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-requests/{request_id}/cancel"
+      body: "*"
+    };
+  }
+  
   // 获取请假详情
-  rpc GetLeaveRequest(GetLeaveRequestRequest) returns (LeaveRequestDetailResponse);
+  rpc GetLeaveRequest(GetLeaveRequestRequest) returns (LeaveRequestDetailResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/leave-requests/{request_id}"
+    };
+  }
+  
   // 查询我的请假记录
-  rpc ListMyLeaveRequests(ListMyLeaveRequestsRequest) returns (ListLeaveRequestsResponse);
+  rpc ListMyLeaveRequests(ListMyLeaveRequestsRequest) returns (ListLeaveRequestsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/leave-requests/my"
+    };
+  }
+  
   // 查询请假记录（管理员）
-  rpc ListLeaveRequests(ListLeaveRequestsRequest) returns (ListLeaveRequestsResponse);
+  rpc ListLeaveRequests(ListLeaveRequestsRequest) returns (ListLeaveRequestsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/leave-requests"
+    };
+  }
+  
   // 查询待我审批的请假
-  rpc ListPendingApprovals(ListPendingApprovalsRequest) returns (ListLeaveRequestsResponse);
+  rpc ListPendingApprovals(ListPendingApprovalsRequest) returns (ListLeaveRequestsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/leave-requests/pending-approvals"
+    };
+  }
+  
   // 批准请假
-  rpc ApproveLeaveRequest(ApproveLeaveRequestRequest) returns (ApproveLeaveRequestResponse);
+  rpc ApproveLeaveRequest(ApproveLeaveRequestRequest) returns (ApproveLeaveRequestResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-requests/{request_id}/approve"
+      body: "*"
+    };
+  }
+  
   // 拒绝请假
-  rpc RejectLeaveRequest(RejectLeaveRequestRequest) returns (RejectLeaveRequestResponse);
+  rpc RejectLeaveRequest(RejectLeaveRequestRequest) returns (RejectLeaveRequestResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-requests/{request_id}/reject"
+      body: "*"
+    };
+  }
 }
 
 // 请假额度服务
 service LeaveQuotaService {
   // 初始化员工额度
-  rpc InitEmployeeQuota(InitEmployeeQuotaRequest) returns (InitEmployeeQuotaResponse);
+  rpc InitEmployeeQuota(InitEmployeeQuotaRequest) returns (InitEmployeeQuotaResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-quotas/init"
+      body: "*"
+    };
+  }
+  
   // 更新额度
-  rpc UpdateQuota(UpdateQuotaRequest) returns (QuotaResponse);
+  rpc UpdateQuota(UpdateQuotaRequest) returns (QuotaResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/hrm/leave-quotas/{id}"
+      body: "*"
+    };
+  }
+  
   // 获取员工额度
-  rpc GetEmployeeQuotas(GetEmployeeQuotasRequest) returns (GetEmployeeQuotasResponse);
+  rpc GetEmployeeQuotas(GetEmployeeQuotasRequest) returns (GetEmployeeQuotasResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/employees/{employee_id}/leave-quotas"
+    };
+  }
 }
 
 // ==================== 消息定义 ====================

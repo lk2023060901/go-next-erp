@@ -151,6 +151,10 @@ type AttendanceSummary struct {
 	TripCount int     `json:"trip_count"` // 出差次数
 	TripDays  float64 `json:"trip_days"`  // 出差天数
 
+	// 外出统计
+	LeaveOfficeCount int     `json:"leave_office_count"` // 外出次数
+	LeaveOfficeHours float64 `json:"leave_office_hours"` // 外出小时数
+
 	// 工时统计
 	WorkHours         float64 `json:"work_hours"`          // 工作总时长
 	StandardWorkHours float64 `json:"standard_work_hours"` // 标准工时
@@ -163,4 +167,40 @@ type AttendanceSummary struct {
 	UpdatedAt   time.Time  `json:"updated_at"`
 	ConfirmedAt *time.Time `json:"confirmed_at,omitempty"`
 	ConfirmedBy *uuid.UUID `json:"confirmed_by,omitempty"`
+}
+
+// LeaveOffice 外出记录
+type LeaveOffice struct {
+	ID       uuid.UUID `json:"id"`
+	TenantID uuid.UUID `json:"tenant_id"`
+
+	// 申请人信息（关联 organization.employees）
+	EmployeeID   uuid.UUID `json:"employee_id"`   // 对应 organization.employees.id
+	EmployeeName string    `json:"employee_name"` // 冗余
+	DepartmentID uuid.UUID `json:"department_id"` // 冗余
+
+	// 外出时间
+	StartTime time.Time `json:"start_time"` // 开始时间
+	EndTime   time.Time `json:"end_time"`   // 结束时间
+	Duration  float64   `json:"duration"`   // 外出时长（小时）
+
+	// 外出信息
+	Destination string `json:"destination"` // 外出地点
+	Purpose     string `json:"purpose"`     // 外出事由
+	Contact     string `json:"contact"`     // 联系方式
+
+	// 审批信息
+	ApprovalID     *uuid.UUID `json:"approval_id,omitempty"`
+	ApprovalStatus string     `json:"approval_status"` // pending, approved, rejected
+	ApprovedBy     *uuid.UUID `json:"approved_by,omitempty"`
+	ApprovedAt     *time.Time `json:"approved_at,omitempty"`
+	RejectReason   string     `json:"reject_reason,omitempty"`
+
+	// 备注
+	Remark string `json:"remark,omitempty"`
+
+	// 审计字段
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 }

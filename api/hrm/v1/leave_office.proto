@@ -1,0 +1,226 @@
+syntax = "proto3";
+
+package api.hrm.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/hrm/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// 外出服务
+service LeaveOfficeService {
+  // 创建外出申请
+  rpc CreateLeaveOffice(CreateLeaveOfficeRequest) returns (LeaveOfficeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-offices"
+      body: "*"
+    };
+  }
+  
+  // 更新外出申请
+  rpc UpdateLeaveOffice(UpdateLeaveOfficeRequest) returns (LeaveOfficeResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/hrm/leave-offices/{id}"
+      body: "*"
+    };
+  }
+  
+  // 删除外出申请
+  rpc DeleteLeaveOffice(DeleteLeaveOfficeRequest) returns (DeleteLeaveOfficeResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/hrm/leave-offices/{id}"
+    };
+  }
+  
+  // 获取外出详情
+  rpc GetLeaveOffice(GetLeaveOfficeRequest) returns (LeaveOfficeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/leave-offices/{id}"
+    };
+  }
+  
+  // 列表查询外出记录
+  rpc ListLeaveOffices(ListLeaveOfficesRequest) returns (ListLeaveOfficesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/leave-offices"
+    };
+  }
+  
+  // 查询员工外出记录
+  rpc ListEmployeeLeaveOffices(ListEmployeeLeaveOfficesRequest) returns (ListLeaveOfficesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/employees/{employee_id}/leave-offices"
+    };
+  }
+  
+  // 查询待审批的外出
+  rpc ListPendingLeaveOffices(ListPendingLeaveOfficesRequest) returns (ListLeaveOfficesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/leave-offices/pending"
+    };
+  }
+  
+  // 提交外出审批
+  rpc SubmitLeaveOffice(SubmitLeaveOfficeRequest) returns (SubmitLeaveOfficeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-offices/{leave_office_id}/submit"
+      body: "*"
+    };
+  }
+  
+  // 批准外出
+  rpc ApproveLeaveOffice(ApproveLeaveOfficeRequest) returns (ApproveLeaveOfficeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-offices/{leave_office_id}/approve"
+      body: "*"
+    };
+  }
+  
+  // 拒绝外出
+  rpc RejectLeaveOffice(RejectLeaveOfficeRequest) returns (RejectLeaveOfficeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/leave-offices/{leave_office_id}/reject"
+      body: "*"
+    };
+  }
+}
+
+// ==================== 消息定义 ====================
+
+// 外出记录
+message LeaveOfficeResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string employee_id = 3;
+  string employee_name = 4;
+  string department_id = 5;
+  google.protobuf.Timestamp start_time = 6;
+  google.protobuf.Timestamp end_time = 7;
+  double duration = 8;  // 外出时长（小时）
+  string destination = 9;
+  string purpose = 10;
+  string contact = 11;
+  string approval_status = 12;  // pending, approved, rejected
+  string approved_by = 13;
+  google.protobuf.Timestamp approved_at = 14;
+  string reject_reason = 15;
+  string remark = 16;
+  google.protobuf.Timestamp created_at = 17;
+  google.protobuf.Timestamp updated_at = 18;
+}
+
+// ==================== 请求定义 ====================
+
+// 创建外出申请
+message CreateLeaveOfficeRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string employee_name = 3;
+  string department_id = 4;
+  google.protobuf.Timestamp start_time = 5;
+  google.protobuf.Timestamp end_time = 6;
+  string destination = 7;
+  string purpose = 8;
+  string contact = 9;
+  string remark = 10;
+}
+
+// 更新外出申请
+message UpdateLeaveOfficeRequest {
+  string id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  string destination = 4;
+  string purpose = 5;
+  string contact = 6;
+  string remark = 7;
+}
+
+// 删除外出申请
+message DeleteLeaveOfficeRequest {
+  string id = 1;
+}
+
+message DeleteLeaveOfficeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 获取外出详情
+message GetLeaveOfficeRequest {
+  string id = 1;
+}
+
+// 列表查询外出记录
+message ListLeaveOfficesRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string department_id = 3;
+  string approval_status = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+  string keyword = 7;
+  int32 page = 8;
+  int32 page_size = 9;
+}
+
+message ListLeaveOfficesResponse {
+  repeated LeaveOfficeResponse items = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 查询员工外出记录
+message ListEmployeeLeaveOfficesRequest {
+  string employee_id = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+  string approval_status = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+// 查询待审批的外出
+message ListPendingLeaveOfficesRequest {
+  string tenant_id = 1;
+  string approver_id = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 提交外出审批
+message SubmitLeaveOfficeRequest {
+  string leave_office_id = 1;
+  string submitter_id = 2;
+}
+
+message SubmitLeaveOfficeResponse {
+  bool success = 1;
+  string message = 2;
+  string workflow_id = 3;
+}
+
+// 批准外出
+message ApproveLeaveOfficeRequest {
+  string leave_office_id = 1;
+  string approver_id = 2;
+  string comment = 3;
+}
+
+message ApproveLeaveOfficeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 拒绝外出
+message RejectLeaveOfficeRequest {
+  string leave_office_id = 1;
+  string approver_id = 2;
+  string reason = 3;
+}
+
+message RejectLeaveOfficeResponse {
+  bool success = 1;
+  string message = 2;
+}

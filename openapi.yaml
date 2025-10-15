@@ -6,405 +6,21 @@ info:
     title: ""
     version: 0.0.1
 paths:
-    /api/v1/approval-tasks/batch-process:
-        post:
-            tags:
-                - ApprovalTaskService
-            description: 批量处理任务
-            operationId: ApprovalTaskService_BatchProcessTasks
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/BatchProcessTasksRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/BatchProcessTasksResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/approval-tasks/my-tasks:
+    /api/v1/employees:
         get:
             tags:
-                - ApprovalTaskService
-            description: 列出我的任务
-            operationId: ApprovalTaskService_ListMyTasks
+                - EmployeeService
+            description: 列出员工
+            operationId: EmployeeService_ListEmployees
             parameters:
-                - name: status
+                - name: tenantId
                   in: query
                   schema:
                     type: string
-                - name: limit
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: offset
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListApprovalTasksResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/approval-tasks/my-tasks/count:
-        get:
-            tags:
-                - ApprovalTaskService
-            description: 统计待处理任务数
-            operationId: ApprovalTaskService_CountPendingTasks
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/CountPendingTasksResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/approval-tasks/{id}:
-        get:
-            tags:
-                - ApprovalTaskService
-            description: 获取审批任务
-            operationId: ApprovalTaskService_GetApprovalTask
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ApprovalTaskResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/approval-tasks/{id}/delegate:
-        post:
-            tags:
-                - ApprovalTaskService
-            description: 委托任务
-            operationId: ApprovalTaskService_DelegateTask
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/DelegateTaskRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/approval-tasks/{id}/process:
-        post:
-            tags:
-                - ApprovalTaskService
-            description: 处理审批任务
-            operationId: ApprovalTaskService_ProcessTask
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/ProcessTaskRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/approval-tasks/{id}/transfer:
-        post:
-            tags:
-                - ApprovalTaskService
-            description: 转审任务
-            operationId: ApprovalTaskService_TransferTask
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/TransferTaskRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/process-instances:
-        get:
-            tags:
-                - ProcessInstanceService
-            description: 列出流程实例
-            operationId: ProcessInstanceService_ListProcessInstances
-            parameters:
-                - name: processDefId
+                - name: orgId
                   in: query
                   schema:
                     type: string
-                - name: status
-                  in: query
-                  schema:
-                    type: string
-                - name: applicantId
-                  in: query
-                  schema:
-                    type: string
-                - name: startDate
-                  in: query
-                  schema:
-                    type: string
-                - name: endDate
-                  in: query
-                  schema:
-                    type: string
-                - name: limit
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: offset
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListProcessInstancesResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/process-instances/my-applications:
-        get:
-            tags:
-                - ProcessInstanceService
-            description: 列出我的申请
-            operationId: ProcessInstanceService_ListMyApplications
-            parameters:
-                - name: limit
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: offset
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListProcessInstancesResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/process-instances/start:
-        post:
-            tags:
-                - ProcessInstanceService
-            description: 启动流程
-            operationId: ProcessInstanceService_StartProcess
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/StartProcessRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ProcessInstanceResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/process-instances/stats/summary:
-        get:
-            tags:
-                - ProcessInstanceService
-            description: 获取实例统计汇总
-            operationId: ProcessInstanceService_GetInstanceStatsSummary
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/InstanceStatsSummaryResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/process-instances/{id}:
-        get:
-            tags:
-                - ProcessInstanceService
-            description: 获取流程实例
-            operationId: ProcessInstanceService_GetProcessInstance
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ProcessInstanceResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/process-instances/{id}/cancel:
-        post:
-            tags:
-                - ProcessInstanceService
-            description: 取消流程
-            operationId: ProcessInstanceService_CancelProcess
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/CancelProcessRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/process-instances/{id}/withdraw:
-        post:
-            tags:
-                - ProcessInstanceService
-            description: 撤回流程
-            operationId: ProcessInstanceService_WithdrawProcess
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/WithdrawProcessRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/processes:
-        get:
-            tags:
-                - ProcessDefinitionService
-            description: 列出流程定义
-            operationId: ProcessDefinitionService_ListProcessDefinitions
-            parameters:
                 - name: page
                   in: query
                   schema:
@@ -421,7 +37,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ListProcessDefinitionsResponse'
+                                $ref: '#/components/schemas/ListEmployeesResponse'
                 default:
                     description: Default error response
                     content:
@@ -430,14 +46,14 @@ paths:
                                 $ref: '#/components/schemas/Status'
         post:
             tags:
-                - ProcessDefinitionService
-            description: 创建流程定义
-            operationId: ProcessDefinitionService_CreateProcessDefinition
+                - EmployeeService
+            description: 创建员工
+            operationId: EmployeeService_CreateEmployee
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateProcessDefinitionRequest'
+                            $ref: '#/components/schemas/CreateEmployeeRequest'
                 required: true
             responses:
                 "200":
@@ -445,19 +61,19 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ProcessDefinitionResponse'
+                                $ref: '#/components/schemas/EmployeeResponse'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/v1/processes/{id}:
+    /api/v1/employees/{id}:
         get:
             tags:
-                - ProcessDefinitionService
-            description: 获取流程定义
-            operationId: ProcessDefinitionService_GetProcessDefinition
+                - EmployeeService
+            description: 获取员工
+            operationId: EmployeeService_GetEmployee
             parameters:
                 - name: id
                   in: path
@@ -470,7 +86,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ProcessDefinitionResponse'
+                                $ref: '#/components/schemas/EmployeeResponse'
                 default:
                     description: Default error response
                     content:
@@ -479,9 +95,9 @@ paths:
                                 $ref: '#/components/schemas/Status'
         put:
             tags:
-                - ProcessDefinitionService
-            description: 更新流程定义
-            operationId: ProcessDefinitionService_UpdateProcessDefinition
+                - EmployeeService
+            description: 更新员工
+            operationId: EmployeeService_UpdateEmployee
             parameters:
                 - name: id
                   in: path
@@ -492,7 +108,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/UpdateProcessDefinitionRequest'
+                            $ref: '#/components/schemas/UpdateEmployeeRequest'
                 required: true
             responses:
                 "200":
@@ -500,7 +116,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ProcessDefinitionResponse'
+                                $ref: '#/components/schemas/EmployeeResponse'
                 default:
                     description: Default error response
                     content:
@@ -509,9 +125,9 @@ paths:
                                 $ref: '#/components/schemas/Status'
         delete:
             tags:
-                - ProcessDefinitionService
-            description: 删除流程定义
-            operationId: ProcessDefinitionService_DeleteProcessDefinition
+                - EmployeeService
+            description: 删除员工
+            operationId: EmployeeService_DeleteEmployee
             parameters:
                 - name: id
                   in: path
@@ -521,63 +137,98 @@ paths:
             responses:
                 "200":
                     description: OK
-                    content: {}
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteEmployeeResponse'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/v1/processes/{id}/disable:
-        patch:
-            tags:
-                - ProcessDefinitionService
-            description: 禁用流程定义
-            operationId: ProcessDefinitionService_DisableProcessDefinition
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/processes/{id}/enable:
-        patch:
-            tags:
-                - ProcessDefinitionService
-            description: 启用流程定义
-            operationId: ProcessDefinitionService_EnableProcessDefinition
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/processes/{id}/stats:
+    /api/v1/organizations:
         get:
             tags:
-                - ProcessDefinitionService
-            description: 获取流程统计
-            operationId: ProcessDefinitionService_GetProcessStats
+                - OrganizationService
+            description: 列出组织
+            operationId: OrganizationService_ListOrganizations
+            parameters:
+                - name: tenantId
+                  in: query
+                  schema:
+                    type: string
+                - name: parentId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListOrganizationsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - OrganizationService
+            description: 创建组织
+            operationId: OrganizationService_CreateOrganization
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateOrganizationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OrganizationResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/organizations/tree:
+        get:
+            tags:
+                - OrganizationService
+            description: 获取组织树
+            operationId: OrganizationService_GetOrganizationTree
+            parameters:
+                - name: tenantId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OrganizationTreeResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/organizations/{id}:
+        get:
+            tags:
+                - OrganizationService
+            description: 获取组织
+            operationId: OrganizationService_GetOrganization
             parameters:
                 - name: id
                   in: path
@@ -590,7 +241,61 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ProcessStatsResponse'
+                                $ref: '#/components/schemas/OrganizationResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        put:
+            tags:
+                - OrganizationService
+            description: 更新组织
+            operationId: OrganizationService_UpdateOrganization
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateOrganizationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OrganizationResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - OrganizationService
+            description: 删除组织
+            operationId: OrganizationService_DeleteOrganization
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteOrganizationResponse'
                 default:
                     description: Default error response
                     content:
@@ -599,97 +304,83 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
-        ApprovalTaskResponse:
+        CreateEmployeeRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: string
+                userId:
+                    type: string
+                orgId:
+                    type: string
+                positionId:
+                    type: string
+                employeeNo:
+                    type: string
+                name:
+                    type: string
+                mobile:
+                    type: string
+                email:
+                    type: string
+                status:
+                    type: string
+        CreateOrganizationRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: string
+                parentId:
+                    type: string
+                name:
+                    type: string
+                code:
+                    type: string
+                type:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+        DeleteEmployeeResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        DeleteOrganizationResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        EmployeeResponse:
             type: object
             properties:
                 id:
                     type: string
                 tenantId:
                     type: string
-                processInstanceId:
+                userId:
                     type: string
-                nodeId:
+                orgId:
                     type: string
-                nodeName:
+                orgName:
                     type: string
-                assigneeId:
+                positionId:
                     type: string
-                assigneeName:
+                positionName:
+                    type: string
+                employeeNo:
+                    type: string
+                name:
+                    type: string
+                mobile:
+                    type: string
+                email:
                     type: string
                 status:
-                    type: string
-                action:
-                    type: string
-                comment:
-                    type: string
-                approvedAt:
                     type: string
                 createdAt:
                     type: string
                 updatedAt:
-                    type: string
-        BatchProcessResult:
-            type: object
-            properties:
-                taskId:
-                    type: string
-                success:
-                    type: boolean
-                error:
-                    type: string
-        BatchProcessTasksRequest:
-            type: object
-            properties:
-                taskIds:
-                    type: array
-                    items:
-                        type: string
-                action:
-                    type: string
-                comment:
-                    type: string
-        BatchProcessTasksResponse:
-            type: object
-            properties:
-                results:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/BatchProcessResult'
-        CancelProcessRequest:
-            type: object
-            properties:
-                id:
-                    type: string
-                reason:
-                    type: string
-        CountPendingTasksResponse:
-            type: object
-            properties:
-                count:
-                    type: integer
-                    format: int32
-        CreateProcessDefinitionRequest:
-            type: object
-            properties:
-                code:
-                    type: string
-                name:
-                    type: string
-                category:
-                    type: string
-                formId:
-                    type: string
-                workflowId:
-                    type: string
-            description: 请求和响应消息定义
-        DelegateTaskRequest:
-            type: object
-            properties:
-                id:
-                    type: string
-                delegateToId:
-                    type: string
-                comment:
                     type: string
         GoogleProtobufAny:
             type: object
@@ -699,165 +390,75 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        InstanceStatsSummaryResponse:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    format: int32
-                pending:
-                    type: integer
-                    format: int32
-                approved:
-                    type: integer
-                    format: int32
-                rejected:
-                    type: integer
-                    format: int32
-                withdrawn:
-                    type: integer
-                    format: int32
-                cancelled:
-                    type: integer
-                    format: int32
-                byStatus:
-                    type: object
-                    additionalProperties:
-                        type: integer
-                        format: int32
-        ListApprovalTasksResponse:
+        ListEmployeesResponse:
             type: object
             properties:
                 items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/ApprovalTaskResponse'
+                        $ref: '#/components/schemas/EmployeeResponse'
                 total:
                     type: integer
                     format: int32
-        ListProcessDefinitionsResponse:
+        ListOrganizationsResponse:
             type: object
             properties:
                 items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/ProcessDefinitionResponse'
+                        $ref: '#/components/schemas/OrganizationResponse'
                 total:
                     type: integer
                     format: int32
-        ListProcessInstancesResponse:
-            type: object
-            properties:
-                items:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/ProcessInstanceResponse'
-                total:
-                    type: integer
-                    format: int32
-        ProcessDefinitionResponse:
+        OrganizationResponse:
             type: object
             properties:
                 id:
                     type: string
                 tenantId:
                     type: string
-                code:
+                parentId:
                     type: string
                 name:
                     type: string
-                formId:
+                code:
                     type: string
-                formName:
+                type:
                     type: string
-                workflowId:
+                path:
                     type: string
-                workflowName:
-                    type: string
-                enabled:
-                    type: boolean
+                level:
+                    type: integer
+                    format: int32
+                sort:
+                    type: integer
+                    format: int32
                 createdAt:
                     type: string
                 updatedAt:
                     type: string
-        ProcessInstanceResponse:
+        OrganizationTreeNode:
             type: object
             properties:
                 id:
                     type: string
-                tenantId:
+                name:
                     type: string
-                processDefId:
+                code:
                     type: string
-                processDefCode:
+                type:
                     type: string
-                processDefName:
-                    type: string
-                workflowInstanceId:
-                    type: string
-                formDataId:
-                    type: string
-                applicantId:
-                    type: string
-                applicantName:
-                    type: string
-                title:
-                    type: string
-                status:
-                    type: string
-                currentNodeId:
-                    type: string
-                currentNodeName:
-                    type: string
-                startedAt:
-                    type: string
-                completedAt:
-                    type: string
-                createdAt:
-                    type: string
-                updatedAt:
-                    type: string
-        ProcessStatsResponse:
+                children:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/OrganizationTreeNode'
+        OrganizationTreeResponse:
             type: object
             properties:
-                processDefId:
-                    type: string
-                processCode:
-                    type: string
-                processName:
-                    type: string
-                totalInstances:
-                    type: integer
-                    format: int32
-                pendingInstances:
-                    type: integer
-                    format: int32
-                approvedInstances:
-                    type: integer
-                    format: int32
-                rejectedInstances:
-                    type: integer
-                    format: int32
-                avgDuration:
-                    type: string
-        ProcessTaskRequest:
-            type: object
-            properties:
-                id:
-                    type: string
-                action:
-                    type: string
-                comment:
-                    type: string
-        StartProcessRequest:
-            type: object
-            properties:
-                processDefId:
-                    type: string
-                formData:
-                    type: object
-                    additionalProperties:
-                        type: string
+                nodes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/OrganizationTreeNode'
         Status:
             type: object
             properties:
@@ -874,37 +475,37 @@ components:
                         $ref: '#/components/schemas/GoogleProtobufAny'
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
-        TransferTaskRequest:
+        UpdateEmployeeRequest:
             type: object
             properties:
                 id:
                     type: string
-                transferToId:
+                orgId:
                     type: string
-                comment:
+                positionId:
                     type: string
-        UpdateProcessDefinitionRequest:
+                name:
+                    type: string
+                mobile:
+                    type: string
+                email:
+                    type: string
+                status:
+                    type: string
+        UpdateOrganizationRequest:
             type: object
             properties:
                 id:
                     type: string
                 name:
                     type: string
-                formId:
+                code:
                     type: string
-                workflowId:
-                    type: string
-                enabled:
-                    type: boolean
-        WithdrawProcessRequest:
-            type: object
-            properties:
-                id:
-                    type: string
+                sort:
+                    type: integer
+                    format: int32
 tags:
-    - name: ApprovalTaskService
-      description: ApprovalTaskService 审批任务服务
-    - name: ProcessDefinitionService
-      description: ProcessDefinitionService 流程定义服务
-    - name: ProcessInstanceService
-      description: ProcessInstanceService 流程实例服务
+    - name: EmployeeService
+      description: EmployeeService 员工服务
+    - name: OrganizationService
+      description: OrganizationService 组织服务

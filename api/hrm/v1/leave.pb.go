@@ -7,6 +7,7 @@
 package hrmv1
 
 import (
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -2963,7 +2964,7 @@ var File_api_hrm_v1_leave_proto protoreflect.FileDescriptor
 const file_api_hrm_v1_leave_proto_rawDesc = "" +
 	"\n" +
 	"\x16api/hrm/v1/leave.proto\x12\n" +
-	"api.hrm.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x86\x01\n" +
+	"api.hrm.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x86\x01\n" +
 	"\fApprovalNode\x12\x14\n" +
 	"\x05level\x18\x01 \x01(\x05R\x05level\x12#\n" +
 	"\rapprover_type\x18\x02 \x01(\tR\fapproverType\x12\x1f\n" +
@@ -3232,30 +3233,30 @@ const file_api_hrm_v1_leave_proto_rawDesc = "" +
 	"employeeId\x12\x12\n" +
 	"\x04year\x18\x03 \x01(\x05R\x04year\"L\n" +
 	"\x19GetEmployeeQuotasResponse\x12/\n" +
-	"\x05items\x18\x01 \x03(\v2\x19.api.hrm.v1.QuotaResponseR\x05items2\xae\x04\n" +
-	"\x10LeaveTypeService\x12T\n" +
-	"\x0fCreateLeaveType\x12\".api.hrm.v1.CreateLeaveTypeRequest\x1a\x1d.api.hrm.v1.LeaveTypeResponse\x12T\n" +
-	"\x0fUpdateLeaveType\x12\".api.hrm.v1.UpdateLeaveTypeRequest\x1a\x1d.api.hrm.v1.LeaveTypeResponse\x12Z\n" +
-	"\x0fDeleteLeaveType\x12\".api.hrm.v1.DeleteLeaveTypeRequest\x1a#.api.hrm.v1.DeleteLeaveTypeResponse\x12N\n" +
-	"\fGetLeaveType\x12\x1f.api.hrm.v1.GetLeaveTypeRequest\x1a\x1d.api.hrm.v1.LeaveTypeResponse\x12W\n" +
-	"\x0eListLeaveTypes\x12!.api.hrm.v1.ListLeaveTypesRequest\x1a\".api.hrm.v1.ListLeaveTypesResponse\x12i\n" +
-	"\x14ListActiveLeaveTypes\x12'.api.hrm.v1.ListActiveLeaveTypesRequest\x1a(.api.hrm.v1.ListActiveLeaveTypesResponse2\xe4\b\n" +
-	"\x13LeaveRequestService\x12]\n" +
-	"\x12CreateLeaveRequest\x12%.api.hrm.v1.CreateLeaveRequestRequest\x1a .api.hrm.v1.LeaveRequestResponse\x12]\n" +
-	"\x12UpdateLeaveRequest\x12%.api.hrm.v1.UpdateLeaveRequestRequest\x1a .api.hrm.v1.LeaveRequestResponse\x12c\n" +
-	"\x12SubmitLeaveRequest\x12%.api.hrm.v1.SubmitLeaveRequestRequest\x1a&.api.hrm.v1.SubmitLeaveRequestResponse\x12i\n" +
-	"\x14WithdrawLeaveRequest\x12'.api.hrm.v1.WithdrawLeaveRequestRequest\x1a(.api.hrm.v1.WithdrawLeaveRequestResponse\x12c\n" +
-	"\x12CancelLeaveRequest\x12%.api.hrm.v1.CancelLeaveRequestRequest\x1a&.api.hrm.v1.CancelLeaveRequestResponse\x12]\n" +
-	"\x0fGetLeaveRequest\x12\".api.hrm.v1.GetLeaveRequestRequest\x1a&.api.hrm.v1.LeaveRequestDetailResponse\x12d\n" +
-	"\x13ListMyLeaveRequests\x12&.api.hrm.v1.ListMyLeaveRequestsRequest\x1a%.api.hrm.v1.ListLeaveRequestsResponse\x12`\n" +
-	"\x11ListLeaveRequests\x12$.api.hrm.v1.ListLeaveRequestsRequest\x1a%.api.hrm.v1.ListLeaveRequestsResponse\x12f\n" +
-	"\x14ListPendingApprovals\x12'.api.hrm.v1.ListPendingApprovalsRequest\x1a%.api.hrm.v1.ListLeaveRequestsResponse\x12f\n" +
-	"\x13ApproveLeaveRequest\x12&.api.hrm.v1.ApproveLeaveRequestRequest\x1a'.api.hrm.v1.ApproveLeaveRequestResponse\x12c\n" +
-	"\x12RejectLeaveRequest\x12%.api.hrm.v1.RejectLeaveRequestRequest\x1a&.api.hrm.v1.RejectLeaveRequestResponse2\xa1\x02\n" +
-	"\x11LeaveQuotaService\x12`\n" +
-	"\x11InitEmployeeQuota\x12$.api.hrm.v1.InitEmployeeQuotaRequest\x1a%.api.hrm.v1.InitEmployeeQuotaResponse\x12H\n" +
-	"\vUpdateQuota\x12\x1e.api.hrm.v1.UpdateQuotaRequest\x1a\x19.api.hrm.v1.QuotaResponse\x12`\n" +
-	"\x11GetEmployeeQuotas\x12$.api.hrm.v1.GetEmployeeQuotasRequest\x1a%.api.hrm.v1.GetEmployeeQuotasResponseB\x9c\x01\n" +
+	"\x05items\x18\x01 \x03(\v2\x19.api.hrm.v1.QuotaResponseR\x05items2\x92\x06\n" +
+	"\x10LeaveTypeService\x12x\n" +
+	"\x0fCreateLeaveType\x12\".api.hrm.v1.CreateLeaveTypeRequest\x1a\x1d.api.hrm.v1.LeaveTypeResponse\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/api/v1/hrm/leave-types\x12}\n" +
+	"\x0fUpdateLeaveType\x12\".api.hrm.v1.UpdateLeaveTypeRequest\x1a\x1d.api.hrm.v1.LeaveTypeResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\x1a\x1c/api/v1/hrm/leave-types/{id}\x12\x80\x01\n" +
+	"\x0fDeleteLeaveType\x12\".api.hrm.v1.DeleteLeaveTypeRequest\x1a#.api.hrm.v1.DeleteLeaveTypeResponse\"$\x82\xd3\xe4\x93\x02\x1e*\x1c/api/v1/hrm/leave-types/{id}\x12t\n" +
+	"\fGetLeaveType\x12\x1f.api.hrm.v1.GetLeaveTypeRequest\x1a\x1d.api.hrm.v1.LeaveTypeResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/hrm/leave-types/{id}\x12x\n" +
+	"\x0eListLeaveTypes\x12!.api.hrm.v1.ListLeaveTypesRequest\x1a\".api.hrm.v1.ListLeaveTypesResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/hrm/leave-types\x12\x91\x01\n" +
+	"\x14ListActiveLeaveTypes\x12'.api.hrm.v1.ListActiveLeaveTypesRequest\x1a(.api.hrm.v1.ListActiveLeaveTypesResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/v1/hrm/leave-types/active2\x9e\r\n" +
+	"\x13LeaveRequestService\x12\x84\x01\n" +
+	"\x12CreateLeaveRequest\x12%.api.hrm.v1.CreateLeaveRequestRequest\x1a .api.hrm.v1.LeaveRequestResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/api/v1/hrm/leave-requests\x12\x89\x01\n" +
+	"\x12UpdateLeaveRequest\x12%.api.hrm.v1.UpdateLeaveRequestRequest\x1a .api.hrm.v1.LeaveRequestResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\x1a\x1f/api/v1/hrm/leave-requests/{id}\x12\x9e\x01\n" +
+	"\x12SubmitLeaveRequest\x12%.api.hrm.v1.SubmitLeaveRequestRequest\x1a&.api.hrm.v1.SubmitLeaveRequestResponse\"9\x82\xd3\xe4\x93\x023:\x01*\"./api/v1/hrm/leave-requests/{request_id}/submit\x12\xa6\x01\n" +
+	"\x14WithdrawLeaveRequest\x12'.api.hrm.v1.WithdrawLeaveRequestRequest\x1a(.api.hrm.v1.WithdrawLeaveRequestResponse\";\x82\xd3\xe4\x93\x025:\x01*\"0/api/v1/hrm/leave-requests/{request_id}/withdraw\x12\x9e\x01\n" +
+	"\x12CancelLeaveRequest\x12%.api.hrm.v1.CancelLeaveRequestRequest\x1a&.api.hrm.v1.CancelLeaveRequestResponse\"9\x82\xd3\xe4\x93\x023:\x01*\"./api/v1/hrm/leave-requests/{request_id}/cancel\x12\x8e\x01\n" +
+	"\x0fGetLeaveRequest\x12\".api.hrm.v1.GetLeaveRequestRequest\x1a&.api.hrm.v1.LeaveRequestDetailResponse\"/\x82\xd3\xe4\x93\x02)\x12'/api/v1/hrm/leave-requests/{request_id}\x12\x8b\x01\n" +
+	"\x13ListMyLeaveRequests\x12&.api.hrm.v1.ListMyLeaveRequestsRequest\x1a%.api.hrm.v1.ListLeaveRequestsResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/hrm/leave-requests/my\x12\x84\x01\n" +
+	"\x11ListLeaveRequests\x12$.api.hrm.v1.ListLeaveRequestsRequest\x1a%.api.hrm.v1.ListLeaveRequestsResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/hrm/leave-requests\x12\x9c\x01\n" +
+	"\x14ListPendingApprovals\x12'.api.hrm.v1.ListPendingApprovalsRequest\x1a%.api.hrm.v1.ListLeaveRequestsResponse\"4\x82\xd3\xe4\x93\x02.\x12,/api/v1/hrm/leave-requests/pending-approvals\x12\xa2\x01\n" +
+	"\x13ApproveLeaveRequest\x12&.api.hrm.v1.ApproveLeaveRequestRequest\x1a'.api.hrm.v1.ApproveLeaveRequestResponse\":\x82\xd3\xe4\x93\x024:\x01*\"//api/v1/hrm/leave-requests/{request_id}/approve\x12\x9e\x01\n" +
+	"\x12RejectLeaveRequest\x12%.api.hrm.v1.RejectLeaveRequestRequest\x1a&.api.hrm.v1.RejectLeaveRequestResponse\"9\x82\xd3\xe4\x93\x023:\x01*\"./api/v1/hrm/leave-requests/{request_id}/reject2\xb1\x03\n" +
+	"\x11LeaveQuotaService\x12\x8a\x01\n" +
+	"\x11InitEmployeeQuota\x12$.api.hrm.v1.InitEmployeeQuotaRequest\x1a%.api.hrm.v1.InitEmployeeQuotaResponse\"(\x82\xd3\xe4\x93\x02\":\x01*\"\x1d/api/v1/hrm/leave-quotas/init\x12r\n" +
+	"\vUpdateQuota\x12\x1e.api.hrm.v1.UpdateQuotaRequest\x1a\x19.api.hrm.v1.QuotaResponse\"(\x82\xd3\xe4\x93\x02\":\x01*\x1a\x1d/api/v1/hrm/leave-quotas/{id}\x12\x9a\x01\n" +
+	"\x11GetEmployeeQuotas\x12$.api.hrm.v1.GetEmployeeQuotasRequest\x1a%.api.hrm.v1.GetEmployeeQuotasResponse\"8\x82\xd3\xe4\x93\x022\x120/api/v1/hrm/employees/{employee_id}/leave-quotasB\x9c\x01\n" +
 	"\x0ecom.api.hrm.v1B\n" +
 	"LeaveProtoP\x01Z4github.com/lk2023060901/go-next-erp/api/hrm/v1;hrmv1\xa2\x02\x03AHX\xaa\x02\n" +
 	"Api.Hrm.V1\xca\x02\n" +

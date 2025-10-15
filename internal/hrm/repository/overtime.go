@@ -86,6 +86,43 @@ type BusinessTripFilter struct {
 	Keyword        string
 }
 
+// LeaveOfficeRepository 外出仓储接口
+type LeaveOfficeRepository interface {
+	// Create 创建外出记录
+	Create(ctx context.Context, leaveOffice *model.LeaveOffice) error
+
+	// FindByID 根据ID查找
+	FindByID(ctx context.Context, id uuid.UUID) (*model.LeaveOffice, error)
+
+	// Update 更新外出记录
+	Update(ctx context.Context, leaveOffice *model.LeaveOffice) error
+
+	// Delete 删除外出记录
+	Delete(ctx context.Context, id uuid.UUID) error
+
+	// List 列表查询（分页）
+	List(ctx context.Context, tenantID uuid.UUID, filter *LeaveOfficeFilter, offset, limit int) ([]*model.LeaveOffice, int, error)
+
+	// FindByEmployee 查询员工外出记录
+	FindByEmployee(ctx context.Context, tenantID, employeeID uuid.UUID, year int) ([]*model.LeaveOffice, error)
+
+	// FindPending 查询待审批的外出
+	FindPending(ctx context.Context, tenantID uuid.UUID) ([]*model.LeaveOffice, error)
+
+	// FindOverlapping 查询时间重叠的外出记录
+	FindOverlapping(ctx context.Context, tenantID, employeeID uuid.UUID, startTime, endTime time.Time) ([]*model.LeaveOffice, error)
+}
+
+// LeaveOfficeFilter 外出查询过滤器
+type LeaveOfficeFilter struct {
+	EmployeeID     *uuid.UUID
+	DepartmentID   *uuid.UUID
+	ApprovalStatus *string
+	StartDate      *time.Time
+	EndDate        *time.Time
+	Keyword        string
+}
+
 // AttendanceSummaryRepository 考勤汇总仓储接口
 type AttendanceSummaryRepository interface {
 	// Create 创建考勤汇总

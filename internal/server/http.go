@@ -118,6 +118,12 @@ func NewHTTPServer(
 	hrmv1.RegisterShiftServiceHTTPServer(srv, hrmAdapter)
 	hrmv1.RegisterScheduleServiceHTTPServer(srv, hrmAdapter)
 	hrmv1.RegisterAttendanceRuleServiceHTTPServer(srv, hrmAdapter)
+	hrmv1.RegisterOvertimeServiceHTTPServer(srv, hrmAdapter)
+	hrmv1.RegisterLeaveTypeServiceHTTPServer(srv, hrmAdapter)
+	hrmv1.RegisterLeaveRequestServiceHTTPServer(srv, hrmAdapter)
+	hrmv1.RegisterLeaveQuotaServiceHTTPServer(srv, hrmAdapter)
+	hrmv1.RegisterBusinessTripServiceHTTPServer(srv, hrmAdapter)
+	hrmv1.RegisterLeaveOfficeServiceHTTPServer(srv, hrmAdapter)
 
 	// 注册 WebSocket 通知推送路由
 	srv.HandleFunc("/api/v1/notifications/ws", wsHandler.ServeHTTP)

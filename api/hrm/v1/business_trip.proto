@@ -1,0 +1,256 @@
+syntax = "proto3";
+
+package api.hrm.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/hrm/v1;v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// 出差服务
+service BusinessTripService {
+  // 创建出差申请
+  rpc CreateBusinessTrip(CreateBusinessTripRequest) returns (BusinessTripResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/business-trips"
+      body: "*"
+    };
+  }
+  
+  // 更新出差申请
+  rpc UpdateBusinessTrip(UpdateBusinessTripRequest) returns (BusinessTripResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/hrm/business-trips/{id}"
+      body: "*"
+    };
+  }
+  
+  // 删除出差申请
+  rpc DeleteBusinessTrip(DeleteBusinessTripRequest) returns (DeleteBusinessTripResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/hrm/business-trips/{id}"
+    };
+  }
+  
+  // 获取出差详情
+  rpc GetBusinessTrip(GetBusinessTripRequest) returns (BusinessTripResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/business-trips/{id}"
+    };
+  }
+  
+  // 列表查询出差记录
+  rpc ListBusinessTrips(ListBusinessTripsRequest) returns (ListBusinessTripsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/business-trips"
+    };
+  }
+  
+  // 查询员工出差记录
+  rpc ListEmployeeBusinessTrips(ListEmployeeBusinessTripsRequest) returns (ListBusinessTripsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/employees/{employee_id}/business-trips"
+    };
+  }
+  
+  // 查询待审批的出差
+  rpc ListPendingBusinessTrips(ListPendingBusinessTripsRequest) returns (ListBusinessTripsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/hrm/business-trips/pending"
+    };
+  }
+  
+  // 提交出差审批
+  rpc SubmitBusinessTrip(SubmitBusinessTripRequest) returns (SubmitBusinessTripResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/business-trips/{business_trip_id}/submit"
+      body: "*"
+    };
+  }
+  
+  // 批准出差
+  rpc ApproveBusinessTrip(ApproveBusinessTripRequest) returns (ApproveBusinessTripResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/business-trips/{business_trip_id}/approve"
+      body: "*"
+    };
+  }
+  
+  // 拒绝出差
+  rpc RejectBusinessTrip(RejectBusinessTripRequest) returns (RejectBusinessTripResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/business-trips/{business_trip_id}/reject"
+      body: "*"
+    };
+  }
+  
+  // 提交出差报告
+  rpc SubmitTripReport(SubmitTripReportRequest) returns (BusinessTripResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/hrm/business-trips/{business_trip_id}/report"
+      body: "*"
+    };
+  }
+}
+
+// ==================== 消息定义 ====================
+
+// 出差记录
+message BusinessTripResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string employee_id = 3;
+  string employee_name = 4;
+  string department_id = 5;
+  google.protobuf.Timestamp start_time = 6;
+  google.protobuf.Timestamp end_time = 7;
+  double duration = 8;
+  string destination = 9;
+  string transportation = 10;
+  string accommodation = 11;
+  repeated string companions = 12;
+  string purpose = 13;
+  string tasks = 14;
+  double estimated_cost = 15;
+  double actual_cost = 16;
+  string approval_status = 17;  // pending, approved, rejected
+  string approved_by = 18;
+  google.protobuf.Timestamp approved_at = 19;
+  string reject_reason = 20;
+  string report = 21;
+  google.protobuf.Timestamp report_at = 22;
+  string remark = 23;
+  google.protobuf.Timestamp created_at = 24;
+  google.protobuf.Timestamp updated_at = 25;
+}
+
+// ==================== 请求定义 ====================
+
+// 创建出差申请
+message CreateBusinessTripRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string employee_name = 3;
+  string department_id = 4;
+  google.protobuf.Timestamp start_time = 5;
+  google.protobuf.Timestamp end_time = 6;
+  string destination = 7;
+  string transportation = 8;
+  string accommodation = 9;
+  repeated string companions = 10;
+  string purpose = 11;
+  string tasks = 12;
+  double estimated_cost = 13;
+  string remark = 14;
+}
+
+// 更新出差申请
+message UpdateBusinessTripRequest {
+  string id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  string destination = 4;
+  string transportation = 5;
+  string accommodation = 6;
+  repeated string companions = 7;
+  string purpose = 8;
+  string tasks = 9;
+  double estimated_cost = 10;
+  string remark = 11;
+}
+
+// 删除出差申请
+message DeleteBusinessTripRequest {
+  string id = 1;
+}
+
+message DeleteBusinessTripResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 获取出差详情
+message GetBusinessTripRequest {
+  string id = 1;
+}
+
+// 列表查询出差记录
+message ListBusinessTripsRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string department_id = 3;
+  string approval_status = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+  string keyword = 7;
+  int32 page = 8;
+  int32 page_size = 9;
+}
+
+message ListBusinessTripsResponse {
+  repeated BusinessTripResponse items = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 查询员工出差记录
+message ListEmployeeBusinessTripsRequest {
+  string employee_id = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+  string approval_status = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+// 查询待审批的出差
+message ListPendingBusinessTripsRequest {
+  string tenant_id = 1;
+  string approver_id = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 提交出差审批
+message SubmitBusinessTripRequest {
+  string business_trip_id = 1;
+  string submitter_id = 2;
+}
+
+message SubmitBusinessTripResponse {
+  bool success = 1;
+  string message = 2;
+  string workflow_id = 3;
+}
+
+// 批准出差
+message ApproveBusinessTripRequest {
+  string business_trip_id = 1;
+  string approver_id = 2;
+  string comment = 3;
+}
+
+message ApproveBusinessTripResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 拒绝出差
+message RejectBusinessTripRequest {
+  string business_trip_id = 1;
+  string approver_id = 2;
+  string reason = 3;
+}
+
+message RejectBusinessTripResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 提交出差报告
+message SubmitTripReportRequest {
+  string business_trip_id = 1;
+  string report = 2;
+  double actual_cost = 3;
+}
