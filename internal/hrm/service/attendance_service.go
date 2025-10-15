@@ -24,6 +24,10 @@ type AttendanceService interface {
 	// List 列表查询
 	List(ctx context.Context, tenantID uuid.UUID, filter *repository.AttendanceRecordFilter, offset, limit int) ([]*model.AttendanceRecord, int, error)
 
+	// ListWithCursor 游标分页查询（高性能）
+	// 返回值：records, nextCursor, hasNext, error
+	ListWithCursor(ctx context.Context, tenantID uuid.UUID, filter *repository.AttendanceRecordFilter, cursor *time.Time, limit int) ([]*model.AttendanceRecord, *time.Time, bool, error)
+
 	// GetEmployeeRecords 获取员工考勤记录
 	GetEmployeeRecords(ctx context.Context, tenantID, employeeID uuid.UUID, startDate, endDate time.Time) ([]*model.AttendanceRecord, error)
 
@@ -216,6 +220,11 @@ func (s *attendanceService) GetByID(ctx context.Context, id uuid.UUID) (*model.A
 
 func (s *attendanceService) List(ctx context.Context, tenantID uuid.UUID, filter *repository.AttendanceRecordFilter, offset, limit int) ([]*model.AttendanceRecord, int, error) {
 	return s.attendanceRepo.List(ctx, tenantID, filter, offset, limit)
+}
+
+// ListWithCursor 游标分页查询（直接调用repository层）
+func (s *attendanceService) ListWithCursor(ctx context.Context, tenantID uuid.UUID, filter *repository.AttendanceRecordFilter, cursor *time.Time, limit int) ([]*model.AttendanceRecord, *time.Time, bool, error) {
+	return s.attendanceRepo.ListWithCursor(ctx, tenantID, filter, cursor, limit)
 }
 
 func (s *attendanceService) GetEmployeeRecords(ctx context.Context, tenantID, employeeID uuid.UUID, startDate, endDate time.Time) ([]*model.AttendanceRecord, error) {

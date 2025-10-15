@@ -1,0 +1,396 @@
+syntax = "proto3";
+
+package api.hrm.v1;
+
+option go_package = "github.com/lk2023060901/go-next-erp/api/hrm/v1;v1";
+
+import "google/protobuf/timestamp.proto";
+
+// 请假类型服务
+service LeaveTypeService {
+  // 创建请假类型
+  rpc CreateLeaveType(CreateLeaveTypeRequest) returns (LeaveTypeResponse);
+  // 更新请假类型
+  rpc UpdateLeaveType(UpdateLeaveTypeRequest) returns (LeaveTypeResponse);
+  // 删除请假类型
+  rpc DeleteLeaveType(DeleteLeaveTypeRequest) returns (DeleteLeaveTypeResponse);
+  // 获取请假类型详情
+  rpc GetLeaveType(GetLeaveTypeRequest) returns (LeaveTypeResponse);
+  // 列表查询请假类型
+  rpc ListLeaveTypes(ListLeaveTypesRequest) returns (ListLeaveTypesResponse);
+  // 获取启用的请假类型
+  rpc ListActiveLeaveTypes(ListActiveLeaveTypesRequest) returns (ListActiveLeaveTypesResponse);
+}
+
+// 请假申请服务
+service LeaveRequestService {
+  // 创建请假申请
+  rpc CreateLeaveRequest(CreateLeaveRequestRequest) returns (LeaveRequestResponse);
+  // 更新请假申请
+  rpc UpdateLeaveRequest(UpdateLeaveRequestRequest) returns (LeaveRequestResponse);
+  // 提交请假申请
+  rpc SubmitLeaveRequest(SubmitLeaveRequestRequest) returns (SubmitLeaveRequestResponse);
+  // 撤回请假申请
+  rpc WithdrawLeaveRequest(WithdrawLeaveRequestRequest) returns (WithdrawLeaveRequestResponse);
+  // 取消请假
+  rpc CancelLeaveRequest(CancelLeaveRequestRequest) returns (CancelLeaveRequestResponse);
+  // 获取请假详情
+  rpc GetLeaveRequest(GetLeaveRequestRequest) returns (LeaveRequestDetailResponse);
+  // 查询我的请假记录
+  rpc ListMyLeaveRequests(ListMyLeaveRequestsRequest) returns (ListLeaveRequestsResponse);
+  // 查询请假记录（管理员）
+  rpc ListLeaveRequests(ListLeaveRequestsRequest) returns (ListLeaveRequestsResponse);
+  // 查询待我审批的请假
+  rpc ListPendingApprovals(ListPendingApprovalsRequest) returns (ListLeaveRequestsResponse);
+  // 批准请假
+  rpc ApproveLeaveRequest(ApproveLeaveRequestRequest) returns (ApproveLeaveRequestResponse);
+  // 拒绝请假
+  rpc RejectLeaveRequest(RejectLeaveRequestRequest) returns (RejectLeaveRequestResponse);
+}
+
+// 请假额度服务
+service LeaveQuotaService {
+  // 初始化员工额度
+  rpc InitEmployeeQuota(InitEmployeeQuotaRequest) returns (InitEmployeeQuotaResponse);
+  // 更新额度
+  rpc UpdateQuota(UpdateQuotaRequest) returns (QuotaResponse);
+  // 获取员工额度
+  rpc GetEmployeeQuotas(GetEmployeeQuotasRequest) returns (GetEmployeeQuotasResponse);
+}
+
+// ==================== 消息定义 ====================
+
+// 审批节点
+message ApprovalNode {
+  int32 level = 1;
+  string approver_type = 2;  // direct_manager, dept_manager, hr, general_manager, custom
+  string approver_id = 3;    // 自定义审批人ID（当type为custom时使用）
+  bool required = 4;
+}
+
+// 基于天数的审批规则
+message DurationRule {
+  double min_duration = 1;
+  double max_duration = 2;  // 0表示无上限
+  repeated ApprovalNode approval_chain = 3;
+}
+
+// 审批规则配置
+message ApprovalRules {
+  repeated ApprovalNode default_chain = 1;
+  repeated DurationRule duration_rules = 2;
+}
+
+// 请假类型
+message LeaveTypeResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string code = 3;
+  string name = 4;
+  string description = 5;
+  bool is_paid = 6;
+  bool requires_approval = 7;
+  bool requires_proof = 8;
+  bool deduct_quota = 9;
+  string unit = 10;
+  double min_duration = 11;
+  double max_duration = 12;
+  int32 advance_days = 13;
+  ApprovalRules approval_rules = 14;  // 审批规则配置
+  string color = 15;
+  bool is_active = 16;
+  int32 sort = 17;
+  google.protobuf.Timestamp created_at = 18;
+}
+
+// 请假申请
+message LeaveRequestResponse {
+  string id = 1;
+  string tenant_id = 2;
+  string employee_id = 3;
+  string employee_name = 4;
+  string department_id = 5;
+  string leave_type_id = 6;
+  string leave_type_name = 7;
+  google.protobuf.Timestamp start_time = 8;
+  google.protobuf.Timestamp end_time = 9;
+  double duration = 10;
+  string unit = 11;
+  string reason = 12;
+  repeated string proof_urls = 13;
+  string status = 14;
+  string current_approver_id = 15;
+  google.protobuf.Timestamp submitted_at = 16;
+  google.protobuf.Timestamp created_at = 17;
+}
+
+// 请假申请详情（含审批记录）
+message LeaveRequestDetailResponse {
+  LeaveRequestResponse request = 1;
+  repeated ApprovalResponse approvals = 2;
+}
+
+// 审批记录
+message ApprovalResponse {
+  string id = 1;
+  string leave_request_id = 2;
+  string approver_id = 3;
+  string approver_name = 4;
+  int32 level = 5;
+  string status = 6;
+  string action = 7;
+  string comment = 8;
+  google.protobuf.Timestamp approved_at = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+// 请假额度
+message QuotaResponse {
+  string id = 1;
+  string employee_id = 2;
+  string leave_type_id = 3;
+  string leave_type_name = 4;
+  string leave_type_code = 5;
+  string unit = 6;
+  string color = 7;
+  int32 year = 8;
+  double total_quota = 9;
+  double used_quota = 10;
+  double pending_quota = 11;
+  double remaining_quota = 12;
+  google.protobuf.Timestamp expired_at = 13;
+}
+
+// ==================== 请求定义 ====================
+
+// 创建请假类型
+message CreateLeaveTypeRequest {
+  string tenant_id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  bool is_paid = 5;
+  bool requires_approval = 6;
+  bool requires_proof = 7;
+  bool deduct_quota = 8;
+  string unit = 9;
+  double min_duration = 10;
+  double max_duration = 11;
+  int32 advance_days = 12;
+  ApprovalRules approval_rules = 13;  // 审批规则配置
+  string color = 14;
+  int32 sort = 15;
+}
+
+// 更新请假类型
+message UpdateLeaveTypeRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  bool is_paid = 4;
+  bool requires_approval = 5;
+  bool requires_proof = 6;
+  bool deduct_quota = 7;
+  string unit = 8;
+  double min_duration = 9;
+  double max_duration = 10;
+  int32 advance_days = 11;
+  ApprovalRules approval_rules = 12;  // 审批规则配置
+  string color = 13;
+  bool is_active = 14;
+  int32 sort = 15;
+}
+
+// 删除请假类型
+message DeleteLeaveTypeRequest {
+  string id = 1;
+}
+
+message DeleteLeaveTypeResponse {
+  bool success = 1;
+}
+
+// 获取请假类型
+message GetLeaveTypeRequest {
+  string id = 1;
+}
+
+// 列表查询请假类型
+message ListLeaveTypesRequest {
+  string tenant_id = 1;
+  bool is_active = 2;
+  bool requires_proof = 3;
+  bool deduct_quota = 4;
+  string keyword = 5;
+  int32 page = 6;
+  int32 page_size = 7;
+}
+
+message ListLeaveTypesResponse {
+  repeated LeaveTypeResponse items = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 获取启用的请假类型
+message ListActiveLeaveTypesRequest {
+  string tenant_id = 1;
+}
+
+message ListActiveLeaveTypesResponse {
+  repeated LeaveTypeResponse items = 1;
+}
+
+// 创建请假申请
+message CreateLeaveRequestRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string employee_name = 3;
+  string department_id = 4;
+  string leave_type_id = 5;
+  google.protobuf.Timestamp start_time = 6;
+  google.protobuf.Timestamp end_time = 7;
+  double duration = 8;
+  string reason = 9;
+  repeated string proof_urls = 10;
+}
+
+// 更新请假申请
+message UpdateLeaveRequestRequest {
+  string id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  double duration = 4;
+  string reason = 5;
+  repeated string proof_urls = 6;
+}
+
+// 提交请假申请
+message SubmitLeaveRequestRequest {
+  string request_id = 1;
+  string submitter_id = 2;
+}
+
+message SubmitLeaveRequestResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 撤回请假申请
+message WithdrawLeaveRequestRequest {
+  string request_id = 1;
+  string operator_id = 2;
+}
+
+message WithdrawLeaveRequestResponse {
+  bool success = 1;
+}
+
+// 取消请假
+message CancelLeaveRequestRequest {
+  string request_id = 1;
+  string operator_id = 2;
+  string reason = 3;
+}
+
+message CancelLeaveRequestResponse {
+  bool success = 1;
+}
+
+// 获取请假详情
+message GetLeaveRequestRequest {
+  string request_id = 1;
+}
+
+// 查询我的请假记录
+message ListMyLeaveRequestsRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  string leave_type_id = 3;
+  string status = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+  int32 page = 7;
+  int32 page_size = 8;
+}
+
+// 查询请假记录
+message ListLeaveRequestsRequest {
+  string tenant_id = 1;
+  string leave_type_id = 2;
+  string department_id = 3;
+  string status = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+  string keyword = 7;
+  int32 page = 8;
+  int32 page_size = 9;
+}
+
+message ListLeaveRequestsResponse {
+  repeated LeaveRequestResponse items = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 查询待审批的请假
+message ListPendingApprovalsRequest {
+  string tenant_id = 1;
+  string approver_id = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 批准请假
+message ApproveLeaveRequestRequest {
+  string request_id = 1;
+  string approver_id = 2;
+  string comment = 3;
+}
+
+message ApproveLeaveRequestResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 拒绝请假
+message RejectLeaveRequestRequest {
+  string request_id = 1;
+  string approver_id = 2;
+  string comment = 3;
+}
+
+message RejectLeaveRequestResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 初始化员工额度
+message InitEmployeeQuotaRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  int32 year = 3;
+}
+
+message InitEmployeeQuotaResponse {
+  bool success = 1;
+}
+
+// 更新额度
+message UpdateQuotaRequest {
+  string id = 1;
+  double total_quota = 2;
+}
+
+// 获取员工额度
+message GetEmployeeQuotasRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+  int32 year = 3;
+}
+
+message GetEmployeeQuotasResponse {
+  repeated QuotaResponse items = 1;
+}

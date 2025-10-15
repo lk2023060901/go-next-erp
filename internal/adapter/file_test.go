@@ -113,6 +113,19 @@ func (m *MockFileRepository) GetFileCount(ctx context.Context, tenantID uuid.UUI
 	return args.Get(0).(int64), args.Error(1)
 }
 
+func (m *MockFileRepository) ListWithCursor(ctx context.Context, filter *repository.FileFilter, cursor *time.Time, limit int) ([]*model.File, *time.Time, bool, error) {
+	args := m.Called(ctx, filter, cursor, limit)
+	if args.Get(0) == nil {
+		return nil, nil, false, args.Error(3)
+	}
+	nextCursor := args.Get(1)
+	hasNext := args.Bool(2)
+	if nextCursor == nil {
+		return args.Get(0).([]*model.File), nil, hasNext, args.Error(3)
+	}
+	return args.Get(0).([]*model.File), nextCursor.(*time.Time), hasNext, args.Error(3)
+}
+
 // MockDownloadService mocks the download service
 type MockDownloadService struct {
 	mock.Mock

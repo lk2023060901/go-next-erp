@@ -235,6 +235,45 @@ func (m *MockAuditRepository) CleanupOldLogs(ctx context.Context, before time.Ti
 	return args.Error(0)
 }
 
+func (m *MockAuditRepository) ListByActionWithCursor(ctx context.Context, tenantID uuid.UUID, action string, cursor *time.Time, limit int) ([]*model.AuditLog, *time.Time, bool, error) {
+	args := m.Called(ctx, tenantID, action, cursor, limit)
+	if args.Get(0) == nil {
+		return nil, nil, false, args.Error(3)
+	}
+	nextCursor := args.Get(1)
+	hasNext := args.Bool(2)
+	if nextCursor == nil {
+		return args.Get(0).([]*model.AuditLog), nil, hasNext, args.Error(3)
+	}
+	return args.Get(0).([]*model.AuditLog), nextCursor.(*time.Time), hasNext, args.Error(3)
+}
+
+func (m *MockAuditRepository) ListByUserWithCursor(ctx context.Context, userID uuid.UUID, cursor *time.Time, limit int) ([]*model.AuditLog, *time.Time, bool, error) {
+	args := m.Called(ctx, userID, cursor, limit)
+	if args.Get(0) == nil {
+		return nil, nil, false, args.Error(3)
+	}
+	nextCursor := args.Get(1)
+	hasNext := args.Bool(2)
+	if nextCursor == nil {
+		return args.Get(0).([]*model.AuditLog), nil, hasNext, args.Error(3)
+	}
+	return args.Get(0).([]*model.AuditLog), nextCursor.(*time.Time), hasNext, args.Error(3)
+}
+
+func (m *MockAuditRepository) ListByTenantWithCursor(ctx context.Context, tenantID uuid.UUID, cursor *time.Time, limit int) ([]*model.AuditLog, *time.Time, bool, error) {
+	args := m.Called(ctx, tenantID, cursor, limit)
+	if args.Get(0) == nil {
+		return nil, nil, false, args.Error(3)
+	}
+	nextCursor := args.Get(1)
+	hasNext := args.Bool(2)
+	if nextCursor == nil {
+		return args.Get(0).([]*model.AuditLog), nil, hasNext, args.Error(3)
+	}
+	return args.Get(0).([]*model.AuditLog), nextCursor.(*time.Time), hasNext, args.Error(3)
+}
+
 // ==================== 测试用例 ====================
 
 // 测试用户注册成功

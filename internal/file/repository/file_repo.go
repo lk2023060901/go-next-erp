@@ -27,6 +27,7 @@ type FileRepository interface {
 
 	// 列表查询
 	List(ctx context.Context, filter *FileFilter) ([]*model.File, int64, error)
+	ListWithCursor(ctx context.Context, filter *FileFilter, cursor *time.Time, limit int) ([]*model.File, *time.Time, bool, error)
 	ListByTenant(ctx context.Context, tenantID uuid.UUID, limit, offset int) ([]*model.File, error)
 	ListByUploader(ctx context.Context, uploaderID uuid.UUID, limit, offset int) ([]*model.File, error)
 
@@ -527,13 +528,125 @@ func (r *fileRepo) List(ctx context.Context, filter *FileFilter) ([]*model.File,
 	return files, total, nil
 }
 
+// ListWithCursor 游标分页查询（高性能，适用于大数据量）
+func (r *fileRepo) ListWithCursor(ctx context.Context, filter *FileFilter, cursor *time.Time, limit int) ([]*model.File, *time.Time, bool, error) {
+	// 构建WHERE条件
+	where := "deleted_at IS NULL AND tenant_id = $1"
+	args := []interface{}{filter.TenantID}
+	argIdx := 1
+
+	// 游标条件
+	if cursor != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND created_at < $%d", argIdx)
+		args = append(args, *cursor)
+	}
+
+	// 其他筛选条件
+	if filter.UploadedBy != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND uploaded_by = $%d", argIdx)
+		args = append(args, *filter.UploadedBy)
+	}
+	if filter.Category != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND category = $%d", argIdx)
+		args = append(args, *filter.Category)
+	}
+	if filter.Status != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND status = $%d", argIdx)
+		args = append(args, *filter.Status)
+	}
+	if filter.IsTemporary != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND is_temporary = $%d", argIdx)
+		args = append(args, *filter.IsTemporary)
+	}
+	if filter.SearchQuery != nil && *filter.SearchQuery != "" {
+		argIdx++
+		where += fmt.Sprintf(" AND filename ILIKE $%d", argIdx)
+		args = append(args, "%"+*filter.SearchQuery+"%")
+	}
+
+	// 构建查询（多查1条用于判断是否有下一页）
+	argIdx++
+	query := fmt.Sprintf(`
+		SELECT
+			id, tenant_id, filename, storage_key, size, mime_type, content_type,
+			checksum, virus_scanned, virus_scan_result, virus_scanned_at,
+			extension, bucket, category, tags, metadata,
+			status, is_temporary, is_public,
+			version_number, parent_file_id,
+			is_compressed, has_watermark, watermark_text,
+			uploaded_by, access_level,
+			thumbnail_key, preview_url, preview_expires_at,
+			expires_at, archived_at,
+			created_at, updated_at, deleted_at
+		FROM files
+		WHERE %s
+		ORDER BY created_at DESC, id DESC
+		LIMIT $%d
+	`, where, argIdx)
+	args = append(args, limit+1)
+
+	rows, err := r.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, nil, false, fmt.Errorf("failed to list files: %w", err)
+	}
+	defer rows.Close()
+
+	files := []*model.File{}
+	for rows.Next() {
+		file := &model.File{}
+		var metadataJSON []byte
+
+		err := rows.Scan(
+			&file.ID, &file.TenantID, &file.Filename, &file.StorageKey, &file.Size, &file.MimeType, &file.ContentType,
+			&file.Checksum, &file.VirusScanned, &file.VirusScanResult, &file.VirusScannedAt,
+			&file.Extension, &file.Bucket, &file.Category, &file.Tags, &metadataJSON,
+			&file.Status, &file.IsTemporary, &file.IsPublic,
+			&file.VersionNumber, &file.ParentFileID,
+			&file.IsCompressed, &file.HasWatermark, &file.WatermarkText,
+			&file.UploadedBy, &file.AccessLevel,
+			&file.ThumbnailKey, &file.PreviewURL, &file.PreviewExpiresAt,
+			&file.ExpiresAt, &file.ArchivedAt,
+			&file.CreatedAt, &file.UpdatedAt, &file.DeletedAt,
+		)
+		if err != nil {
+			return nil, nil, false, fmt.Errorf("failed to scan file: %w", err)
+		}
+
+		if metadataJSON != nil {
+			json.Unmarshal(metadataJSON, &file.Metadata)
+		}
+
+		files = append(files, file)
+	}
+
+	// 判断是否有下一页
+	hasNext := len(files) > limit
+	if hasNext {
+		files = files[:limit]
+	}
+
+	// 生成下一页游标
+	var nextCursor *time.Time
+	if hasNext && len(files) > 0 {
+		lastFile := files[len(files)-1]
+		nextCursor = &lastFile.CreatedAt
+	}
+
+	return files, nextCursor, hasNext, nil
+}
+
 // ListByTenant 按租户列出文件
 func (r *fileRepo) ListByTenant(ctx context.Context, tenantID uuid.UUID, limit, offset int) ([]*model.File, error) {
 	filter := &FileFilter{
-		TenantID: tenantID,
-		Page:     (offset / limit) + 1,
-		PageSize: limit,
-		OrderBy:  "created_at",
+		TenantID:  tenantID,
+		Page:      (offset / limit) + 1,
+		PageSize:  limit,
+		OrderBy:   "created_at",
 		OrderDesc: true,
 	}
 

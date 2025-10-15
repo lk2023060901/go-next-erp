@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,6 +20,9 @@ type ApprovalTaskRepository interface {
 	ListPendingByAssignee(ctx context.Context, assigneeID uuid.UUID) ([]*model.ApprovalTask, error)
 	CountPendingByAssignee(ctx context.Context, assigneeID uuid.UUID) (int, error)
 	UpdateStatus(ctx context.Context, id uuid.UUID, status model.TaskStatus, action *model.ApprovalAction, comment *string, approvedAt *time.Time) error
+
+	// 游标分页查询（高性能，适用于大数据量）
+	ListByAssigneeWithCursor(ctx context.Context, assigneeID uuid.UUID, status *model.TaskStatus, cursor *time.Time, limit int) ([]*model.ApprovalTask, *time.Time, bool, error)
 }
 
 type approvalTaskRepo struct {
@@ -267,4 +271,96 @@ func (r *approvalTaskRepo) UpdateStatus(ctx context.Context, id uuid.UUID, statu
 
 	_, err := r.db.Exec(ctx, sql, status, action, comment, approvedAt, time.Now(), id)
 	return err
+}
+
+// ListByAssigneeWithCursor 游标分页查询审批人的任务（高性能，适用于大数据量）
+// 使用 created_at 作为游标字段，配合 id 保证排序稳定性
+func (r *approvalTaskRepo) ListByAssigneeWithCursor(
+	ctx context.Context,
+	assigneeID uuid.UUID,
+	status *model.TaskStatus,
+	cursor *time.Time,
+	limit int,
+) ([]*model.ApprovalTask, *time.Time, bool, error) {
+	// 构建 WHERE 条件
+	where := "assignee_id = $1"
+	args := []interface{}{assigneeID}
+	argIdx := 1
+
+	// 添加游标条件
+	if cursor != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND created_at < $%d", argIdx)
+		args = append(args, *cursor)
+	}
+
+	// 添加状态过滤
+	if status != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND status = $%d", argIdx)
+		args = append(args, *status)
+	}
+
+	// 构建查询（多查1条用于判断是否有下一页）
+	argIdx++
+	sql := fmt.Sprintf(`
+		SELECT id, tenant_id, process_instance_id, node_id, assignee_id,
+		       status, action, comment, approved_at, created_at, updated_at
+		FROM approval_tasks
+		WHERE %s
+		ORDER BY created_at DESC, id DESC
+		LIMIT $%d
+	`, where, argIdx)
+	args = append(args, limit+1)
+
+	// 执行查询
+	rows, err := r.db.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	defer rows.Close()
+
+	// 扫描结果
+	var tasks []*model.ApprovalTask
+	for rows.Next() {
+		var task model.ApprovalTask
+		err := rows.Scan(
+			&task.ID,
+			&task.TenantID,
+			&task.ProcessInstanceID,
+			&task.NodeID,
+			&task.AssigneeID,
+			&task.Status,
+			&task.Action,
+			&task.Comment,
+			&task.ApprovedAt,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, nil, false, err
+		}
+
+		tasks = append(tasks, &task)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, nil, false, err
+	}
+
+	// 判断是否有下一页
+	hasNext := len(tasks) > limit
+	if hasNext {
+		tasks = tasks[:limit]
+	}
+
+	// 生成下一页游标
+	var nextCursor *time.Time
+	if hasNext && len(tasks) > 0 {
+		lastTask := tasks[len(tasks)-1]
+		nextCursor = &lastTask.CreatedAt
+	}
+
+	return tasks, nextCursor, hasNext, nil
 }

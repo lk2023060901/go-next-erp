@@ -222,6 +222,114 @@ func (r *scheduleRepo) List(ctx context.Context, tenantID uuid.UUID, filter *rep
 	return schedules, total, rows.Err()
 }
 
+// ListWithCursor 游标分页查询排班（高性能）
+func (r *scheduleRepo) ListWithCursor(
+	ctx context.Context,
+	tenantID uuid.UUID,
+	filter *repository.ScheduleFilter,
+	cursor *time.Time,
+	limit int,
+) ([]*model.Schedule, *time.Time, bool, error) {
+	// 构建 WHERE 条件
+	where := "tenant_id = $1 AND deleted_at IS NULL"
+	args := []interface{}{tenantID}
+	argIdx := 1
+
+	// 添加游标条件
+	if cursor != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND created_at < $%d", argIdx)
+		args = append(args, *cursor)
+	}
+
+	// 添加过滤条件
+	if filter != nil {
+		if filter.EmployeeID != nil {
+			argIdx++
+			where += fmt.Sprintf(" AND employee_id = $%d", argIdx)
+			args = append(args, *filter.EmployeeID)
+		}
+		if filter.DepartmentID != nil {
+			argIdx++
+			where += fmt.Sprintf(" AND department_id = $%d", argIdx)
+			args = append(args, *filter.DepartmentID)
+		}
+		if filter.ShiftID != nil {
+			argIdx++
+			where += fmt.Sprintf(" AND shift_id = $%d", argIdx)
+			args = append(args, *filter.ShiftID)
+		}
+		if filter.StartDate != nil {
+			argIdx++
+			where += fmt.Sprintf(" AND schedule_date >= $%d", argIdx)
+			args = append(args, *filter.StartDate)
+		}
+		if filter.EndDate != nil {
+			argIdx++
+			where += fmt.Sprintf(" AND schedule_date <= $%d", argIdx)
+			args = append(args, *filter.EndDate)
+		}
+		if filter.Status != nil {
+			argIdx++
+			where += fmt.Sprintf(" AND status = $%d", argIdx)
+			args = append(args, *filter.Status)
+		}
+	}
+
+	// 构建查询（多查1条用于判断是否有下一页）
+	argIdx++
+	sql := fmt.Sprintf(`
+		SELECT id, tenant_id, employee_id, employee_name, department_id,
+		       shift_id, shift_name, schedule_date, workday_type, status, created_at
+		FROM hrm_schedules
+		WHERE %s
+		ORDER BY created_at DESC, id DESC
+		LIMIT $%d
+	`, where, argIdx)
+	args = append(args, limit+1)
+
+	// 执行查询
+	rows, err := r.db.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	defer rows.Close()
+
+	// 扫描结果
+	var schedules []*model.Schedule
+	for rows.Next() {
+		schedule := &model.Schedule{}
+		err := rows.Scan(
+			&schedule.ID, &schedule.TenantID, &schedule.EmployeeID, &schedule.EmployeeName, &schedule.DepartmentID,
+			&schedule.ShiftID, &schedule.ShiftName,
+			&schedule.ScheduleDate, &schedule.WorkdayType, &schedule.Status, &schedule.CreatedAt,
+		)
+		if err != nil {
+			return nil, nil, false, err
+		}
+		schedules = append(schedules, schedule)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, nil, false, err
+	}
+
+	// 判断是否有下一页
+	hasNext := len(schedules) > limit
+	if hasNext {
+		schedules = schedules[:limit]
+	}
+
+	// 生成下一页游标
+	var nextCursor *time.Time
+	if hasNext && len(schedules) > 0 {
+		lastSchedule := schedules[len(schedules)-1]
+		nextCursor = &lastSchedule.CreatedAt
+	}
+
+	return schedules, nextCursor, hasNext, nil
+}
+
 func (r *scheduleRepo) FindByEmployee(ctx context.Context, tenantID, employeeID uuid.UUID, month string) ([]*model.Schedule, error) {
 	// month 格式: "2025-01"
 	startDate, _ := time.Parse("2006-01", month)

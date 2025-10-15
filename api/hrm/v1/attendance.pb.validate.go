@@ -549,6 +549,10 @@ func (m *ListEmployeeAttendanceRequest) validate(all bool) error {
 
 	// no validation rules for PageSize
 
+	// no validation rules for Cursor
+
+	// no validation rules for UseCursor
+
 	if len(errors) > 0 {
 		return ListEmployeeAttendanceRequestMultiError(errors)
 	}
@@ -664,6 +668,10 @@ func (m *ListDepartmentAttendanceRequest) validate(all bool) error {
 
 	// no validation rules for PageSize
 
+	// no validation rules for Cursor
+
+	// no validation rules for UseCursor
+
 	if len(errors) > 0 {
 		return ListDepartmentAttendanceRequestMultiError(errors)
 	}
@@ -776,6 +784,10 @@ func (m *ListExceptionAttendanceRequest) validate(all bool) error {
 	// no validation rules for Page
 
 	// no validation rules for PageSize
+
+	// no validation rules for Cursor
+
+	// no validation rules for UseCursor
 
 	if len(errors) > 0 {
 		return ListExceptionAttendanceRequestMultiError(errors)
@@ -1088,6 +1100,18 @@ func (m *ListAttendanceRecordResponse) validate(all bool) error {
 	}
 
 	// no validation rules for Total
+
+	// no validation rules for HasNext
+
+	// no validation rules for HasPrev
+
+	// no validation rules for NextCursor
+
+	// no validation rules for PrevCursor
+
+	// no validation rules for Page
+
+	// no validation rules for PageSize
 
 	if len(errors) > 0 {
 		return ListAttendanceRecordResponseMultiError(errors)

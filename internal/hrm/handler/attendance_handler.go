@@ -2,11 +2,13 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	pb "github.com/lk2023060901/go-next-erp/api/hrm/v1"
 	"github.com/lk2023060901/go-next-erp/internal/hrm/model"
+	"github.com/lk2023060901/go-next-erp/internal/hrm/repository"
 	"github.com/lk2023060901/go-next-erp/internal/hrm/service"
 )
 
@@ -100,7 +102,7 @@ func (h *AttendanceHandler) GetAttendanceRecord(ctx context.Context, req *pb.Get
 	return convertAttendanceRecordToProto(record), nil
 }
 
-// ListEmployeeAttendance 查询员工考勤记录
+// ListEmployeeAttendance 查询员工考勤记录（支持游标分页）
 func (h *AttendanceHandler) ListEmployeeAttendance(ctx context.Context, req *pb.ListEmployeeAttendanceRequest) (*pb.ListAttendanceRecordResponse, error) {
 	tenantID, err := uuid.Parse(req.TenantId)
 	if err != nil {
@@ -114,11 +116,69 @@ func (h *AttendanceHandler) ListEmployeeAttendance(ctx context.Context, req *pb.
 	// 解析日期（使用上海时区）
 	loc, _ := time.LoadLocation("Asia/Shanghai")
 	startDate, _ := time.ParseInLocation("2006-01-02", req.StartDate, loc)
-	// endDate 需要包含当天整天，所以加一天再减1秒，或者直接到第二天00:00:00
 	endDateParsed, _ := time.ParseInLocation("2006-01-02", req.EndDate, loc)
-	endDate := endDateParsed.AddDate(0, 0, 1) // 加一天，查询范围变为 [startDate, endDate)
+	endDate := endDateParsed.AddDate(0, 0, 1)
 
+	// 判断是否使用游标分页
+	if req.UseCursor {
+		return h.listEmployeeAttendanceWithCursor(ctx, tenantID, employeeID, startDate, endDate, req)
+	}
+
+	// 使用传统分页（保持兼容性）
 	records, err := h.attendanceService.GetEmployeeRecords(ctx, tenantID, employeeID, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]*pb.AttendanceRecordResponse, 0, len(records))
+	for _, record := range records {
+		items = append(items, convertAttendanceRecordToProto(record))
+	}
+
+	return &pb.ListAttendanceRecordResponse{
+		Items: items,
+		Total: int32(len(items)),
+		Page:  1,
+	}, nil
+}
+
+// listEmployeeAttendanceWithCursor 游标分页查询（高性能）
+func (h *AttendanceHandler) listEmployeeAttendanceWithCursor(
+	ctx context.Context,
+	tenantID, employeeID uuid.UUID,
+	startDate, endDate time.Time,
+	req *pb.ListEmployeeAttendanceRequest,
+) (*pb.ListAttendanceRecordResponse, error) {
+	// 解析游标
+	var cursor *time.Time
+	if req.Cursor != "" {
+		cursorTime, err := time.Parse(time.RFC3339, req.Cursor)
+		if err != nil {
+			return nil, fmt.Errorf("invalid cursor format: %w", err)
+		}
+		cursor = &cursorTime
+	}
+
+	// 构建过滤条件
+	filter := &repository.AttendanceRecordFilter{
+		EmployeeID: &employeeID,
+		StartDate:  &startDate,
+		EndDate:    &endDate,
+	}
+
+	// 页大小（默认 20，最大 100）
+	limit := int(req.PageSize)
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	// 调用service层游标分页
+	records, nextCursor, hasNext, err := h.attendanceService.ListWithCursor(
+		ctx, tenantID, filter, cursor, limit,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -129,10 +189,27 @@ func (h *AttendanceHandler) ListEmployeeAttendance(ctx context.Context, req *pb.
 		items = append(items, convertAttendanceRecordToProto(record))
 	}
 
-	return &pb.ListAttendanceRecordResponse{
-		Items: items,
-		Total: int32(len(items)),
-	}, nil
+	// 构建响应
+	response := &pb.ListAttendanceRecordResponse{
+		Items:    items,
+		Total:    -1, // 游标分页不返回总数
+		HasNext:  hasNext,
+		HasPrev:  cursor != nil,
+		PageSize: int32(limit),
+	}
+
+	// 生成下一页游标
+	if nextCursor != nil {
+		response.NextCursor = nextCursor.Format(time.RFC3339)
+	}
+
+	// 生成上一页游标（简化处理）
+	if cursor != nil && len(records) > 0 {
+		firstRecord := records[0]
+		response.PrevCursor = firstRecord.ClockTime.Format(time.RFC3339)
+	}
+
+	return response, nil
 }
 
 // ListDepartmentAttendance 查询部门考勤记录

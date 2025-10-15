@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,6 +31,11 @@ type AuditLogRepository interface {
 
 	// 清理
 	CleanupOldLogs(ctx context.Context, before time.Time) error
+
+	// 游标分页查询（高性能，适用于大数据量）
+	ListByUserWithCursor(ctx context.Context, userID uuid.UUID, cursor *time.Time, limit int) ([]*model.AuditLog, *time.Time, bool, error)
+	ListByTenantWithCursor(ctx context.Context, tenantID uuid.UUID, cursor *time.Time, limit int) ([]*model.AuditLog, *time.Time, bool, error)
+	ListByActionWithCursor(ctx context.Context, tenantID uuid.UUID, action string, cursor *time.Time, limit int) ([]*model.AuditLog, *time.Time, bool, error)
 }
 
 type auditLogRepo struct {
@@ -260,4 +266,185 @@ func (r *auditLogRepo) scanAuditLogs(rows pgx.Rows) ([]*model.AuditLog, error) {
 	}
 
 	return logs, nil
+}
+
+// ListByUserWithCursor 游标分页查询用户的审计日志（高性能）
+func (r *auditLogRepo) ListByUserWithCursor(
+	ctx context.Context,
+	userID uuid.UUID,
+	cursor *time.Time,
+	limit int,
+) ([]*model.AuditLog, *time.Time, bool, error) {
+	// 构建 WHERE 条件
+	where := "user_id = $1"
+	args := []interface{}{userID}
+	argIdx := 1
+
+	// 添加游标条件
+	if cursor != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND created_at < $%d", argIdx)
+		args = append(args, *cursor)
+	}
+
+	// 构建查询（多查1条用于判断是否有下一页）
+	argIdx++
+	sql := fmt.Sprintf(`
+		SELECT id, request_id, tenant_id, user_id, action, resource_type, resource_id,
+		       changes, ip_address, user_agent, result, error_message, created_at
+		FROM audit_logs
+		WHERE %s
+		ORDER BY created_at DESC, id DESC
+		LIMIT $%d
+	`, where, argIdx)
+	args = append(args, limit+1)
+
+	// 执行查询
+	rows, err := r.db.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	defer rows.Close()
+
+	// 扫描结果
+	logs, err := r.scanAuditLogs(rows)
+	if err != nil {
+		return nil, nil, false, err
+	}
+
+	// 判断是否有下一页
+	hasNext := len(logs) > limit
+	if hasNext {
+		logs = logs[:limit]
+	}
+
+	// 生成下一页游标
+	var nextCursor *time.Time
+	if hasNext && len(logs) > 0 {
+		lastLog := logs[len(logs)-1]
+		nextCursor = &lastLog.CreatedAt
+	}
+
+	return logs, nextCursor, hasNext, nil
+}
+
+// ListByTenantWithCursor 游标分页查询租户的审计日志（高性能）
+func (r *auditLogRepo) ListByTenantWithCursor(
+	ctx context.Context,
+	tenantID uuid.UUID,
+	cursor *time.Time,
+	limit int,
+) ([]*model.AuditLog, *time.Time, bool, error) {
+	// 构建 WHERE 条件
+	where := "tenant_id = $1"
+	args := []interface{}{tenantID}
+	argIdx := 1
+
+	// 添加游标条件
+	if cursor != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND created_at < $%d", argIdx)
+		args = append(args, *cursor)
+	}
+
+	// 构建查询（多查1条用于判断是否有下一页）
+	argIdx++
+	sql := fmt.Sprintf(`
+		SELECT id, request_id, tenant_id, user_id, action, resource_type, resource_id,
+		       changes, ip_address, user_agent, result, error_message, created_at
+		FROM audit_logs
+		WHERE %s
+		ORDER BY created_at DESC, id DESC
+		LIMIT $%d
+	`, where, argIdx)
+	args = append(args, limit+1)
+
+	// 执行查询
+	rows, err := r.db.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	defer rows.Close()
+
+	// 扫描结果
+	logs, err := r.scanAuditLogs(rows)
+	if err != nil {
+		return nil, nil, false, err
+	}
+
+	// 判断是否有下一页
+	hasNext := len(logs) > limit
+	if hasNext {
+		logs = logs[:limit]
+	}
+
+	// 生成下一页游标
+	var nextCursor *time.Time
+	if hasNext && len(logs) > 0 {
+		lastLog := logs[len(logs)-1]
+		nextCursor = &lastLog.CreatedAt
+	}
+
+	return logs, nextCursor, hasNext, nil
+}
+
+// ListByActionWithCursor 游标分页查询指定动作的审计日志（高性能）
+func (r *auditLogRepo) ListByActionWithCursor(
+	ctx context.Context,
+	tenantID uuid.UUID,
+	action string,
+	cursor *time.Time,
+	limit int,
+) ([]*model.AuditLog, *time.Time, bool, error) {
+	// 构建 WHERE 条件
+	where := "tenant_id = $1 AND action = $2"
+	args := []interface{}{tenantID, action}
+	argIdx := 2
+
+	// 添加游标条件
+	if cursor != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND created_at < $%d", argIdx)
+		args = append(args, *cursor)
+	}
+
+	// 构建查询（多查1条用于判断是否有下一页）
+	argIdx++
+	sql := fmt.Sprintf(`
+		SELECT id, request_id, tenant_id, user_id, action, resource_type, resource_id,
+		       changes, ip_address, user_agent, result, error_message, created_at
+		FROM audit_logs
+		WHERE %s
+		ORDER BY created_at DESC, id DESC
+		LIMIT $%d
+	`, where, argIdx)
+	args = append(args, limit+1)
+
+	// 执行查询
+	rows, err := r.db.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	defer rows.Close()
+
+	// 扫描结果
+	logs, err := r.scanAuditLogs(rows)
+	if err != nil {
+		return nil, nil, false, err
+	}
+
+	// 判断是否有下一页
+	hasNext := len(logs) > limit
+	if hasNext {
+		logs = logs[:limit]
+	}
+
+	// 生成下一页游标
+	var nextCursor *time.Time
+	if hasNext && len(logs) > 0 {
+		lastLog := logs[len(logs)-1]
+		nextCursor = &lastLog.CreatedAt
+	}
+
+	return logs, nextCursor, hasNext, nil
 }

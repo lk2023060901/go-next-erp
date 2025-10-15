@@ -221,6 +221,135 @@ func (r *attendanceRecordRepo) FindByDepartment(ctx context.Context, tenantID, d
 	return records, rows.Err()
 }
 
+// ListWithCursor 游标分页查询（高性能，适用于大数据量）
+// 优点：性能稳定，不受数据量和页数影响
+// 缺点：不支持跳页，无法显示总页数
+func (r *attendanceRecordRepo) ListWithCursor(
+	ctx context.Context,
+	tenantID uuid.UUID,
+	filter *repository.AttendanceRecordFilter,
+	cursor *time.Time, // 游标（上一页最后一条记录的clock_time）
+	limit int,
+) ([]*model.AttendanceRecord, *time.Time, bool, error) {
+
+	// 1. 构建WHERE条件
+	where := "tenant_id = $1 AND deleted_at IS NULL"
+	args := []interface{}{tenantID}
+	argIdx := 2
+
+	// 添加游标条件（使用复合排序：clock_time DESC, id DESC）
+	if cursor != nil {
+		where += fmt.Sprintf(" AND clock_time < $%d", argIdx)
+		args = append(args, *cursor)
+		argIdx++
+	}
+
+	// 添加其他筛选条件
+	if filter != nil {
+		if filter.EmployeeID != nil {
+			where += fmt.Sprintf(" AND employee_id = $%d", argIdx)
+			args = append(args, *filter.EmployeeID)
+			argIdx++
+		}
+		if filter.DepartmentID != nil {
+			where += fmt.Sprintf(" AND department_id = $%d", argIdx)
+			args = append(args, *filter.DepartmentID)
+			argIdx++
+		}
+		if filter.StartDate != nil {
+			where += fmt.Sprintf(" AND clock_time >= $%d", argIdx)
+			args = append(args, *filter.StartDate)
+			argIdx++
+		}
+		if filter.EndDate != nil {
+			where += fmt.Sprintf(" AND clock_time < $%d", argIdx)
+			args = append(args, *filter.EndDate)
+			argIdx++
+		}
+		if filter.ClockType != nil {
+			where += fmt.Sprintf(" AND clock_type = $%d", argIdx)
+			args = append(args, *filter.ClockType)
+			argIdx++
+		}
+		if filter.Status != nil {
+			where += fmt.Sprintf(" AND status = $%d", argIdx)
+			args = append(args, *filter.Status)
+			argIdx++
+		}
+		if filter.SourceType != nil {
+			where += fmt.Sprintf(" AND source_type = $%d", argIdx)
+			args = append(args, *filter.SourceType)
+			argIdx++
+		}
+		if filter.IsException != nil {
+			where += fmt.Sprintf(" AND is_exception = $%d", argIdx)
+			args = append(args, *filter.IsException)
+			argIdx++
+		}
+		if filter.Keyword != "" {
+			where += fmt.Sprintf(" AND employee_name LIKE $%d", argIdx)
+			args = append(args, "%"+filter.Keyword+"%")
+			argIdx++
+		}
+	}
+
+	// 2. 构建查询（多查1条用于判断是否有下一页）
+	// 使用复合排序确保稳定性：clock_time DESC, id DESC
+	sql := fmt.Sprintf(`
+		SELECT id, tenant_id, employee_id, employee_name, department_id,
+		       shift_id, shift_name, clock_time, clock_type, status,
+		       check_in_method, source_type, is_exception, exception_reason,
+		       exception_type, remark, created_at
+		FROM hrm_attendance_records
+		WHERE %s
+		ORDER BY clock_time DESC, id DESC
+		LIMIT $%d
+	`, where, argIdx)
+	args = append(args, limit+1) // +1用于判断是否有下一页
+
+	// 3. 执行查询
+	rows, err := r.db.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, nil, false, fmt.Errorf("query failed: %w", err)
+	}
+	defer rows.Close()
+
+	// 4. 扫描结果
+	records := make([]*model.AttendanceRecord, 0, limit)
+	for rows.Next() {
+		record := &model.AttendanceRecord{}
+		err := rows.Scan(
+			&record.ID, &record.TenantID, &record.EmployeeID, &record.EmployeeName, &record.DepartmentID,
+			&record.ShiftID, &record.ShiftName, &record.ClockTime, &record.ClockType, &record.Status,
+			&record.CheckInMethod, &record.SourceType, &record.IsException, &record.ExceptionReason,
+			&record.ExceptionType, &record.Remark, &record.CreatedAt,
+		)
+		if err != nil {
+			return nil, nil, false, fmt.Errorf("scan failed: %w", err)
+		}
+		records = append(records, record)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, nil, false, err
+	}
+
+	// 5. 判断是否有下一页
+	hasNext := len(records) > limit
+	if hasNext {
+		records = records[:limit] // 移除多余的一条
+	}
+
+	// 6. 生成下一页游标
+	var nextCursor *time.Time
+	if hasNext && len(records) > 0 {
+		lastRecord := records[len(records)-1]
+		nextCursor = &lastRecord.ClockTime
+	}
+
+	return records, nextCursor, hasNext, nil
+}
+
 func (r *attendanceRecordRepo) FindByDateRange(ctx context.Context, tenantID uuid.UUID, startDate, endDate time.Time) ([]*model.AttendanceRecord, error) {
 	sql := `
 		SELECT id, tenant_id, employee_id, employee_name,

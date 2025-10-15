@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/lk2023060901/go-next-erp/internal/hrm/model"
@@ -59,6 +60,9 @@ type HRMEmployeeRepository interface {
 
 	// ExistsByEmployeeID 检查员工是否已有HRM扩展信息
 	ExistsByEmployeeID(ctx context.Context, tenantID, employeeID uuid.UUID) (bool, error)
+
+	// 游标分页查询（高性能，适用于大数据量）
+	ListWithCursor(ctx context.Context, tenantID uuid.UUID, filter *HRMEmployeeFilter, cursor *time.Time, limit int) ([]*model.HRMEmployee, *time.Time, bool, error)
 }
 
 // HRMEmployeeFilter HRM员工查询过滤器

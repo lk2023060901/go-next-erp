@@ -375,13 +375,16 @@ func (x *GetAttendanceRecordRequest) GetId() string {
 }
 
 type ListEmployeeAttendanceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
-	EmployeeId    string                 `protobuf:"bytes,2,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
-	StartDate     string                 `protobuf:"bytes,3,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
-	EndDate       string                 `protobuf:"bytes,4,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
-	Page          int32                  `protobuf:"varint,5,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	TenantId   string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	EmployeeId string                 `protobuf:"bytes,2,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	StartDate  string                 `protobuf:"bytes,3,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	EndDate    string                 `protobuf:"bytes,4,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	Page       int32                  `protobuf:"varint,5,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize   int32                  `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// 游标分页支持（推荐用于大数据量）
+	Cursor        string `protobuf:"bytes,7,opt,name=cursor,proto3" json:"cursor,omitempty"`                         // 游标（上一页最后一条记录的clock_time，RFC3339格式）
+	UseCursor     bool   `protobuf:"varint,8,opt,name=use_cursor,json=useCursor,proto3" json:"use_cursor,omitempty"` // 是否使用游标分页
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -458,14 +461,31 @@ func (x *ListEmployeeAttendanceRequest) GetPageSize() int32 {
 	return 0
 }
 
+func (x *ListEmployeeAttendanceRequest) GetCursor() string {
+	if x != nil {
+		return x.Cursor
+	}
+	return ""
+}
+
+func (x *ListEmployeeAttendanceRequest) GetUseCursor() bool {
+	if x != nil {
+		return x.UseCursor
+	}
+	return false
+}
+
 type ListDepartmentAttendanceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
-	DepartmentId  string                 `protobuf:"bytes,2,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
-	StartDate     string                 `protobuf:"bytes,3,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
-	EndDate       string                 `protobuf:"bytes,4,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
-	Page          int32                  `protobuf:"varint,5,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	TenantId     string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	DepartmentId string                 `protobuf:"bytes,2,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	StartDate    string                 `protobuf:"bytes,3,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	EndDate      string                 `protobuf:"bytes,4,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	Page         int32                  `protobuf:"varint,5,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize     int32                  `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// 游标分页支持
+	Cursor        string `protobuf:"bytes,7,opt,name=cursor,proto3" json:"cursor,omitempty"`
+	UseCursor     bool   `protobuf:"varint,8,opt,name=use_cursor,json=useCursor,proto3" json:"use_cursor,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -542,13 +562,30 @@ func (x *ListDepartmentAttendanceRequest) GetPageSize() int32 {
 	return 0
 }
 
+func (x *ListDepartmentAttendanceRequest) GetCursor() string {
+	if x != nil {
+		return x.Cursor
+	}
+	return ""
+}
+
+func (x *ListDepartmentAttendanceRequest) GetUseCursor() bool {
+	if x != nil {
+		return x.UseCursor
+	}
+	return false
+}
+
 type ListExceptionAttendanceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
-	StartDate     string                 `protobuf:"bytes,2,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
-	EndDate       string                 `protobuf:"bytes,3,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
-	Page          int32                  `protobuf:"varint,4,opt,name=page,proto3" json:"page,omitempty"`
-	PageSize      int32                  `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	TenantId  string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	StartDate string                 `protobuf:"bytes,2,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	EndDate   string                 `protobuf:"bytes,3,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	Page      int32                  `protobuf:"varint,4,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize  int32                  `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// 游标分页支持
+	Cursor        string `protobuf:"bytes,6,opt,name=cursor,proto3" json:"cursor,omitempty"`
+	UseCursor     bool   `protobuf:"varint,7,opt,name=use_cursor,json=useCursor,proto3" json:"use_cursor,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -616,6 +653,20 @@ func (x *ListExceptionAttendanceRequest) GetPageSize() int32 {
 		return x.PageSize
 	}
 	return 0
+}
+
+func (x *ListExceptionAttendanceRequest) GetCursor() string {
+	if x != nil {
+		return x.Cursor
+	}
+	return ""
+}
+
+func (x *ListExceptionAttendanceRequest) GetUseCursor() bool {
+	if x != nil {
+		return x.UseCursor
+	}
+	return false
 }
 
 type AttendanceRecordResponse struct {
@@ -833,7 +884,13 @@ func (x *AttendanceRecordResponse) GetCreatedAt() string {
 type ListAttendanceRecordResponse struct {
 	state         protoimpl.MessageState      `protogen:"open.v1"`
 	Items         []*AttendanceRecordResponse `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
-	Total         int32                       `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Total         int32                       `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`                            // 总记录数（游标分页时为-1表示未知）
+	HasNext       bool                        `protobuf:"varint,3,opt,name=has_next,json=hasNext,proto3" json:"has_next,omitempty"`         // 是否有下一页
+	HasPrev       bool                        `protobuf:"varint,4,opt,name=has_prev,json=hasPrev,proto3" json:"has_prev,omitempty"`         // 是否有上一页
+	NextCursor    string                      `protobuf:"bytes,5,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"` // 下一页游标（clock_time，RFC3339格式）
+	PrevCursor    string                      `protobuf:"bytes,6,opt,name=prev_cursor,json=prevCursor,proto3" json:"prev_cursor,omitempty"` // 上一页游标
+	Page          int32                       `protobuf:"varint,7,opt,name=page,proto3" json:"page,omitempty"`                              // 当前页码（offset分页）
+	PageSize      int32                       `protobuf:"varint,8,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`      // 每页大小
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -878,6 +935,48 @@ func (x *ListAttendanceRecordResponse) GetItems() []*AttendanceRecordResponse {
 func (x *ListAttendanceRecordResponse) GetTotal() int32 {
 	if x != nil {
 		return x.Total
+	}
+	return 0
+}
+
+func (x *ListAttendanceRecordResponse) GetHasNext() bool {
+	if x != nil {
+		return x.HasNext
+	}
+	return false
+}
+
+func (x *ListAttendanceRecordResponse) GetHasPrev() bool {
+	if x != nil {
+		return x.HasPrev
+	}
+	return false
+}
+
+func (x *ListAttendanceRecordResponse) GetNextCursor() string {
+	if x != nil {
+		return x.NextCursor
+	}
+	return ""
+}
+
+func (x *ListAttendanceRecordResponse) GetPrevCursor() string {
+	if x != nil {
+		return x.PrevCursor
+	}
+	return ""
+}
+
+func (x *ListAttendanceRecordResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListAttendanceRecordResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
 	}
 	return 0
 }
@@ -3458,7 +3557,7 @@ const file_api_hrm_v1_attendance_proto_rawDesc = "" +
 	"\amessage\x18\n" +
 	" \x01(\tR\amessage\",\n" +
 	"\x1aGetAttendanceRecordRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xc8\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xff\x01\n" +
 	"\x1dListEmployeeAttendanceRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x1f\n" +
 	"\vemployee_id\x18\x02 \x01(\tR\n" +
@@ -3467,7 +3566,10 @@ const file_api_hrm_v1_attendance_proto_rawDesc = "" +
 	"start_date\x18\x03 \x01(\tR\tstartDate\x12\x19\n" +
 	"\bend_date\x18\x04 \x01(\tR\aendDate\x12\x12\n" +
 	"\x04page\x18\x05 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x06 \x01(\x05R\bpageSize\"\xce\x01\n" +
+	"\tpage_size\x18\x06 \x01(\x05R\bpageSize\x12\x16\n" +
+	"\x06cursor\x18\a \x01(\tR\x06cursor\x12\x1d\n" +
+	"\n" +
+	"use_cursor\x18\b \x01(\bR\tuseCursor\"\x85\x02\n" +
 	"\x1fListDepartmentAttendanceRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12#\n" +
 	"\rdepartment_id\x18\x02 \x01(\tR\fdepartmentId\x12\x1d\n" +
@@ -3475,14 +3577,20 @@ const file_api_hrm_v1_attendance_proto_rawDesc = "" +
 	"start_date\x18\x03 \x01(\tR\tstartDate\x12\x19\n" +
 	"\bend_date\x18\x04 \x01(\tR\aendDate\x12\x12\n" +
 	"\x04page\x18\x05 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x06 \x01(\x05R\bpageSize\"\xa8\x01\n" +
+	"\tpage_size\x18\x06 \x01(\x05R\bpageSize\x12\x16\n" +
+	"\x06cursor\x18\a \x01(\tR\x06cursor\x12\x1d\n" +
+	"\n" +
+	"use_cursor\x18\b \x01(\bR\tuseCursor\"\xdf\x01\n" +
 	"\x1eListExceptionAttendanceRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x02 \x01(\tR\tstartDate\x12\x19\n" +
 	"\bend_date\x18\x03 \x01(\tR\aendDate\x12\x12\n" +
 	"\x04page\x18\x04 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x05 \x01(\x05R\bpageSize\"\xe0\x05\n" +
+	"\tpage_size\x18\x05 \x01(\x05R\bpageSize\x12\x16\n" +
+	"\x06cursor\x18\x06 \x01(\tR\x06cursor\x12\x1d\n" +
+	"\n" +
+	"use_cursor\x18\a \x01(\bR\tuseCursor\"\xe0\x05\n" +
 	"\x18AttendanceRecordResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x1f\n" +
@@ -3513,10 +3621,18 @@ const file_api_hrm_v1_attendance_proto_rawDesc = "" +
 	"\x0eexception_type\x18\x14 \x01(\tR\rexceptionType\x12\x16\n" +
 	"\x06remark\x18\x15 \x01(\tR\x06remark\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x16 \x01(\tR\tcreatedAt\"p\n" +
+	"created_at\x18\x16 \x01(\tR\tcreatedAt\"\x99\x02\n" +
 	"\x1cListAttendanceRecordResponse\x12:\n" +
 	"\x05items\x18\x01 \x03(\v2$.api.hrm.v1.AttendanceRecordResponseR\x05items\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total\"\xbd\x01\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x19\n" +
+	"\bhas_next\x18\x03 \x01(\bR\ahasNext\x12\x19\n" +
+	"\bhas_prev\x18\x04 \x01(\bR\ahasPrev\x12\x1f\n" +
+	"\vnext_cursor\x18\x05 \x01(\tR\n" +
+	"nextCursor\x12\x1f\n" +
+	"\vprev_cursor\x18\x06 \x01(\tR\n" +
+	"prevCursor\x12\x12\n" +
+	"\x04page\x18\a \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\b \x01(\x05R\bpageSize\"\xbd\x01\n" +
 	"\x1eGetAttendanceStatisticsRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x1f\n" +
 	"\vemployee_id\x18\x02 \x01(\tR\n" +

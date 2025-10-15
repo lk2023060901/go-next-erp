@@ -238,6 +238,45 @@ func (m *MockAuditLogRepository) CleanupOldLogs(ctx context.Context, before time
 	return args.Error(0)
 }
 
+func (m *MockAuditLogRepository) ListByActionWithCursor(ctx context.Context, tenantID uuid.UUID, action string, cursor *time.Time, limit int) ([]*model.AuditLog, *time.Time, bool, error) {
+	args := m.Called(ctx, tenantID, action, cursor, limit)
+	if args.Get(0) == nil {
+		return nil, nil, false, args.Error(3)
+	}
+	nextCursor := args.Get(1)
+	hasNext := args.Bool(2)
+	if nextCursor == nil {
+		return args.Get(0).([]*model.AuditLog), nil, hasNext, args.Error(3)
+	}
+	return args.Get(0).([]*model.AuditLog), nextCursor.(*time.Time), hasNext, args.Error(3)
+}
+
+func (m *MockAuditLogRepository) ListByUserWithCursor(ctx context.Context, userID uuid.UUID, cursor *time.Time, limit int) ([]*model.AuditLog, *time.Time, bool, error) {
+	args := m.Called(ctx, userID, cursor, limit)
+	if args.Get(0) == nil {
+		return nil, nil, false, args.Error(3)
+	}
+	nextCursor := args.Get(1)
+	hasNext := args.Bool(2)
+	if nextCursor == nil {
+		return args.Get(0).([]*model.AuditLog), nil, hasNext, args.Error(3)
+	}
+	return args.Get(0).([]*model.AuditLog), nextCursor.(*time.Time), hasNext, args.Error(3)
+}
+
+func (m *MockAuditLogRepository) ListByTenantWithCursor(ctx context.Context, tenantID uuid.UUID, cursor *time.Time, limit int) ([]*model.AuditLog, *time.Time, bool, error) {
+	args := m.Called(ctx, tenantID, cursor, limit)
+	if args.Get(0) == nil {
+		return nil, nil, false, args.Error(3)
+	}
+	nextCursor := args.Get(1)
+	hasNext := args.Bool(2)
+	if nextCursor == nil {
+		return args.Get(0).([]*model.AuditLog), nil, hasNext, args.Error(3)
+	}
+	return args.Get(0).([]*model.AuditLog), nextCursor.(*time.Time), hasNext, args.Error(3)
+}
+
 // Helper function to create test authentication service
 func createTestAuthService(userRepo *MockUserRepository, sessionRepo *MockSessionRepository, auditRepo *MockAuditLogRepository) *authentication.Service {
 	// Use test JWT config

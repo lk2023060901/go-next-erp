@@ -405,3 +405,72 @@ func (r *userRepo) ListUsersByRole(ctx context.Context, roleID uuid.UUID) ([]*mo
 	}
 	return users, nil
 }
+
+// ListByTenantWithCursor 游标分页查询租户用户列表（高性能）
+func (r *userRepo) ListByTenantWithCursor(
+	ctx context.Context,
+	tenantID uuid.UUID,
+	cursor *time.Time,
+	limit int,
+) ([]*model.User, *time.Time, bool, error) {
+	// 构建 WHERE 条件
+	where := "tenant_id = $1 AND deleted_at IS NULL"
+	args := []interface{}{tenantID}
+	argIdx := 1
+
+	// 添加游标条件
+	if cursor != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND created_at < $%d", argIdx)
+		args = append(args, *cursor)
+	}
+
+	// 构建查询（多查1条用于判断是否有下一页）
+	argIdx++
+	sql := fmt.Sprintf(`
+		SELECT id, username, email, password_hash, tenant_id, status,
+		       mfa_enabled, mfa_secret, last_login_at, last_login_ip,
+		       login_attempts, locked_until, metadata, created_at, updated_at, deleted_at
+		FROM users
+		WHERE %s
+		ORDER BY created_at DESC, id DESC
+		LIMIT $%d
+	`, where, argIdx)
+	args = append(args, limit+1)
+
+	// 执行查询
+	rows, err := r.db.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	defer rows.Close()
+
+	// 扫描结果
+	var users []*model.User
+	for rows.Next() {
+		var user model.User
+		if err := r.scanUser(rows, &user); err != nil {
+			return nil, nil, false, err
+		}
+		users = append(users, &user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, nil, false, err
+	}
+
+	// 判断是否有下一页
+	hasNext := len(users) > limit
+	if hasNext {
+		users = users[:limit]
+	}
+
+	// 生成下一页游标
+	var nextCursor *time.Time
+	if hasNext && len(users) > 0 {
+		lastUser := users[len(users)-1]
+		nextCursor = &lastUser.CreatedAt
+	}
+
+	return users, nextCursor, hasNext, nil
+}

@@ -28,6 +28,10 @@ type AttendanceRecordRepository interface {
 	// List 列表查询（分页）
 	List(ctx context.Context, tenantID uuid.UUID, filter *AttendanceRecordFilter, offset, limit int) ([]*model.AttendanceRecord, int, error)
 
+	// ListWithCursor 游标分页查询（高性能，适用于大数据量）
+	// 返回值：records, nextCursor, hasNext, error
+	ListWithCursor(ctx context.Context, tenantID uuid.UUID, filter *AttendanceRecordFilter, cursor *time.Time, limit int) ([]*model.AttendanceRecord, *time.Time, bool, error)
+
 	// FindByEmployee 查询员工考勤记录
 	FindByEmployee(ctx context.Context, tenantID, employeeID uuid.UUID, startDate, endDate time.Time) ([]*model.AttendanceRecord, error)
 

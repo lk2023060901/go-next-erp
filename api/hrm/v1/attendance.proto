@@ -241,6 +241,10 @@ message ListEmployeeAttendanceRequest {
   string end_date = 4;
   int32 page = 5;
   int32 page_size = 6;
+  
+  // 游标分页支持（推荐用于大数据量）
+  string cursor = 7;           // 游标（上一页最后一条记录的clock_time，RFC3339格式）
+  bool use_cursor = 8;         // 是否使用游标分页
 }
 
 message ListDepartmentAttendanceRequest {
@@ -250,6 +254,10 @@ message ListDepartmentAttendanceRequest {
   string end_date = 4;
   int32 page = 5;
   int32 page_size = 6;
+  
+  // 游标分页支持
+  string cursor = 7;
+  bool use_cursor = 8;
 }
 
 message ListExceptionAttendanceRequest {
@@ -258,6 +266,10 @@ message ListExceptionAttendanceRequest {
   string end_date = 3;
   int32 page = 4;
   int32 page_size = 5;
+  
+  // 游标分页支持
+  string cursor = 6;
+  bool use_cursor = 7;
 }
 
 message AttendanceRecordResponse {
@@ -287,7 +299,13 @@ message AttendanceRecordResponse {
 
 message ListAttendanceRecordResponse {
   repeated AttendanceRecordResponse items = 1;
-  int32 total = 2;
+  int32 total = 2;                  // 总记录数（游标分页时为-1表示未知）
+  bool has_next = 3;                // 是否有下一页
+  bool has_prev = 4;                // 是否有上一页
+  string next_cursor = 5;           // 下一页游标（clock_time，RFC3339格式）
+  string prev_cursor = 6;           // 上一页游标
+  int32 page = 7;                   // 当前页码（offset分页）
+  int32 page_size = 8;              // 每页大小
 }
 
 message GetAttendanceStatisticsRequest {

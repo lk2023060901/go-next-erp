@@ -6,25 +6,405 @@ info:
     title: ""
     version: 0.0.1
 paths:
-    /api/v1/hrm/attendance-rules:
+    /api/v1/approval-tasks/batch-process:
+        post:
+            tags:
+                - ApprovalTaskService
+            description: 批量处理任务
+            operationId: ApprovalTaskService_BatchProcessTasks
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/BatchProcessTasksRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchProcessTasksResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/approval-tasks/my-tasks:
         get:
             tags:
-                - AttendanceRuleService
-            description: 列出考勤规则
-            operationId: AttendanceRuleService_ListAttendanceRules
+                - ApprovalTaskService
+            description: 列出我的任务
+            operationId: ApprovalTaskService_ListMyTasks
             parameters:
-                - name: tenantId
+                - name: status
                   in: query
                   schema:
                     type: string
-                - name: applyType
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListApprovalTasksResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/approval-tasks/my-tasks/count:
+        get:
+            tags:
+                - ApprovalTaskService
+            description: 统计待处理任务数
+            operationId: ApprovalTaskService_CountPendingTasks
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CountPendingTasksResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/approval-tasks/{id}:
+        get:
+            tags:
+                - ApprovalTaskService
+            description: 获取审批任务
+            operationId: ApprovalTaskService_GetApprovalTask
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ApprovalTaskResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/approval-tasks/{id}/delegate:
+        post:
+            tags:
+                - ApprovalTaskService
+            description: 委托任务
+            operationId: ApprovalTaskService_DelegateTask
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/DelegateTaskRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/approval-tasks/{id}/process:
+        post:
+            tags:
+                - ApprovalTaskService
+            description: 处理审批任务
+            operationId: ApprovalTaskService_ProcessTask
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ProcessTaskRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/approval-tasks/{id}/transfer:
+        post:
+            tags:
+                - ApprovalTaskService
+            description: 转审任务
+            operationId: ApprovalTaskService_TransferTask
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/TransferTaskRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances:
+        get:
+            tags:
+                - ProcessInstanceService
+            description: 列出流程实例
+            operationId: ProcessInstanceService_ListProcessInstances
+            parameters:
+                - name: processDefId
                   in: query
                   schema:
                     type: string
-                - name: isActive
+                - name: status
                   in: query
                   schema:
-                    type: boolean
+                    type: string
+                - name: applicantId
+                  in: query
+                  schema:
+                    type: string
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListProcessInstancesResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/my-applications:
+        get:
+            tags:
+                - ProcessInstanceService
+            description: 列出我的申请
+            operationId: ProcessInstanceService_ListMyApplications
+            parameters:
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: offset
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListProcessInstancesResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/start:
+        post:
+            tags:
+                - ProcessInstanceService
+            description: 启动流程
+            operationId: ProcessInstanceService_StartProcess
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/StartProcessRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ProcessInstanceResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/stats/summary:
+        get:
+            tags:
+                - ProcessInstanceService
+            description: 获取实例统计汇总
+            operationId: ProcessInstanceService_GetInstanceStatsSummary
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InstanceStatsSummaryResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/{id}:
+        get:
+            tags:
+                - ProcessInstanceService
+            description: 获取流程实例
+            operationId: ProcessInstanceService_GetProcessInstance
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ProcessInstanceResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/{id}/cancel:
+        post:
+            tags:
+                - ProcessInstanceService
+            description: 取消流程
+            operationId: ProcessInstanceService_CancelProcess
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CancelProcessRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/process-instances/{id}/withdraw:
+        post:
+            tags:
+                - ProcessInstanceService
+            description: 撤回流程
+            operationId: ProcessInstanceService_WithdrawProcess
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/WithdrawProcessRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/processes:
+        get:
+            tags:
+                - ProcessDefinitionService
+            description: 列出流程定义
+            operationId: ProcessDefinitionService_ListProcessDefinitions
+            parameters:
                 - name: page
                   in: query
                   schema:
@@ -41,7 +421,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ListAttendanceRulesResponse'
+                                $ref: '#/components/schemas/ListProcessDefinitionsResponse'
                 default:
                     description: Default error response
                     content:
@@ -50,14 +430,14 @@ paths:
                                 $ref: '#/components/schemas/Status'
         post:
             tags:
-                - AttendanceRuleService
-            description: 创建考勤规则
-            operationId: AttendanceRuleService_CreateAttendanceRule
+                - ProcessDefinitionService
+            description: 创建流程定义
+            operationId: ProcessDefinitionService_CreateProcessDefinition
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateAttendanceRuleRequest'
+                            $ref: '#/components/schemas/CreateProcessDefinitionRequest'
                 required: true
             responses:
                 "200":
@@ -65,19 +445,19 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/AttendanceRuleResponse'
+                                $ref: '#/components/schemas/ProcessDefinitionResponse'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/v1/hrm/attendance-rules/{id}:
+    /api/v1/processes/{id}:
         get:
             tags:
-                - AttendanceRuleService
-            description: 获取考勤规则
-            operationId: AttendanceRuleService_GetAttendanceRule
+                - ProcessDefinitionService
+            description: 获取流程定义
+            operationId: ProcessDefinitionService_GetProcessDefinition
             parameters:
                 - name: id
                   in: path
@@ -90,7 +470,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/AttendanceRuleResponse'
+                                $ref: '#/components/schemas/ProcessDefinitionResponse'
                 default:
                     description: Default error response
                     content:
@@ -99,9 +479,9 @@ paths:
                                 $ref: '#/components/schemas/Status'
         put:
             tags:
-                - AttendanceRuleService
-            description: 更新考勤规则
-            operationId: AttendanceRuleService_UpdateAttendanceRule
+                - ProcessDefinitionService
+            description: 更新流程定义
+            operationId: ProcessDefinitionService_UpdateProcessDefinition
             parameters:
                 - name: id
                   in: path
@@ -112,7 +492,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/UpdateAttendanceRuleRequest'
+                            $ref: '#/components/schemas/UpdateProcessDefinitionRequest'
                 required: true
             responses:
                 "200":
@@ -120,7 +500,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/AttendanceRuleResponse'
+                                $ref: '#/components/schemas/ProcessDefinitionResponse'
                 default:
                     description: Default error response
                     content:
@@ -129,9 +509,75 @@ paths:
                                 $ref: '#/components/schemas/Status'
         delete:
             tags:
-                - AttendanceRuleService
-            description: 删除考勤规则
-            operationId: AttendanceRuleService_DeleteAttendanceRule
+                - ProcessDefinitionService
+            description: 删除流程定义
+            operationId: ProcessDefinitionService_DeleteProcessDefinition
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/processes/{id}/disable:
+        patch:
+            tags:
+                - ProcessDefinitionService
+            description: 禁用流程定义
+            operationId: ProcessDefinitionService_DisableProcessDefinition
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/processes/{id}/enable:
+        patch:
+            tags:
+                - ProcessDefinitionService
+            description: 启用流程定义
+            operationId: ProcessDefinitionService_EnableProcessDefinition
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/processes/{id}/stats:
+        get:
+            tags:
+                - ProcessDefinitionService
+            description: 获取流程统计
+            operationId: ProcessDefinitionService_GetProcessStats
             parameters:
                 - name: id
                   in: path
@@ -144,597 +590,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/DeleteAttendanceRuleResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/attendance/clock-in:
-        post:
-            tags:
-                - AttendanceService
-            description: 打卡
-            operationId: AttendanceService_ClockIn
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/ClockInRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ClockInResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/attendance/department/{departmentId}:
-        get:
-            tags:
-                - AttendanceService
-            description: 查询部门考勤记录
-            operationId: AttendanceService_ListDepartmentAttendance
-            parameters:
-                - name: departmentId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
-                - name: startDate
-                  in: query
-                  schema:
-                    type: string
-                - name: endDate
-                  in: query
-                  schema:
-                    type: string
-                - name: page
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: pageSize
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListAttendanceRecordResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/attendance/employee/{employeeId}:
-        get:
-            tags:
-                - AttendanceService
-            description: 查询员工考勤记录
-            operationId: AttendanceService_ListEmployeeAttendance
-            parameters:
-                - name: employeeId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
-                - name: startDate
-                  in: query
-                  schema:
-                    type: string
-                - name: endDate
-                  in: query
-                  schema:
-                    type: string
-                - name: page
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: pageSize
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListAttendanceRecordResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/attendance/exceptions:
-        get:
-            tags:
-                - AttendanceService
-            description: 查询异常考勤
-            operationId: AttendanceService_ListExceptionAttendance
-            parameters:
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
-                - name: startDate
-                  in: query
-                  schema:
-                    type: string
-                - name: endDate
-                  in: query
-                  schema:
-                    type: string
-                - name: page
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: pageSize
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListAttendanceRecordResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/attendance/records/{id}:
-        get:
-            tags:
-                - AttendanceService
-            description: 获取考勤记录
-            operationId: AttendanceService_GetAttendanceRecord
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/AttendanceRecordResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/attendance/statistics:
-        get:
-            tags:
-                - AttendanceService
-            description: 考勤统计
-            operationId: AttendanceService_GetAttendanceStatistics
-            parameters:
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
-                - name: employeeId
-                  in: query
-                  schema:
-                    type: string
-                - name: departmentId
-                  in: query
-                  schema:
-                    type: string
-                - name: startDate
-                  in: query
-                  schema:
-                    type: string
-                - name: endDate
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/AttendanceStatisticsResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/schedules:
-        post:
-            tags:
-                - ScheduleService
-            description: 创建排班
-            operationId: ScheduleService_CreateSchedule
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/CreateScheduleRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ScheduleResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/schedules/batch:
-        post:
-            tags:
-                - ScheduleService
-            description: 批量创建排班
-            operationId: ScheduleService_BatchCreateSchedules
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/BatchCreateSchedulesRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/BatchCreateSchedulesResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/schedules/department/{departmentId}:
-        get:
-            tags:
-                - ScheduleService
-            description: 查询部门排班
-            operationId: ScheduleService_ListDepartmentSchedules
-            parameters:
-                - name: departmentId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
-                - name: month
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListSchedulesResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/schedules/employee/{employeeId}:
-        get:
-            tags:
-                - ScheduleService
-            description: 查询员工排班
-            operationId: ScheduleService_ListEmployeeSchedules
-            parameters:
-                - name: employeeId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
-                - name: month
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListSchedulesResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/schedules/{id}:
-        get:
-            tags:
-                - ScheduleService
-            description: 获取排班
-            operationId: ScheduleService_GetSchedule
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ScheduleResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        put:
-            tags:
-                - ScheduleService
-            description: 更新排班
-            operationId: ScheduleService_UpdateSchedule
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateScheduleRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ScheduleResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        delete:
-            tags:
-                - ScheduleService
-            description: 删除排班
-            operationId: ScheduleService_DeleteSchedule
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/DeleteScheduleResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/shifts:
-        get:
-            tags:
-                - ShiftService
-            description: 列出班次
-            operationId: ShiftService_ListShifts
-            parameters:
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
-                - name: type
-                  in: query
-                  schema:
-                    type: string
-                - name: isActive
-                  in: query
-                  schema:
-                    type: boolean
-                - name: page
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: pageSize
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListShiftsResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        post:
-            tags:
-                - ShiftService
-            description: 创建班次
-            operationId: ShiftService_CreateShift
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/CreateShiftRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ShiftResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/shifts/active:
-        get:
-            tags:
-                - ShiftService
-            description: 列出启用的班次（必须在 GetShift 之前，避免路由冲突）
-            operationId: ShiftService_ListActiveShifts
-            parameters:
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListShiftsResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/v1/hrm/shifts/{id}:
-        get:
-            tags:
-                - ShiftService
-            description: 获取班次
-            operationId: ShiftService_GetShift
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ShiftResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        put:
-            tags:
-                - ShiftService
-            description: 更新班次
-            operationId: ShiftService_UpdateShift
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateShiftRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ShiftResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        delete:
-            tags:
-                - ShiftService
-            description: 删除班次
-            operationId: ShiftService_DeleteShift
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/DeleteShiftResponse'
+                                $ref: '#/components/schemas/ProcessStatsResponse'
                 default:
                     description: Default error response
                     content:
@@ -743,353 +599,98 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
-        AllowedLocationInfo:
-            type: object
-            properties:
-                name:
-                    type: string
-                latitude:
-                    type: number
-                    format: double
-                longitude:
-                    type: number
-                    format: double
-                radius:
-                    type: integer
-                    format: int32
-                address:
-                    type: string
-        AttendanceRecordResponse:
+        ApprovalTaskResponse:
             type: object
             properties:
                 id:
                     type: string
                 tenantId:
                     type: string
-                employeeId:
+                processInstanceId:
                     type: string
-                employeeName:
+                nodeId:
                     type: string
-                departmentId:
+                nodeName:
                     type: string
-                shiftId:
+                assigneeId:
                     type: string
-                shiftName:
-                    type: string
-                clockTime:
-                    type: string
-                clockType:
+                assigneeName:
                     type: string
                 status:
                     type: string
-                checkInMethod:
+                action:
                     type: string
-                sourceType:
+                comment:
                     type: string
-                location:
-                    $ref: '#/components/schemas/LocationInfo'
-                address:
+                approvedAt:
                     type: string
-                wifiSsid:
-                    type: string
-                photoUrl:
-                    type: string
-                faceScore:
-                    type: number
-                    format: double
-                isException:
-                    type: boolean
-                exceptionReason:
-                    type: string
-                exceptionType:
-                    type: string
-                remark:
-                    type: string
-                createdAt:
-                    type: string
-        AttendanceRuleResponse:
-            type: object
-            properties:
-                id:
-                    type: string
-                tenantId:
-                    type: string
-                code:
-                    type: string
-                name:
-                    type: string
-                description:
-                    type: string
-                applyType:
-                    type: string
-                departmentIds:
-                    type: array
-                    items:
-                        type: string
-                employeeIds:
-                    type: array
-                    items:
-                        type: string
-                workdayType:
-                    type: string
-                weekendDays:
-                    type: array
-                    items:
-                        type: integer
-                        format: int32
-                defaultShiftId:
-                    type: string
-                locationRequired:
-                    type: boolean
-                allowedLocations:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/AllowedLocationInfo'
-                wifiRequired:
-                    type: boolean
-                allowedWifi:
-                    type: array
-                    items:
-                        type: string
-                faceRequired:
-                    type: boolean
-                faceThreshold:
-                    type: number
-                    format: double
-                allowFieldWork:
-                    type: boolean
-                isActive:
-                    type: boolean
-                priority:
-                    type: integer
-                    format: int32
                 createdAt:
                     type: string
                 updatedAt:
                     type: string
-        AttendanceStatisticsResponse:
+        BatchProcessResult:
             type: object
             properties:
-                totalDays:
-                    type: integer
-                    format: int32
-                normalDays:
-                    type: integer
-                    format: int32
-                lateDays:
-                    type: integer
-                    format: int32
-                earlyDays:
-                    type: integer
-                    format: int32
-                absentDays:
-                    type: integer
-                    format: int32
-                leaveDays:
-                    type: integer
-                    format: int32
-                overtimeHours:
-                    type: integer
-                    format: int32
-                statusCount:
-                    type: object
-                    additionalProperties:
-                        type: integer
-                        format: int32
-        BatchCreateSchedulesRequest:
-            type: object
-            properties:
-                tenantId:
+                taskId:
                     type: string
-                schedules:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/CreateScheduleRequest'
-        BatchCreateSchedulesResponse:
+                success:
+                    type: boolean
+                error:
+                    type: string
+        BatchProcessTasksRequest:
             type: object
             properties:
-                successCount:
-                    type: integer
-                    format: int32
-                failedCount:
-                    type: integer
-                    format: int32
-                errorMessages:
+                taskIds:
                     type: array
                     items:
                         type: string
-        ClockInRequest:
+                action:
+                    type: string
+                comment:
+                    type: string
+        BatchProcessTasksResponse:
             type: object
             properties:
-                tenantId:
-                    type: string
-                employeeId:
-                    type: string
-                clockType:
-                    type: string
-                checkInMethod:
-                    type: string
-                location:
-                    $ref: '#/components/schemas/LocationInfo'
-                wifiSsid:
-                    type: string
-                wifiMac:
-                    type: string
-                photoUrl:
-                    type: string
-                faceScore:
-                    type: number
-                    format: double
-                deviceId:
-                    type: string
-                remark:
-                    type: string
-        ClockInResponse:
+                results:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/BatchProcessResult'
+        CancelProcessRequest:
             type: object
             properties:
                 id:
                     type: string
-                employeeId:
+                reason:
                     type: string
-                employeeName:
-                    type: string
-                clockTime:
-                    type: string
-                clockType:
-                    type: string
-                status:
-                    type: string
-                shiftName:
-                    type: string
-                isException:
-                    type: boolean
-                exceptionReason:
-                    type: string
-                message:
-                    type: string
-        CreateAttendanceRuleRequest:
+        CountPendingTasksResponse:
             type: object
             properties:
-                tenantId:
-                    type: string
+                count:
+                    type: integer
+                    format: int32
+        CreateProcessDefinitionRequest:
+            type: object
+            properties:
                 code:
                     type: string
                 name:
                     type: string
-                description:
+                category:
                     type: string
-                applyType:
+                formId:
                     type: string
-                departmentIds:
-                    type: array
-                    items:
-                        type: string
-                employeeIds:
-                    type: array
-                    items:
-                        type: string
-                workdayType:
+                workflowId:
                     type: string
-                weekendDays:
-                    type: array
-                    items:
-                        type: integer
-                        format: int32
-                defaultShiftId:
-                    type: string
-                locationRequired:
-                    type: boolean
-                allowedLocations:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/AllowedLocationInfo'
-                wifiRequired:
-                    type: boolean
-                allowedWifi:
-                    type: array
-                    items:
-                        type: string
-                faceRequired:
-                    type: boolean
-                faceThreshold:
-                    type: number
-                    format: double
-                allowFieldWork:
-                    type: boolean
-                priority:
-                    type: integer
-                    format: int32
-        CreateScheduleRequest:
+            description: 请求和响应消息定义
+        DelegateTaskRequest:
             type: object
             properties:
-                tenantId:
+                id:
                     type: string
-                employeeId:
+                delegateToId:
                     type: string
-                shiftId:
+                comment:
                     type: string
-                scheduleDate:
-                    type: string
-                workdayType:
-                    type: string
-                remark:
-                    type: string
-        CreateShiftRequest:
-            type: object
-            properties:
-                tenantId:
-                    type: string
-                code:
-                    type: string
-                name:
-                    type: string
-                type:
-                    type: string
-                description:
-                    type: string
-                workStart:
-                    type: string
-                workEnd:
-                    type: string
-                flexibleStart:
-                    type: string
-                flexibleEnd:
-                    type: string
-                workDuration:
-                    type: integer
-                    format: int32
-                checkInRequired:
-                    type: boolean
-                checkOutRequired:
-                    type: boolean
-                lateGracePeriod:
-                    type: integer
-                    format: int32
-                earlyGracePeriod:
-                    type: integer
-                    format: int32
-                isCrossDays:
-                    type: boolean
-                allowOvertime:
-                    type: boolean
-                sort:
-                    type: integer
-                    format: int32
-        DeleteAttendanceRuleResponse:
-            type: object
-            properties:
-                success:
-                    type: boolean
-        DeleteScheduleResponse:
-            type: object
-            properties:
-                success:
-                    type: boolean
-        DeleteShiftResponse:
-            type: object
-            properties:
-                success:
-                    type: boolean
         GoogleProtobufAny:
             type: object
             properties:
@@ -1098,88 +699,63 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        ListAttendanceRecordResponse:
+        InstanceStatsSummaryResponse:
+            type: object
+            properties:
+                total:
+                    type: integer
+                    format: int32
+                pending:
+                    type: integer
+                    format: int32
+                approved:
+                    type: integer
+                    format: int32
+                rejected:
+                    type: integer
+                    format: int32
+                withdrawn:
+                    type: integer
+                    format: int32
+                cancelled:
+                    type: integer
+                    format: int32
+                byStatus:
+                    type: object
+                    additionalProperties:
+                        type: integer
+                        format: int32
+        ListApprovalTasksResponse:
             type: object
             properties:
                 items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/AttendanceRecordResponse'
+                        $ref: '#/components/schemas/ApprovalTaskResponse'
                 total:
                     type: integer
                     format: int32
-        ListAttendanceRulesResponse:
+        ListProcessDefinitionsResponse:
             type: object
             properties:
                 items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/AttendanceRuleResponse'
+                        $ref: '#/components/schemas/ProcessDefinitionResponse'
                 total:
                     type: integer
                     format: int32
-        ListSchedulesResponse:
+        ListProcessInstancesResponse:
             type: object
             properties:
                 items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/ScheduleResponse'
+                        $ref: '#/components/schemas/ProcessInstanceResponse'
                 total:
                     type: integer
                     format: int32
-        ListShiftsResponse:
-            type: object
-            properties:
-                items:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/ShiftResponse'
-                total:
-                    type: integer
-                    format: int32
-        LocationInfo:
-            type: object
-            properties:
-                latitude:
-                    type: number
-                    format: double
-                longitude:
-                    type: number
-                    format: double
-                accuracy:
-                    type: number
-                    format: double
-                address:
-                    type: string
-        ScheduleResponse:
-            type: object
-            properties:
-                id:
-                    type: string
-                tenantId:
-                    type: string
-                employeeId:
-                    type: string
-                employeeName:
-                    type: string
-                departmentId:
-                    type: string
-                shiftId:
-                    type: string
-                shiftName:
-                    type: string
-                scheduleDate:
-                    type: string
-                workdayType:
-                    type: string
-                status:
-                    type: string
-                remark:
-                    type: string
-                createdAt:
-                    type: string
-        ShiftResponse:
+        ProcessDefinitionResponse:
             type: object
             properties:
                 id:
@@ -1190,44 +766,98 @@ components:
                     type: string
                 name:
                     type: string
-                type:
+                formId:
                     type: string
-                description:
+                formName:
                     type: string
-                workStart:
+                workflowId:
                     type: string
-                workEnd:
+                workflowName:
                     type: string
-                flexibleStart:
-                    type: string
-                flexibleEnd:
-                    type: string
-                workDuration:
-                    type: integer
-                    format: int32
-                checkInRequired:
+                enabled:
                     type: boolean
-                checkOutRequired:
-                    type: boolean
-                lateGracePeriod:
-                    type: integer
-                    format: int32
-                earlyGracePeriod:
-                    type: integer
-                    format: int32
-                isCrossDays:
-                    type: boolean
-                allowOvertime:
-                    type: boolean
-                isActive:
-                    type: boolean
-                sort:
-                    type: integer
-                    format: int32
                 createdAt:
                     type: string
                 updatedAt:
                     type: string
+        ProcessInstanceResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                tenantId:
+                    type: string
+                processDefId:
+                    type: string
+                processDefCode:
+                    type: string
+                processDefName:
+                    type: string
+                workflowInstanceId:
+                    type: string
+                formDataId:
+                    type: string
+                applicantId:
+                    type: string
+                applicantName:
+                    type: string
+                title:
+                    type: string
+                status:
+                    type: string
+                currentNodeId:
+                    type: string
+                currentNodeName:
+                    type: string
+                startedAt:
+                    type: string
+                completedAt:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        ProcessStatsResponse:
+            type: object
+            properties:
+                processDefId:
+                    type: string
+                processCode:
+                    type: string
+                processName:
+                    type: string
+                totalInstances:
+                    type: integer
+                    format: int32
+                pendingInstances:
+                    type: integer
+                    format: int32
+                approvedInstances:
+                    type: integer
+                    format: int32
+                rejectedInstances:
+                    type: integer
+                    format: int32
+                avgDuration:
+                    type: string
+        ProcessTaskRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                action:
+                    type: string
+                comment:
+                    type: string
+        StartProcessRequest:
+            type: object
+            properties:
+                processDefId:
+                    type: string
+                formData:
+                    type: object
+                    additionalProperties:
+                        type: string
         Status:
             type: object
             properties:
@@ -1244,81 +874,37 @@ components:
                         $ref: '#/components/schemas/GoogleProtobufAny'
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
-        UpdateAttendanceRuleRequest:
+        TransferTaskRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                transferToId:
+                    type: string
+                comment:
+                    type: string
+        UpdateProcessDefinitionRequest:
             type: object
             properties:
                 id:
                     type: string
                 name:
                     type: string
-                description:
+                formId:
                     type: string
-                applyType:
+                workflowId:
                     type: string
-                departmentIds:
-                    type: array
-                    items:
-                        type: string
-                employeeIds:
-                    type: array
-                    items:
-                        type: string
-                locationRequired:
+                enabled:
                     type: boolean
-                wifiRequired:
-                    type: boolean
-                faceRequired:
-                    type: boolean
-                allowFieldWork:
-                    type: boolean
-                isActive:
-                    type: boolean
-                priority:
-                    type: integer
-                    format: int32
-        UpdateScheduleRequest:
+        WithdrawProcessRequest:
             type: object
             properties:
                 id:
                     type: string
-                shiftId:
-                    type: string
-                workdayType:
-                    type: string
-                status:
-                    type: string
-                remark:
-                    type: string
-        UpdateShiftRequest:
-            type: object
-            properties:
-                id:
-                    type: string
-                name:
-                    type: string
-                description:
-                    type: string
-                workStart:
-                    type: string
-                workEnd:
-                    type: string
-                lateGracePeriod:
-                    type: integer
-                    format: int32
-                earlyGracePeriod:
-                    type: integer
-                    format: int32
-                isActive:
-                    type: boolean
-                sort:
-                    type: integer
-                    format: int32
 tags:
-    - name: AttendanceRuleService
-      description: AttendanceRuleService 考勤规则服务
-    - name: AttendanceService
-      description: AttendanceService 考勤服务
-    - name: ScheduleService
-      description: ScheduleService 排班服务
-    - name: ShiftService
-      description: ShiftService 班次服务
+    - name: ApprovalTaskService
+      description: ApprovalTaskService 审批任务服务
+    - name: ProcessDefinitionService
+      description: ProcessDefinitionService 流程定义服务
+    - name: ProcessInstanceService
+      description: ProcessInstanceService 流程实例服务

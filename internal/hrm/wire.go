@@ -8,7 +8,7 @@ import (
 	"github.com/lk2023060901/go-next-erp/internal/hrm/handler"
 	"github.com/lk2023060901/go-next-erp/internal/hrm/repository/postgres"
 	"github.com/lk2023060901/go-next-erp/internal/hrm/service"
-	"gorm.io/gorm"
+	"github.com/lk2023060901/go-next-erp/pkg/database"
 )
 
 // ProviderSet HRM 模块的 Wire Provider Set
@@ -34,7 +34,7 @@ var ProviderSet = wire.NewSet(
 )
 
 // InitHRMModule initializes the HRM module
-func InitHRMModule(db *gorm.DB) (*HRMModule, error) {
+func InitHRMModule(db *database.DB) (*HRMModule, error) {
 	panic(wire.Build(ProviderSet, wire.Struct(new(HRMModule), "*")))
 }
 

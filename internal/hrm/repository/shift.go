@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/lk2023060901/go-next-erp/internal/hrm/model"
@@ -32,6 +33,9 @@ type ShiftRepository interface {
 
 	// ListByType 按类型查询
 	ListByType(ctx context.Context, tenantID uuid.UUID, shiftType model.ShiftType) ([]*model.Shift, error)
+
+	// 游标分页查询（高性能，适用于大数据量）
+	ListWithCursor(ctx context.Context, tenantID uuid.UUID, filter *ShiftFilter, cursor *time.Time, limit int) ([]*model.Shift, *time.Time, bool, error)
 }
 
 // ShiftFilter 班次查询过滤器
@@ -72,6 +76,9 @@ type ScheduleRepository interface {
 
 	// FindByDate 查询某日排班
 	FindByDate(ctx context.Context, tenantID uuid.UUID, date string) ([]*model.Schedule, error)
+
+	// 游标分页查询（高性能，适用于大数据量）
+	ListWithCursor(ctx context.Context, tenantID uuid.UUID, filter *ScheduleFilter, cursor *time.Time, limit int) ([]*model.Schedule, *time.Time, bool, error)
 }
 
 // ScheduleFilter 排班查询过滤器

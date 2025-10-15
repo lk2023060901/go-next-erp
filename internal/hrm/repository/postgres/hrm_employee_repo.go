@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -356,4 +357,96 @@ func (r *hrmEmployeeRepo) ExistsByEmployeeID(ctx context.Context, tenantID, empl
 		return false, err
 	}
 	return count > 0, nil
+}
+
+// ListWithCursor 游标分页查询HRM员工（高性能）
+func (r *hrmEmployeeRepo) ListWithCursor(
+	ctx context.Context,
+	tenantID uuid.UUID,
+	filter *repository.HRMEmployeeFilter,
+	cursor *time.Time,
+	limit int,
+) ([]*model.HRMEmployee, *time.Time, bool, error) {
+	// 构建 WHERE 条件
+	where := "tenant_id = $1 AND deleted_at IS NULL"
+	args := []interface{}{tenantID}
+	argIdx := 1
+
+	// 添加游标条件
+	if cursor != nil {
+		argIdx++
+		where += fmt.Sprintf(" AND created_at < $%d", argIdx)
+		args = append(args, *cursor)
+	}
+
+	// 添加过滤条件
+	if filter != nil {
+		if filter.AttendanceRuleID != nil {
+			argIdx++
+			where += fmt.Sprintf(" AND attendance_rule_id = $%d", argIdx)
+			args = append(args, *filter.AttendanceRuleID)
+		}
+		if filter.DefaultShiftID != nil {
+			argIdx++
+			where += fmt.Sprintf(" AND default_shift_id = $%d", argIdx)
+			args = append(args, *filter.DefaultShiftID)
+		}
+		if filter.IsActive != nil {
+			argIdx++
+			where += fmt.Sprintf(" AND is_active = $%d", argIdx)
+			args = append(args, *filter.IsActive)
+		}
+	}
+
+	// 构建查询（多查1条用于判断是否有下一页）
+	argIdx++
+	sql := fmt.Sprintf(`
+		SELECT id, tenant_id, employee_id, card_no, 
+		       attendance_rule_id, default_shift_id, is_active, created_at
+		FROM hrm_employees
+		WHERE %s
+		ORDER BY created_at DESC, id DESC
+		LIMIT $%d
+	`, where, argIdx)
+	args = append(args, limit+1)
+
+	// 执行查询
+	rows, err := r.db.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	defer rows.Close()
+
+	// 扫描结果
+	var employees []*model.HRMEmployee
+	for rows.Next() {
+		emp := &model.HRMEmployee{}
+		err := rows.Scan(
+			&emp.ID, &emp.TenantID, &emp.EmployeeID, &emp.CardNo,
+			&emp.AttendanceRuleID, &emp.DefaultShiftID, &emp.IsActive, &emp.CreatedAt,
+		)
+		if err != nil {
+			return nil, nil, false, err
+		}
+		employees = append(employees, emp)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, nil, false, err
+	}
+
+	// 判断是否有下一页
+	hasNext := len(employees) > limit
+	if hasNext {
+		employees = employees[:limit]
+	}
+
+	// 生成下一页游标
+	var nextCursor *time.Time
+	if hasNext && len(employees) > 0 {
+		lastEmp := employees[len(employees)-1]
+		nextCursor = &lastEmp.CreatedAt
+	}
+
+	return employees, nextCursor, hasNext, nil
 }
